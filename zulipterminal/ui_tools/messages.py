@@ -33,7 +33,11 @@ from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
-from zulipterminal.widget import find_widget_type, process_todo_widget
+from zulipterminal.widget import (
+    find_widget_type,
+    process_poll_widget,
+    process_todo_widget,
+)
 
 
 if typing.TYPE_CHECKING:
@@ -752,6 +756,39 @@ class MessageBox(urwid.Pile):
                 # The original raw content can be fetched if needed,
                 # though it's not very useful.
                 self.message["content"] = todo_widget
+
+            elif widget_type == "poll":
+                poll_question, poll_options = process_poll_widget(
+                    self.message.get("submessages", [])
+                )
+
+                # TODO: ZT doesn't yet support adding poll questions after the
+                # creation of the poll. So, if the poll question is not provided,
+                # we show a message to add one via the web app.
+                if not poll_question:
+                    poll_question = (
+                        "No poll question is provided. Please add one via the web app."
+                    )
+
+                poll_widget = f"<strong>Poll\n{poll_question}</strong>"
+
+                if poll_options:
+                    max_votes_len = max(
+                        len(str(len(option["votes"])))
+                        for option in poll_options.values()
+                    )
+
+                    for option_info in poll_options.values():
+                        padded_votes = f"{len(option_info['votes']):>{max_votes_len}}"
+                        poll_widget += f"\n[ {padded_votes} ] {option_info['option']}"
+                else:
+                    poll_widget += (
+                        "\nNo options provided. Please add them via the web app."
+                    )
+
+                # Update the message content with the latest poll_widget,
+                # similar to the todo_widget above.
+                self.message["content"] = poll_widget
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(

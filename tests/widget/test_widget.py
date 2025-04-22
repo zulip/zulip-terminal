@@ -3,7 +3,12 @@ from typing import Dict, List, Union
 import pytest
 from pytest import param as case
 
-from zulipterminal.widget import Submessage, find_widget_type, process_todo_widget
+from zulipterminal.widget import (
+    Submessage,
+    find_widget_type,
+    process_poll_widget,
+    process_todo_widget,
+)
 
 
 @pytest.mark.parametrize(
@@ -343,3 +348,318 @@ def test_process_todo_widget(
 
     assert title == expected_title
     assert tasks == expected_tasks
+
+
+@pytest.mark.parametrize(
+    "submessages, expected_poll_question, expected_options",
+    [
+        case(
+            [
+                {
+                    "id": 12082,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {'
+                        '"question": "Do polls work on ZT?", "options": ["Yes", "No"]}}'
+                    ),
+                },
+                {
+                    "id": 12083,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+                {
+                    "id": 12084,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":-1}',
+                },
+                {
+                    "id": 12085,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":1}',
+                },
+                {
+                    "id": 12086,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+                {
+                    "id": 12087,
+                    "message_id": 1957499,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":-1}',
+                },
+            ],
+            "Do polls work on ZT?",
+            {
+                "canned,0": {"option": "Yes", "votes": [27294]},
+                "canned,1": {"option": "No", "votes": []},
+            },
+            id="multiple_vote_events",
+        ),
+        case(
+            [
+                {
+                    "id": 12089,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {"question": "Is '
+                        'this a poll with options added later?", '
+                        '"options": ["Yes", "No"]}}'
+                    ),
+                },
+                {
+                    "id": 12090,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"new_option","idx":1,"option":"Maybe"}',
+                },
+                {
+                    "id": 12091,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":1}',
+                },
+                {
+                    "id": 12092,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":-1}',
+                },
+                {
+                    "id": 12093,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"27294,1","vote":1}',
+                },
+                {
+                    "id": 12094,
+                    "message_id": 1957662,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+            ],
+            "Is this a poll with options added later?",
+            {
+                "canned,0": {"option": "Yes", "votes": [27294]},
+                "canned,1": {"option": "No", "votes": []},
+                "27294,1": {"option": "Maybe", "votes": [27294]},
+            },
+            id="new_option_and_votes",
+        ),
+        case(
+            [
+                {
+                    "id": 12095,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {"question": '
+                        '"Let\'s change this question later?", "options": ["Yes"]}}'
+                    ),
+                },
+                {
+                    "id": 12096,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+                {
+                    "id": 12097,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"new_option","idx":1,"option":"No"}',
+                },
+                {
+                    "id": 12098,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":-1}',
+                },
+                {
+                    "id": 12099,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"question",'
+                    '"question":"Has this question stayed the same?"}',
+                },
+                {
+                    "id": 12100,
+                    "message_id": 1957682,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"27294,1","vote":1}',
+                },
+            ],
+            "Has this question stayed the same?",
+            {
+                "canned,0": {"option": "Yes", "votes": []},
+                "27294,1": {"option": "No", "votes": [27294]},
+            },
+            id="new_question_and_votes",
+        ),
+        case(
+            [
+                {
+                    "id": 12101,
+                    "message_id": 1957693,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {"question": "",'
+                        ' "options": ["Yes", "No"]}}'
+                    ),
+                }
+            ],
+            "",
+            {
+                "canned,0": {"option": "Yes", "votes": []},
+                "canned,1": {"option": "No", "votes": []},
+            },
+            id="empty_question",
+        ),
+        case(
+            [
+                {
+                    "id": 12102,
+                    "message_id": 1957700,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {'
+                        '"question": "Does this poll have options?", "options": []}}'
+                    ),
+                }
+            ],
+            "Does this poll have options?",
+            {},
+            id="empty_options",
+        ),
+        case(
+            [
+                {
+                    "id": 12112,
+                    "message_id": 1957722,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {"question": "",'
+                        ' "options": []}}'
+                    ),
+                }
+            ],
+            "",
+            {},
+            id="empty_question_and_options",
+        ),
+        case(
+            [
+                {
+                    "id": 12103,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": (
+                        '{"widget_type": "poll", "extra_data": {"question": "Does'
+                        ' this poll have multiple voters?", "options": ["Yes", "No"]}}'
+                    ),
+                },
+                {
+                    "id": 12104,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+                {
+                    "id": 12105,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":1}',
+                },
+                {
+                    "id": 12106,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":-1}',
+                },
+                {
+                    "id": 12107,
+                    "message_id": 1957719,
+                    "sender_id": 32159,
+                    "msg_type": "widget",
+                    "content": '{"type":"new_option","idx":1,"option":"Maybe"}',
+                },
+                {
+                    "id": 12108,
+                    "message_id": 1957719,
+                    "sender_id": 32159,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"32159,1","vote":1}',
+                },
+                {
+                    "id": 12109,
+                    "message_id": 1957719,
+                    "sender_id": 32159,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+                {
+                    "id": 12110,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,1","vote":-1}',
+                },
+                {
+                    "id": 12111,
+                    "message_id": 1957719,
+                    "sender_id": 27294,
+                    "msg_type": "widget",
+                    "content": '{"type":"vote","key":"canned,0","vote":1}',
+                },
+            ],
+            "Does this poll have multiple voters?",
+            {
+                "canned,0": {"option": "Yes", "votes": [32159, 27294]},
+                "canned,1": {"option": "No", "votes": []},
+                "32159,1": {"option": "Maybe", "votes": [32159]},
+            },
+            id="multiple_voters",
+        ),
+    ],
+)
+def test_process_poll_widget(
+    submessages: List[Submessage],
+    expected_poll_question: str,
+    expected_options: Dict[str, Dict[str, Union[str, List[str]]]],
+) -> None:
+    poll_question, options = process_poll_widget(submessages)
+
+    assert poll_question == expected_poll_question
+    assert options == expected_options
