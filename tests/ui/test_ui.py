@@ -5,7 +5,7 @@ from pytest_mock import MockerFixture
 from urwid import Widget
 
 from zulipterminal.api_types import Composition
-from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
 from zulipterminal.urwid_types import urwid_Box
 
@@ -299,7 +299,7 @@ class TestView:
 
         super_keypress.assert_called_once_with(size, navigation_key)
 
-    @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("ALL_MENTIONS"))
     def test_keypress_ALL_MENTIONS(
         self,
         view: View,
@@ -316,7 +316,7 @@ class TestView:
 
         view.mentioned_button.activate.assert_called_once_with(key)
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("STREAM_MESSAGE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_STREAM_MESSAGE(
         self,
@@ -341,7 +341,7 @@ class TestView:
         assert returned_key == key
         assert view.body.focus_col == 1
 
-    @pytest.mark.parametrize("key", keys_for_command("NEW_HINT"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("NEW_HINT"))
     def test_keypress_NEW_HINT(
         self,
         view: View,
@@ -358,7 +358,7 @@ class TestView:
         set_footer_text.assert_called_once_with()
         assert returned_key == key
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_PEOPLE"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_autohide_users(
         self,
@@ -383,7 +383,7 @@ class TestView:
         mocked_users_view.keypress.assert_called_once_with(size, key)
         assert view.body.focus_position == 2
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_STREAMS"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_autohide_streams(
         self,
@@ -430,7 +430,7 @@ class TestView:
             "no_draft_composition",
         ],
     )
-    @pytest.mark.parametrize("key", keys_for_command("OPEN_DRAFT"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("OPEN_DRAFT"))
     @pytest.mark.parametrize("autohide", [True, False], ids=["autohide", "no_autohide"])
     def test_keypress_OPEN_DRAFT(
         self,
@@ -479,7 +479,7 @@ class TestView:
                 ["No draft message was saved in this session."]
             )
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_PEOPLE"))
     def test_keypress_edit_mode(
         self,
         view: View,
