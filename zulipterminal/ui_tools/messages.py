@@ -915,7 +915,7 @@ class MessageBox(urwid.Pile):
         blockquote_list = soup.find_all("blockquote")
         bq_len = len(blockquote_list)
         for tag in blockquote_list:
-            child_list = tag.findChildren(recursive=False)
+            child_list = tag.find_all(recursive=False)
             child_block = tag.find_all("blockquote")
             actual_padding = f"{padding_char} " * pad_count
             if len(child_list) == 1:
@@ -937,8 +937,8 @@ class MessageBox(urwid.Pile):
                 new_tag.string = actual_padding
                 # If the quoted message is multi-line message
                 # we deconstruct it and pad it at break-points (<br/>)
-                for br in child.findAll("br"):
-                    next_s = br.nextSibling
+                for br in child.find_all("br"):
+                    next_s = br.next_sibling
                     text = str(next_s.string).strip()
                     if text:
                         insert_tag = soup.new_tag("p")
