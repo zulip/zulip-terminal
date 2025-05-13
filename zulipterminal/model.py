@@ -5,7 +5,7 @@ Defines the `Model`, fetching and storing data retrieved from the Zulip server
 import itertools
 import json
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from datetime import datetime
@@ -177,6 +177,7 @@ class Model:
 
         self.user_dict: Dict[str, MinimalUserData] = {}
         self.user_id_email_dict: Dict[int, str] = {}
+        self.user_name_counter: Dict[str, int] = {}
         self._all_users_by_id: Dict[int, RealmUser] = {}
         self._cross_realm_bots_by_id: Dict[int, RealmUser] = {}
         self.users: List[MinimalUserData] = []
@@ -1212,6 +1213,7 @@ class Model:
         # and a user-id to email mapping
         self.user_dict = dict()
         self.user_id_email_dict = dict()
+        self.user_name_counter = Counter()
         for user in self.initial_data["realm_users"]:
             if self.user_id == user["user_id"]:
                 self._all_users_by_id[self.user_id] = user
@@ -1321,6 +1323,7 @@ class Model:
         # NOTE: Do this after generating user_list to avoid current_user duplication
         self.user_dict[current_user["email"]] = current_user
         self.user_id_email_dict[self.user_id] = current_user["email"]
+        self.user_name_counter = Counter(user["full_name"] for user in user_list)
 
         self.users = user_list
 
@@ -1334,6 +1337,12 @@ class Model:
             raise RuntimeError("Invalid user ID.")
 
         return self.user_dict[user_email]["full_name"]
+
+    def is_user_name_duplicate(self, user_name: str) -> bool:
+        """
+        Returns if the count of the users with the same name is more than 1.
+        """
+        return self.user_name_counter.get(user_name, -1) > 1
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
