@@ -59,7 +59,7 @@ from zulipterminal.api_types import (
     UpdateMessageContentEvent,
     UpdateMessagesLocationEvent,
 )
-from zulipterminal.config.keys import primary_display_key_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.config.ui_mappings import EDIT_TOPIC_POLICY, ROLE_BY_ID, STATE_ICON
 from zulipterminal.helper import (
@@ -1714,7 +1714,7 @@ class Model:
                 "Press '{}' to close this window."
             )
             notice = notice_template.format(
-                failed_command, primary_display_key_for_command("EXIT_POPUP")
+                failed_command, key_config.primary_display_key_for_command("EXIT_POPUP")
             )
             self.controller.show_popup_with_message(notice, width=50)
             self.controller.update_screen()

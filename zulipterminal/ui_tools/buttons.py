@@ -11,11 +11,7 @@ import urwid
 from typing_extensions import TypedDict
 
 from zulipterminal.api_types import RESOLVED_TOPIC_PREFIX, EditPropagateMode, Message
-from zulipterminal.config.keys import (
-    is_command_key,
-    primary_display_key_for_command,
-    primary_key_for_command,
-)
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.regexes import REGEX_INTERNAL_LINK_STREAM_ID
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
@@ -120,7 +116,7 @@ class TopButton(urwid.Button):
         self.show_function()
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("ACTIVATE_BUTTON", key):
+        if key_config.is_command_key("ACTIVATE_BUTTON", key):
             self.activate(key)
             return None
         else:  # This is in the else clause, to avoid multiple activation
@@ -129,9 +125,7 @@ class TopButton(urwid.Button):
 
 class HomeButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"All messages     [{primary_display_key_for_command('ALL_MESSAGES')}]"
-        )
+        button_text = f"All messages     [{key_config.primary_display_key_for_command('ALL_MESSAGES')}]"
 
         super().__init__(
             controller=controller,
@@ -145,7 +139,9 @@ class HomeButton(TopButton):
 
 class PMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
+        button_text = (
+            f"Direct messages  [{key_config.primary_display_key_for_command('ALL_PM')}]"
+        )
 
         super().__init__(
             controller=controller,
@@ -159,9 +155,7 @@ class PMButton(TopButton):
 
 class MentionedButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"Mentions         [{primary_display_key_for_command('ALL_MENTIONS')}]"
-        )
+        button_text = f"Mentions         [{key_config.primary_display_key_for_command('ALL_MENTIONS')}]"
 
         super().__init__(
             controller=controller,
@@ -175,9 +169,7 @@ class MentionedButton(TopButton):
 
 class StarredButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = (
-            f"Starred messages [{primary_display_key_for_command('ALL_STARRED')}]"
-        )
+        button_text = f"Starred messages [{key_config.primary_display_key_for_command('ALL_STARRED')}]"
 
         super().__init__(
             controller=controller,
@@ -267,13 +259,13 @@ class StreamButton(TopButton):
         self.view.home_button.update_count(self.model.unread_counts["all_msg"])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("TOGGLE_TOPIC", key):
+        if key_config.is_command_key("TOGGLE_TOPIC", key):
             self.view.left_panel.show_topic_view(self)
-        elif is_command_key("TOGGLE_MUTE_STREAM", key):
+        elif key_config.is_command_key("TOGGLE_MUTE_STREAM", key):
             self.controller.stream_muting_confirmation_popup(
                 self.stream_id, self.stream_name
             )
-        elif is_command_key("STREAM_INFO", key):
+        elif key_config.is_command_key("STREAM_INFO", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
 
@@ -322,7 +314,7 @@ class UserButton(TopButton):
         self._view.write_box.private_box_view(recipient_user_ids=[self.user_id])
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("USER_INFO", key):
+        if key_config.is_command_key("USER_INFO", key):
             self.controller.show_user_info(self.user_id)
         return super().keypress(size, key)
 
@@ -377,7 +369,7 @@ class TopicButton(TopButton):
     # TODO: Handle event-based approach for topic-muting.
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("TOGGLE_TOPIC", key):
+        if key_config.is_command_key("TOGGLE_TOPIC", key):
             # Exit topic view
             self.view.associate_stream_with_topic(self.stream_id, self.topic_name)
             self.view.left_panel.show_stream_view()
@@ -427,7 +419,7 @@ class EmojiButton(TopButton):
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: int
     ) -> bool:
         if event == "mouse press" and button == 1:
-            self.keypress(size, primary_key_for_command("ACTIVATE_BUTTON"))
+            self.keypress(size, key_config.primary_key_for_command("ACTIVATE_BUTTON"))
             return True
         return super().mouse_event(size, event, button, col, row, focus)
 

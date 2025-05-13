@@ -2,6 +2,7 @@
 Defines the `Controller`, which sets up the `Model`, `View`, and how they interact
 """
 
+import configparser
 import itertools
 import os
 import signal
@@ -14,12 +15,13 @@ from types import TracebackType
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pyperclip
+import requests
 import urwid
 import zulip
 from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
-from zulipterminal.config.keys import primary_display_key_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
@@ -47,6 +49,7 @@ from zulipterminal.ui_tools.views import (
     StreamInfoView,
     StreamMembersView,
     UserInfoView,
+    set_terminology,
 )
 from zulipterminal.version import ZT_VERSION
 
@@ -54,6 +57,10 @@ from zulipterminal.version import ZT_VERSION
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 SCROLL_PROMPT = "(up/down scrolls)"
+
+
+class NotAZulipOrganizationError(Exception):
+    pass
 
 
 class Controller:
@@ -97,7 +104,21 @@ class Controller:
         self.is_typing_notification_in_progress = False
 
         self.show_loading()
+        self.feature_level = None
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
+        config_file = os.path.expanduser(config_file)
+        if config_file is not None and os.path.exists(config_file):
+            config = configparser.ConfigParser()
+            with open(config_file) as f:
+                config.read_file(f, config_file)
+            if self.feature_level is None:
+                self.feature_level = self.get_feature_level(config.get("api", "site"))
+        self.terminology = "channel" if self.feature_level > 254 else "stream"
+        self.key_config = key_config
+        self.key_config.set_terminology(
+            self.terminology
+        )  # to set the terminology for key_bindings
+        set_terminology(self.terminology)  # to set terminology for the UI
         self.client = zulip.Client(config_file=config_file, client=client_identifier)
         self.model = Model(self)
         self.view = View(self)
@@ -137,6 +158,12 @@ class Controller:
         self._exception_info = exc_info
         self._critical_exception = critical
         os.write(self._exception_pipe, b"1")
+
+    def get_feature_level(self, realm_url: str) -> str:
+        response = requests.get(url=f"{realm_url}/api/v1/server_settings")
+        if response.status_code != requests.codes.OK:
+            raise NotAZulipOrganizationError(realm_url)
+        return response.json()["zulip_feature_level"]
 
     def is_in_editor_mode(self) -> bool:
         return self._editor is not None
@@ -720,7 +747,7 @@ class Controller:
                     f"* from the end of '{exception_logfile}'"
                     "\n"
                     "* by copying the details to the clipboard now "
-                    f"(press [{primary_display_key_for_command('COPY_TRACEBACK')}])"
+                    f"(press [{self.key_config.primary_display_key_for_command('COPY_TRACEBACK')}])"
                 )
                 full_traceback = "".join(traceback.format_exception(*exc))
                 self.show_exception_popup(message, traceback=full_traceback, width=80)

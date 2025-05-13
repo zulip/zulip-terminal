@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import key_config
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
 from zulipterminal.ui_tools.messages import MessageBox
@@ -79,7 +79,7 @@ class TestPopUpConfirmationView:
         self.callback.assert_not_called()
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_POPUP"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_POPUP"))
     def test_exit_popup_EXIT_POPUP(
         self,
         popup_view: PopUpConfirmationView,
@@ -134,7 +134,7 @@ class TestPopUpView:
             self.pop_up_view.body, header=mocker.ANY, footer=mocker.ANY
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("EXIT_POPUP"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EXIT_POPUP"))
     def test_keypress_EXIT_POPUP(
         self,
         key: str,
@@ -151,7 +151,7 @@ class TestPopUpView:
     ) -> None:
         size = widget_size(self.pop_up_view)
         mocker.patch(
-            MODULE + ".is_command_key",
+            MODULE + ".key_config.is_command_key",
             side_effect=(lambda command, key: command == self.command),
         )
         self.pop_up_view.keypress(size, "cmd_key")
@@ -164,15 +164,15 @@ class TestPopUpView:
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
         size = widget_size(self.pop_up_view)
-        # Patch `is_command_key` to not raise an 'Invalid Command' exception
+        # Patch `key_config.is_command_key` to not raise an 'Invalid Command' exception
         # when its parameters are (self.command, key) as there is no
         # self.command='COMMAND' command in keys.py.
         mocker.patch(
-            MODULE + ".is_command_key",
+            MODULE + ".key_config.is_command_key",
             side_effect=(
                 lambda command, key: False
                 if command == self.command
-                else is_command_key(command, key)
+                else key_config.is_command_key(command, key)
             ),
         )
 
@@ -212,7 +212,11 @@ class TestAboutView:
         )
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("ABOUT")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("ABOUT"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -221,7 +225,7 @@ class TestAboutView:
         self.about_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", {*keys_for_command("COPY_ABOUT_INFO")})
+    @pytest.mark.parametrize("key", {*key_config.keys_for_command("COPY_ABOUT_INFO")})
     def test_keypress_copy_info(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -471,7 +475,11 @@ class TestUserInfoView:
         assert custom_profile_data == {}
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("USER_INFO")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("USER_INFO"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -520,7 +528,7 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.header.widget_list == msg_box.header
         assert self.full_rendered_message.footer.widget_list == msg_box.footer
 
-    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -543,8 +551,8 @@ class TestFullRenderedMsgView:
     @pytest.mark.parametrize(
         "key",
         {
-            *keys_for_command("FULL_RENDERED_MESSAGE"),
-            *keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("FULL_RENDERED_MESSAGE"),
+            *key_config.keys_for_command("EXIT_POPUP"),
         },
     )
     def test_keypress_show_msg_info(
@@ -596,7 +604,7 @@ class TestFullRawMsgView:
         assert self.full_raw_message.header.widget_list == msg_box.header
         assert self.full_raw_message.footer.widget_list == msg_box.footer
 
-    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -619,8 +627,8 @@ class TestFullRawMsgView:
     @pytest.mark.parametrize(
         "key",
         {
-            *keys_for_command("FULL_RAW_MESSAGE"),
-            *keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("FULL_RAW_MESSAGE"),
+            *key_config.keys_for_command("EXIT_POPUP"),
         },
     )
     def test_keypress_show_msg_info(
@@ -671,7 +679,7 @@ class TestEditHistoryView:
             message_id=self.message["id"],
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -692,7 +700,11 @@ class TestEditHistoryView:
         assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EDIT_HISTORY"), *keys_for_command("EXIT_POPUP")}
+        "key",
+        {
+            *key_config.keys_for_command("EDIT_HISTORY"),
+            *key_config.keys_for_command("EXIT_POPUP"),
+        },
     )
     def test_keypress_show_msg_info(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -869,7 +881,7 @@ class TestEditModeView:
             (2, "change_all"),
         ],
     )
-    @pytest.mark.parametrize("key", keys_for_command("ACTIVATE_BUTTON"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("ACTIVATE_BUTTON"))
     def test_select_edit_mode(
         self,
         edit_mode_view: EditModeView,
@@ -915,7 +927,11 @@ class TestMarkdownHelpView:
         assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("MARKDOWN_HELP")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("MARKDOWN_HELP"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -946,7 +962,11 @@ class TestHelpView:
         assert not self.controller.exit_popup.called
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("HELP")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("HELP"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -1013,7 +1033,7 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("EDIT_HISTORY"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("EDIT_HISTORY"))
     @pytest.mark.parametrize("realm_allow_edit_history", [True, False])
     @pytest.mark.parametrize(
         "edited_message_id",
@@ -1064,7 +1084,9 @@ class TestMsgInfoView:
         else:
             self.controller.show_edit_history.assert_not_called()
 
-    @pytest.mark.parametrize("key", keys_for_command("FULL_RENDERED_MESSAGE"))
+    @pytest.mark.parametrize(
+        "key", key_config.keys_for_command("FULL_RENDERED_MESSAGE")
+    )
     def test_keypress_full_rendered_message(
         self,
         message_fixture: Message,
@@ -1090,7 +1112,7 @@ class TestMsgInfoView:
             time_mentions=list(),
         )
 
-    @pytest.mark.parametrize("key", keys_for_command("FULL_RAW_MESSAGE"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("FULL_RAW_MESSAGE"))
     def test_keypress_full_raw_message(
         self,
         message_fixture: Message,
@@ -1117,7 +1139,11 @@ class TestMsgInfoView:
         )
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("MSG_INFO")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("MSG_INFO"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -1126,7 +1152,7 @@ class TestMsgInfoView:
         self.msg_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("VIEW_IN_BROWSER"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("VIEW_IN_BROWSER"))
     def test_keypress_view_in_browser(
         self,
         mocker: MockerFixture,
@@ -1311,7 +1337,7 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
         assert not self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", keys_for_command("STREAM_MEMBERS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("STREAM_MEMBERS"))
     def test_keypress_stream_members(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1466,7 +1492,7 @@ class TestStreamInfoView:
         assert ("Stream email", expected_copy_text) in stream_details_data
 
     @pytest.mark.parametrize("normalized_email_address", ("user@example.com", None))
-    @pytest.mark.parametrize("key", keys_for_command("COPY_STREAM_EMAIL"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("COPY_STREAM_EMAIL"))
     def test_keypress_copy_stream_email(
         self,
         key: str,
@@ -1565,7 +1591,11 @@ class TestStreamInfoView:
         assert footlinks_width == expected_footlinks_width
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("STREAM_INFO")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("STREAM_INFO"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -1574,7 +1604,9 @@ class TestStreamInfoView:
         self.stream_info_view.keypress(size, key)
         assert self.controller.exit_popup.called
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
+    @pytest.mark.parametrize(
+        "key", (*key_config.keys_for_command("ACTIVATE_BUTTON"), " ")
+    )
     def test_checkbox_toggle_mute_stream(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1587,7 +1619,9 @@ class TestStreamInfoView:
 
         toggle_mute_status.assert_called_once_with(stream_id)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
+    @pytest.mark.parametrize(
+        "key", (*key_config.keys_for_command("ACTIVATE_BUTTON"), " ")
+    )
     def test_checkbox_toggle_pin_stream(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1600,7 +1634,9 @@ class TestStreamInfoView:
 
         toggle_pin_status.assert_called_once_with(stream_id)
 
-    @pytest.mark.parametrize("key", (*keys_for_command("ACTIVATE_BUTTON"), " "))
+    @pytest.mark.parametrize(
+        "key", (*key_config.keys_for_command("ACTIVATE_BUTTON"), " ")
+    )
     def test_checkbox_toggle_visual_notification(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1630,7 +1666,11 @@ class TestStreamMembersView:
         self.stream_members_view = StreamMembersView(self.controller, stream_id)
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("STREAM_MEMBERS")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("STREAM_MEMBERS"),
+        },
     )
     def test_keypress_exit_popup(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
@@ -1733,7 +1773,7 @@ class TestEmojiPickerView:
         emoji_picker.mouse_event(size, event, button, 0, 0, mocker.Mock())
         mocked_emoji_picker_keypress.assert_called_once_with(size, keypress)
 
-    @pytest.mark.parametrize("key", keys_for_command("SEARCH_EMOJIS"))
+    @pytest.mark.parametrize("key", key_config.keys_for_command("SEARCH_EMOJIS"))
     def test_keypress_search_emoji(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
     ) -> None:
@@ -1745,7 +1785,11 @@ class TestEmojiPickerView:
         assert self.emoji_picker_view.get_focus() == "header"
 
     @pytest.mark.parametrize(
-        "key", {*keys_for_command("EXIT_POPUP"), *keys_for_command("ADD_REACTION")}
+        "key",
+        {
+            *key_config.keys_for_command("EXIT_POPUP"),
+            *key_config.keys_for_command("ADD_REACTION"),
+        },
     )
     def test_keypress_exit_called(
         self, key: str, widget_size: Callable[[Widget], urwid_Size]
