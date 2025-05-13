@@ -234,6 +234,7 @@ class TestModel:
         model = Model(self.controller)
 
         event_types = [
+            "alert_words",
             "message",
             "update_message",
             "reaction",
@@ -263,6 +264,7 @@ class TestModel:
             "realm_emoji",
             "custom_profile_fields",
             "zulip_version",
+            "alert_words",
         ]
         model.client.register.assert_called_once_with(
             event_types=event_types,
@@ -3373,6 +3375,49 @@ class TestModel:
     )
     def update_message_flags_operation(self, request):
         return request.param
+
+    @pytest.mark.parametrize(
+        "event,initial_alerted_words, expected_alert_words",
+        [
+            case(
+                {"type": "alert_words", "alert_words": ["word1", "word2", "word3"]},
+                ["word1"],
+                ["word1", "word2", "word3"],
+                id="Add_multiple_alert_words",
+            ),
+            case(
+                {"type": "alert_words", "alert_words": []},
+                ["word1"],
+                [],
+                id="Empty_alert_words",
+            ),
+            case(
+                {"type": "alert_words", "alert_words": ["word1", "word4"]},
+                ["word1"],
+                ["word1", "word4"],
+                id="Add_single_new_alert_words",
+            ),
+            case(
+                {"type": "alert_words", "alert_words": ["word1", "word2"]},
+                ["word1", "word2", "word3"],
+                ["word1", "word2"],
+                id="Delete_an_alert_word",
+            ),
+            case(
+                {"type": "alert_words", "alert_words": ["word1", "word3"]},
+                ["word1", "word2"],
+                ["word1", "word3"],
+                id="Add_and_delete_alert_words",
+            ),
+        ],
+    )
+    def test__handle_alert_words_event__single_user(
+        self, mocker, model, event, initial_alerted_words, expected_alert_words
+    ):
+        model._handle_alert_words_event(event)
+
+        assert model._alert_words != initial_alerted_words
+        assert model._alert_words == expected_alert_words
 
     def test_update_star_status_no_index(
         self, mocker, model, update_message_flags_operation
