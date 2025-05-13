@@ -36,6 +36,7 @@ from zulipterminal.config.ui_mappings import (
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
+    SearchStatus,
     TidiedUserInfo,
     asynch,
     match_emoji,
@@ -334,7 +335,7 @@ class StreamsView(urwid.Frame):
             ),
         )
         self.search_lock = threading.Lock()
-        self.empty_search = False
+        self.search_status = SearchStatus.DEFAULT
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -351,7 +352,11 @@ class StreamsView(urwid.Frame):
             )[0]
 
             streams_display_num = len(streams_display)
-            self.empty_search = streams_display_num == 0
+            self.search_status = (
+                SearchStatus.EMPTY
+                if streams_display_num == 0
+                else SearchStatus.FILTERED
+            )
 
             # Add a divider to separate pinned streams from the rest.
             pinned_stream_names = [
@@ -370,7 +375,7 @@ class StreamsView(urwid.Frame):
                 streams_display.insert(first_unpinned_index, StreamsViewDivider())
 
             self.log.clear()
-            if not self.empty_search:
+            if self.search_status == SearchStatus.FILTERED:
                 self.log.extend(streams_display)
             else:
                 self.log.extend([self.stream_search_box.search_error])
@@ -397,14 +402,20 @@ class StreamsView(urwid.Frame):
             self.stream_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.stream_search_box)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif (
+            is_command_key("CLEAR_SEARCH", key)
+            and self.search_status != SearchStatus.DEFAULT
+        ):
             self.stream_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus("body")
             self.log.set_focus(self.focus_index_before_search)
+            self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
@@ -435,7 +446,7 @@ class TopicsView(urwid.Frame):
             header=self.header_list,
         )
         self.search_lock = threading.Lock()
-        self.empty_search = False
+        self.search_status = SearchStatus.DEFAULT
 
     def _focus_position_for_topic_name(self) -> int:
         saved_topic_state = self.view.saved_topic_in_stream_id(
@@ -460,10 +471,14 @@ class TopicsView(urwid.Frame):
                 for topic in self.topics_btn_list.copy()
                 if new_text in topic.topic_name.lower()
             ]
-            self.empty_search = len(topics_to_display) == 0
+            self.search_status = (
+                SearchStatus.EMPTY
+                if len(topics_to_display) == 0
+                else SearchStatus.FILTERED
+            )
 
             self.log.clear()
-            if not self.empty_search:
+            if self.search_status == SearchStatus.FILTERED:
                 self.log.extend(topics_to_display)
             else:
                 self.log.extend([self.topic_search_box.search_error])
@@ -517,14 +532,20 @@ class TopicsView(urwid.Frame):
             self.topic_search_box.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.topic_search_box)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif (
+            is_command_key("CLEAR_SEARCH", key)
+            and self.search_status != SearchStatus.DEFAULT
+        ):
             self.topic_search_box.reset_search_text()
             self.log.clear()
             self.log.extend(self.topics_btn_list)
             self.set_focus("body")
             self.log.set_focus(self.focus_index_before_search)
+            self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
@@ -664,7 +685,7 @@ class RightColumnView(urwid.Frame):
 
         self.allow_update_user_list = True
         self.search_lock = threading.Lock()
-        self.empty_search = False
+        self.search_status = SearchStatus.DEFAULT
         super().__init__(self.users_view(), header=search_box)
 
     @asynch
@@ -705,10 +726,12 @@ class RightColumnView(urwid.Frame):
             else:
                 users_display = users
 
-            self.empty_search = len(users_display) == 0
+            self.search_status = (
+                SearchStatus.EMPTY if len(users_display) == 0 else SearchStatus.FILTERED
+            )
 
             # FIXME Update log directly?
-            if not self.empty_search:
+            if self.search_status != SearchStatus.EMPTY:
                 self.body = self.users_view(users_display)
             else:
                 self.body = UsersView(
@@ -758,14 +781,20 @@ class RightColumnView(urwid.Frame):
             self.user_search.set_caption(" ")
             self.view.controller.enter_editor_mode_with(self.user_search)
             return key
-        elif is_command_key("CLEAR_SEARCH", key):
+        elif (
+            is_command_key("CLEAR_SEARCH", key)
+            and self.search_status != SearchStatus.DEFAULT
+        ):
             self.user_search.reset_search_text()
             self.allow_update_user_list = True
             self.body = UsersView(self.view.controller, self.users_btn_list)
             self.set_body(self.body)
             self.set_focus("body")
+            self.search_status = SearchStatus.DEFAULT
             self.view.controller.update_screen()
             return key
+        elif is_command_key("ALL_MESSAGES", key):
+            self.view.home_button.activate(key)
         elif is_command_key("GO_LEFT", key):
             self.view.show_right_panel(visible=False)
         return super().keypress(size, key)
@@ -925,6 +954,8 @@ class LeftColumnView(urwid.Pile):
             return key
         elif is_command_key("GO_RIGHT", key):
             self.view.show_left_panel(visible=False)
+        elif is_command_key("ALL_MESSAGES", key) and self.get_focus() is self.menu_v:
+            self.view.home_button.activate(key)
         return super().keypress(size, key)
 
 
@@ -2051,7 +2082,7 @@ class EmojiPickerView(PopUpView):
         search_box = urwid.Pile(
             [self.emoji_search, urwid.Divider(SECTION_DIVIDER_LINE)]
         )
-        self.empty_search = False
+        self.search_status = SearchStatus.DEFAULT
         self.search_lock = threading.Lock()
         super().__init__(
             controller,
@@ -2097,10 +2128,14 @@ class EmojiPickerView(PopUpView):
             else:
                 self.emojis_display = self.emoji_buttons
 
-            self.empty_search = len(self.emojis_display) == 0
+            self.search_status = (
+                SearchStatus.EMPTY
+                if len(self.emojis_display) == 0
+                else SearchStatus.FILTERED
+            )
 
             body_content = self.emojis_display
-            if self.empty_search:
+            if self.search_status == SearchStatus.EMPTY:
                 body_content = [self.emoji_search.search_error]
 
             self.contents["body"] = (
@@ -2174,5 +2209,6 @@ class EmojiPickerView(PopUpView):
             self.emoji_search.reset_search_text()
             self.controller.exit_editor_mode()
             self.controller.exit_popup()
+            self.search_status = SearchStatus.DEFAULT
             return key
         return super().keypress(size, key)
