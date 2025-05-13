@@ -54,6 +54,7 @@ typing_deps = [
 helper_deps = [
     "pudb==2022.1.1",
     "snakeviz>=2.1.1",
+    "requests>=2.25.0",  # Added for debug_helper.py
 ]
 
 setup(
@@ -93,6 +94,8 @@ setup(
         "console_scripts": [
             "zulip-term = zulipterminal.cli.run:main",
             "zulip-term-check-symbols = zulipterminal.scripts.render_symbols:main",
+            # Added debug helper with proper path
+            "zulip-term-debug = zulipterminal.scripts.debug_helper:main",
         ],
     },
     extras_require={
