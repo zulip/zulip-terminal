@@ -302,7 +302,7 @@ class Model:
         stream: Optional[str] = None,
         topic: Optional[str] = None,
         pms: bool = False,
-        pm_with: Optional[str] = None,
+        dm_with: Optional[str] = None,
         starred: bool = False,
         mentioned: bool = False,
     ) -> bool:
@@ -312,7 +312,7 @@ class Model:
             frozenset(["stream"]): [["stream", stream]],
             frozenset(["stream", "topic"]): [["stream", stream], ["topic", topic]],
             frozenset(["pms"]): [["is", "private"]],
-            frozenset(["pm_with"]): [["pm-with", pm_with]],
+            frozenset(["dm_with"]): [["pm-with", dm_with]],
             frozenset(["starred"]): [["is", "starred"]],
             frozenset(["mentioned"]): [["is", "mentioned"]],
         }
@@ -326,8 +326,8 @@ class Model:
         if new_narrow != self.narrow:
             self.narrow = new_narrow
 
-            if pm_with is not None and new_narrow[0][0] == "pm-with":
-                users = pm_with.split(", ")
+            if dm_with is not None and new_narrow[0][0] == "pm-with":
+                users = dm_with.split(", ")
                 self.recipients = frozenset(
                     [self.user_dict[user]["user_id"] for user in users] + [self.user_id]
                 )
@@ -371,10 +371,10 @@ class Model:
                 topic = narrow[1][1]
                 ids = index["topic_msg_ids"][stream_id].get(topic, set())
         elif narrow[0][1] == "private":
-            ids = index["private_msg_ids"]
+            ids = index["direct_msg_ids"]
         elif narrow[0][0] == "pm-with":
             recipients = self.recipients
-            ids = index["private_msg_ids_by_user_ids"].get(recipients, set())
+            ids = index["direct_msg_ids_by_user_ids"].get(recipients, set())
         elif narrow[0][1] == "starred":
             ids = index["starred_msg_ids"]
         elif narrow[0][1] == "mentioned":
@@ -1555,7 +1555,7 @@ class Model:
 
     def _handle_typing_event(self, event: Event) -> None:
         """
-        Handle typing notifications (in private messages)
+        Handle typing notifications (in direct messages)
         """
         assert event["type"] == "typing"
 
@@ -1568,7 +1568,7 @@ class Model:
         sender_email = event["sender"]["email"]
         sender_id = event["sender"]["user_id"]
 
-        # If the user is in pm narrow with the person typing
+        # If the user is in dm narrow with the person typing
         # and the person typing isn't the user themselves
         if (
             len(narrow) == 1
