@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 
 import zulip
 from bs4 import BeautifulSoup
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
@@ -51,6 +51,7 @@ from zulipterminal.api_types import (
     ReactionEvent,
     RealmEmojiData,
     RealmUser,
+    Stream,
     StreamComposition,
     StreamMessageUpdateRequest,
     Subscription,
@@ -182,11 +183,18 @@ class Model:
         self.users: List[MinimalUserData] = []
         self._update_users_data_from_initial_data()
 
-        self.stream_dict: Dict[int, Any] = {}
+        self.stream_dict: Dict[int, Subscription] = {}
+        self._unsubscribed_streams: Dict[int, Subscription] = {}
+        self._never_subscribed_streams: Dict[int, Stream] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
         self.unpinned_streams: List[StreamData] = []
         self.visual_notified_streams: Set[int] = set()
+
+        self._register_non_subscribed_streams(
+            unsubscribed_streams=self.initial_data["unsubscribed"],
+            never_subscribed_streams=self.initial_data["never_subscribed"],
+        )
 
         self._subscribe_to_streams(self.initial_data["subscriptions"])
 
@@ -946,7 +954,7 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream_name = self.stream_property(stream_id, "name")
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
@@ -1334,6 +1342,82 @@ class Model:
             raise RuntimeError("Invalid user ID.")
 
         return self.user_dict[user_email]["full_name"]
+
+    def _register_non_subscribed_streams(
+        self,
+        unsubscribed_streams: List[Subscription],
+        never_subscribed_streams: List[Stream],
+    ) -> None:
+        self._unsubscribed_streams = {
+            subscription["stream_id"]: subscription
+            for subscription in unsubscribed_streams
+        }
+        self._never_subscribed_streams = {
+            stream["stream_id"]: stream for stream in never_subscribed_streams
+        }
+
+    def _get_stream_from_id(self, stream_id: int) -> Union[Subscription, Stream]:
+        if stream_id in self.stream_dict:
+            return self.stream_dict[stream_id]
+        elif stream_id in self._unsubscribed_streams:
+            return self._unsubscribed_streams[stream_id]
+        elif stream_id in self._never_subscribed_streams:
+            return self._never_subscribed_streams[stream_id]
+        else:
+            raise RuntimeError(f"Stream with id {stream_id} does not exist!")
+
+    def _get_all_stream_ids(self) -> List[int]:
+        id_list = list(self.stream_dict)
+        id_list.extend(stream_id for stream_id in self._unsubscribed_streams)
+        id_list.extend(stream_id for stream_id in self._never_subscribed_streams)
+        return id_list
+
+    STREAM_KEYS = Literal[
+        "stream_id",
+        "name",
+        "description",
+        "rendered_description",
+        "date_created",
+        "invite_only",
+        "subscribers",
+        "is_announcement_only",
+        "stream_post_policy",
+        "is_web_public",
+        "message_retention_days",
+        "history_public_to_subscribers",
+        "first_message_id",
+        "stream_weekly_traffic",
+    ]
+    SUBSCRIPTION_KEYS = Literal[
+        STREAM_KEYS,
+        "desktop_notifications",
+        "email_notifications",
+        "wildcard_mentions_notify",
+        "push_notifications",
+        "audible_notifications",
+        "pin_to_top",
+        "email_address",
+        "is_muted",
+        "color",
+    ]
+
+    def stream_property(
+        self, stream_id: int, property: STREAM_KEYS
+    ) -> Optional[Union[int, str, bool, List[int]]]:
+        return self._get_stream_from_id(stream_id)[property]
+
+    def subscription_property(
+        self, stream_id: int, property: SUBSCRIPTION_KEYS
+    ) -> Optional[Union[int, str, bool, List[int]]]:
+        subscription = self._get_stream_from_id(stream_id)
+        if property in subscription:
+            subscription = cast(Subscription, subscription)
+            return subscription[property]
+        else:
+            # stream_id is not a subscribed stream.
+            raise RuntimeError(
+                f"Stream with id={stream_id} does not have '{property}' property!"
+            )
 
     def _subscribe_to_streams(self, subscriptions: List[Subscription]) -> None:
         def make_reduced_stream_data(stream: Subscription) -> StreamData:
