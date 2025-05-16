@@ -115,6 +115,6 @@ setup(
         "python-dateutil>=2.8.2",
         "pytz>=2025",  # Can use native support from Python 3.9 onwards
         "tzlocal>=5.0,<5.1",  # 5.1 will drop support for Python 3.7
-        "pyperclip>=1.8.1",
+        "pyperclip>=1.9.0",
     ],
 )
