@@ -113,7 +113,7 @@ setup(
         "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
         "typing_extensions~=4.5.0",
         "python-dateutil>=2.8.2",
-        "pytz>=2022.7.1",
+        "pytz>=2025",  # Can use native support from Python 3.9 onwards
         "tzlocal>=2.1",
         "pyperclip>=1.8.1",
     ],
