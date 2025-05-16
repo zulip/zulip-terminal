@@ -110,7 +110,7 @@ setup(
         "urwid_readline>=0.15.1",
         "beautifulsoup4>=4.13.4",
         "lxml==4.9.4",
-        "pygments>=2.14.0,<2.18.0",
+        "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
         "typing_extensions~=4.5.0",
         "python-dateutil>=2.8.2",
         "pytz>=2022.7.1",
