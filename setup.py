@@ -18,12 +18,12 @@ def long_description():
 
 
 testing_minimal_deps = [
-    "pytest~=7.2.0",
-    "pytest-mock~=3.10.0",
+    "pytest>=7.4.0,<8.0.0",  # 8.0.0 drops support for Python 3.7
+    "pytest-mock>=3.10.0,<3.12.0",  # 3.12.0 drops support for Python 3.7
 ]
 
 testing_plugin_deps = [
-    "pytest-cov~=4.0.0",
+    "pytest-cov>=4.0.0,<5.0.0",  # 5.0.0 drops support for Python 3.7 (6.0.0 drops 3.8)
 ]
 
 testing_deps = testing_minimal_deps + testing_plugin_deps
