@@ -243,6 +243,7 @@ jobs:
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.10', OS: ubuntu-latest, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.11', OS: ubuntu-latest, NAME: "PyPy 3.11 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
