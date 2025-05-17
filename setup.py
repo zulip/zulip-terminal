@@ -42,7 +42,7 @@ gitlint_deps = [
 
 typing_deps = [
     "lxml-stubs",
-    "mypy~=1.8.0",
+    "mypy~=1.8.0",  # >=1.9.0 requires Python 3.8+, >=1.15.0 requires 3.9+
     "types-beautifulsoup4",
     "types-pygments",
     "types-python-dateutil",
