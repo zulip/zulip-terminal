@@ -18,22 +18,22 @@ def long_description():
 
 
 testing_minimal_deps = [
-    "pytest~=7.2.0",
-    "pytest-mock~=3.10.0",
+    "pytest>=7.4.0,<8.0.0",  # 8.0.0 drops support for Python 3.7
+    "pytest-mock>=3.10.0,<3.12.0",  # 3.12.0 drops support for Python 3.7
 ]
 
 testing_plugin_deps = [
-    "pytest-cov~=4.0.0",
+    "pytest-cov>=4.0.0,<5.0.0",  # 5.0.0 drops support for Python 3.7 (6.0.0 drops 3.8)
 ]
 
 testing_deps = testing_minimal_deps + testing_plugin_deps
 
 linting_deps = [
-    "isort~=5.11.0",
-    "black~=23.0",
+    "isort~=5.11.0,<5.12.0",  # 5.12.0 drops support for Python 3.7, 6.0.0 drops 3.8
+    "black==23.3.0",  # Later versions drop support for Python 3.7
     "ruff==0.0.267",
-    "codespell[toml]~=2.2.5",
-    "typos~=1.16.11",
+    "codespell[toml]==2.2.5,<2.2.6",  # 2.2.6 drops support for Python 3.7
+    "typos>=1.32.0",
 ]
 
 gitlint_deps = [
@@ -42,7 +42,7 @@ gitlint_deps = [
 
 typing_deps = [
     "lxml-stubs",
-    "mypy~=1.8.0",
+    "mypy~=1.8.0",  # >=1.9.0 requires Python 3.8+, >=1.15.0 requires 3.9+
     "types-beautifulsoup4",
     "types-pygments",
     "types-python-dateutil",
@@ -106,15 +106,15 @@ setup(
     tests_require=testing_deps,
     install_requires=[
         "urwid~=2.1.2",
-        "zulip>=0.8.2",
-        "urwid_readline>=0.13",
-        "beautifulsoup4>=4.11.1",
-        "lxml~=4.9.2",
-        "pygments>=2.14.0,<2.18.0",
+        "zulip>=0.8.2,<0.9.0",  # Next release, 0.9.0, requires Python 3.9
+        "urwid_readline>=0.15.1",
+        "beautifulsoup4>=4.13.4",
+        "lxml==4.9.4",
+        "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
         "typing_extensions~=4.5.0",
         "python-dateutil>=2.8.2",
-        "pytz>=2022.7.1",
-        "tzlocal>=2.1",
-        "pyperclip>=1.8.1",
+        "pytz>=2025",  # Can use native support from Python 3.9 onwards
+        "tzlocal>=5.0,<5.1",  # 5.1 will drop support for Python 3.7
+        "pyperclip>=1.9.0",
     ],
 )
