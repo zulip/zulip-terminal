@@ -32,8 +32,8 @@ linting_deps = [
     "isort~=5.11.0,<5.12.0",  # 5.12.0 drops support for Python 3.7, 6.0.0 drops 3.8
     "black==23.3.0",  # Later versions drop support for Python 3.7
     "ruff==0.0.267",
-    "codespell[toml]~=2.2.5",
-    "typos~=1.16.11",
+    "codespell[toml]==2.2.5,<2.2.6",  # 2.2.6 drops support for Python 3.7
+    "typos>=1.32.0",
 ]
 
 gitlint_deps = [
