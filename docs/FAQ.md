@@ -21,7 +21,7 @@
   - [Mouse does not support *performing some action/feature*](#mouse-does-not-support-performing-some-actionfeature)
   - [Hotkeys don't work as described](#hotkeys-dont-work-as-described)
   - [Zulip-term crashed!](#zulip-term-crashed)
-  - [Something looks wrong! Where's this feature? There's a bug!](#something-looks-wrong-wheres-this-feature-theres-a-bug)
+  - [Something looks wrong! Where is this feature? There's a bug!](#something-looks-wrong-where-is-this-feature-theres-a-bug)
 
 ## What Python implementations are supported?
 
@@ -492,7 +492,7 @@ cause of the error, which should be output in such cases:
 * version 0.3.1 and earlier: the error is shown on the terminal;
 * versions 0.3.2+: the error is present/appended to the file `zulip-terminal-tracebacks.log`.
 
-## Something looks wrong! Where's this feature? There's a bug!
+## Something looks wrong! Where is this feature? There's a bug!
 Come meet us on the
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 stream on *chat.zulip.org*.
