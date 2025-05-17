@@ -29,7 +29,7 @@ testing_plugin_deps = [
 testing_deps = testing_minimal_deps + testing_plugin_deps
 
 linting_deps = [
-    "isort~=5.11.0",
+    "isort~=5.11.0,<5.12.0",  # 5.12.0 drops support for Python 3.7, 6.0.0 drops 3.8
     "black~=23.0",
     "ruff==0.0.267",
     "codespell[toml]~=2.2.5",
