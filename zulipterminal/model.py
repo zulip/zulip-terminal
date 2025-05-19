@@ -25,6 +25,7 @@ from typing import (
 )
 from urllib.parse import urlparse
 
+import requests
 import zulip
 from bs4 import BeautifulSoup
 from typing_extensions import TypedDict
@@ -873,7 +874,15 @@ class Model:
         """
         Fetches raw message content of a message using its ID.
         """
-        response = self.client.get_raw_message(message_id)
+        # response = self.client.get_raw_message(message_id)
+        response = dict()
+        try:
+            response = self.client.call_endpoint(
+                f"/messages/{message_id}", method="GET", timeout=5
+            )
+        except requests.exceptions.ReadTimeout:
+            raise
+
         if response["result"] == "success":
             return response["raw_content"]
         display_error_if_present(response, self.controller)
