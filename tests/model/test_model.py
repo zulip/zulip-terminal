@@ -2231,6 +2231,8 @@ class TestModel:
             "vary_each_msg",
             "visual_notification_status",
             "types_when_notify_called",
+            "is_muted_stream",
+            "is_muted_topic",
         ],
         [
             (
@@ -2238,11 +2240,52 @@ class TestModel:
                 {"flags": ["mentioned", "wildcard_mentioned"]},
                 True,
                 [],
+                None,
+                None,
             ),  # message_fixture sender_id is 5140
-            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": ["wildcard_mentioned"]}, False, ["stream", "private"]),
-            (5179, {"flags": []}, True, ["stream", "private"]),
-            (5179, {"flags": []}, False, ["private"]),
+            (5179, {"flags": ["mentioned"]}, False, ["stream", "private"], None, None),
+            (
+                5179,
+                {"flags": ["wildcard_mentioned"]},
+                False,
+                ["stream", "private"],
+                None,
+                None,
+            ),
+            (5179, {"flags": []}, True, ["stream", "private"], None, None),
+            (5179, {"flags": []}, False, ["private"], None, None),
+            (
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                ["stream", "private"],
+                True,
+                True,
+            ),
+            (
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                ["stream", "private"],
+                True,
+                False,
+            ),
+            (
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                ["stream", "private"],
+                False,
+                True,
+            ),
+            (
+                5179,
+                {"flags": ["has_alert_word"]},
+                False,
+                ["stream", "private"],
+                False,
+                False,
+            ),
         ],
         ids=[
             "not_notified_since_self_message",
@@ -2250,6 +2293,10 @@ class TestModel:
             "notified_stream_and_private_since_wildcard_mentioned",
             "notified_stream_since_stream_has_desktop_notifications",
             "notified_private_since_private_message",
+            "not_notified_for_stream_since_topic/stream_both_muted",
+            "not_notified_for_stream_since_stream_muted",
+            "not_notified_for_stream_since_topic_muted",
+            "notified_for_stream_since_topic/stream_both_not_muted",
         ],
     )
     def test_notify_users_calling_msg_type(
@@ -2261,6 +2308,8 @@ class TestModel:
         vary_each_msg,
         visual_notification_status,
         types_when_notify_called,
+        is_muted_stream: Optional[bool],
+        is_muted_topic: Optional[bool],
     ):
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
@@ -2268,6 +2317,8 @@ class TestModel:
             MODEL + ".is_visual_notifications_enabled",
             return_value=visual_notification_status,
         )
+        mocker.patch.object(model, "is_muted_stream", return_value=is_muted_stream)
+        mocker.patch.object(model, "is_muted_topic", return_value=is_muted_topic)
         notify = mocker.patch(MODULE + ".notify")
 
         model.notify_user(message_fixture)
@@ -2284,7 +2335,17 @@ class TestModel:
         if target is not None:
             title = f"Test Organization Name:\nFoo Foo (to {target})"
             # TODO: Test message content too?
-            notify.assert_called_once_with(title, mocker.ANY)
+            if message_fixture["type"] == "private":
+                notify.assert_called_once_with(title, mocker.ANY)
+            elif len(
+                vary_each_msg["flags"]
+            ) == 1 and "has_alert_word" in vary_each_msg.get("flags"):
+                if not is_muted_topic and not is_muted_stream:
+                    notify.assert_called_once_with(title, mocker.ANY)
+                else:
+                    notify.assert_not_called()
+            else:
+                notify.assert_called_once_with(title, mocker.ANY)
         else:
             notify.assert_not_called()
 
