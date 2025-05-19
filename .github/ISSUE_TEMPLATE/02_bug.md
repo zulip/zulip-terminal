@@ -34,3 +34,6 @@ Please include as many of the following as possible:
 If possible, please provide details from the `About` menu: (hotkey: Meta + ?)
 (this can provide some of the details above)
 
+### Logs or additional context
+<!-- Include any logs, screenshots, or other context to help diagnose the issue. -->
+

@@ -17,3 +17,6 @@ NOTE: If your proposed feature:
 
 <!-- If discussed in #zulip-terminal or another channel on chat.zulip.org, paste link below: -->
 
+### Potential challenges or limitations
+<!-- Are there any edge cases, constraints, or limitations to consider? -->
+
