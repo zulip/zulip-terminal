@@ -115,7 +115,7 @@ class MessageView(urwid.ListBox):
         self.log = ModListWalker(contents=self.main_view(), action=self.read_message)
 
         super().__init__(self.log)
-        self.set_focus(self.focus_msg)
+        # self.set_focus(self.focus_msg) #Commenting this to resolve issue 1226
         # if loading new/old messages - True
         self.old_loading = False
         self.new_loading = False
@@ -945,7 +945,9 @@ class TabView(urwid.WidgetWrap):
 
 # FIXME: This type could be improved, as Any isn't too explicit and clear.
 # (this was previously str, but some types passed in can be more complex)
-PopUpViewTableContent = Sequence[Tuple[str, Sequence[Union[str, Tuple[str, Any]]]]]
+PopUpViewTableContent = Sequence[
+    Tuple[Union[str, Tuple[str, str]], Sequence[Union[str, Tuple[str, Any]]]]
+]
 
 
 class PopUpView(urwid.Frame):
@@ -1008,8 +1010,14 @@ class PopUpView(urwid.Frame):
         category_width = 0
         text_width = 0
         strip_widths = []
+        category_row_width = 0
         for category, content in contents:
             category_width = max(category_width, len(category))
+            if isinstance(category, tuple):
+                max_category_length = [
+                    len(max(text.split("\n"), key=len)) for text in category
+                ]
+                category_row_width = max(max_category_length)
             for row in content:
                 if isinstance(row, str):
                     # Measure the longest line if the text is separated by
@@ -1023,9 +1031,11 @@ class PopUpView(urwid.Frame):
                     ]
                     strip_widths.append(max_row_lengths)
         column_widths = [max(width) for width in zip(*strip_widths)]
-
         popup_width = max(
-            sum(column_widths) + dividechars, title_width, category_width, text_width
+            sum(column_widths, category_row_width) + dividechars,
+            title_width,
+            category_width,
+            text_width,
         )
         return (popup_width, column_widths)
 
@@ -1041,7 +1051,19 @@ class PopUpView(urwid.Frame):
             if category:
                 if len(widgets) > 0:  # Separate categories with newline.
                     widgets.append(urwid.Text(""))
-                widgets.append(urwid.Text(("popup_category", category)))
+                if isinstance(category, tuple):
+                    label, data = category
+                    widgets.append(
+                        urwid.Columns(
+                            [
+                                urwid.Text(("popup_category", label)),
+                                urwid.Text(("popup_category", f"{data} "), "right"),
+                            ],
+                            dividechars=dividechars,
+                        )
+                    )
+                else:
+                    widgets.append(urwid.Text(("popup_category", category)))
             for index, row in enumerate(content):
                 if isinstance(row, str) and row:
                     widgets.append(urwid.Text(row))
@@ -1614,7 +1636,7 @@ class MsgInfoView(PopUpView):
         full_raw_message_keys = "[{}]".format(
             ", ".join(map(str, display_keys_for_command("FULL_RAW_MESSAGE")))
         )
-        msg_info = [
+        msg_info: PopUpViewTableContent = [
             (
                 "",
                 [
@@ -1624,6 +1646,9 @@ class MsgInfoView(PopUpView):
                 ],
             )
         ]
+
+        # msg_info is list thus allows append
+        assert isinstance(msg_info, list)
 
         # actions for message info popup
         viewing_actions = (
@@ -1650,7 +1675,18 @@ class MsgInfoView(PopUpView):
             msg_info[1][1].append(("Edit History", keys))
         # Render the category using the existing table methods if links exist.
         if message_links:
-            msg_info.append(("Message Links", []))
+            interact_with_link_keys = "[{}]".format(
+                ", ".join(map(str, display_keys_for_command("ENTER")))
+            )
+            msg_info.append(
+                (
+                    (
+                        "Message Links",
+                        f"Interact with links {interact_with_link_keys}",
+                    ),
+                    [],
+                )
+            )
         if topic_links:
             msg_info.append(("Topic Links", []))
         if time_mentions:
