@@ -4742,24 +4742,33 @@ class TestModel:
 
         assert unread_topic == next_unread_topic
 
-    def test_get_next_unread_pm(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        return_value = model.get_next_unread_pm()
-        assert return_value == 1
-        assert model.last_unread_pm == 1
+    @pytest.mark.parametrize(
+        "unread_pms, last_unread_pm, next_unread_pm",
+        [
+            case(
+                {(1, "pm"), (2, "pm2")},
+                None,
+                (1, "pm"),
+                id="unread_present_after_no_state",
+            ),
+            case(
+                {(1, "pm"), (2, "pm2")},
+                (1, "pm"),
+                (2, "pm2"),
+                id="unread_present_after_previous_pm",
+            ),
+            case({}, None, None, id="no_unreads"),
+        ],
+    )
+    def test_get_next_unread_pm(
+        self, model, unread_pms, last_unread_pm, next_unread_pm
+    ):
+        model.unread_counts = {"unread_pms": {stream_pm: 1 for stream_pm in unread_pms}}
+        model.last_unread_pm = last_unread_pm
 
-    def test_get_next_unread_pm_again(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        model.last_unread_pm = 1
-        return_value = model.get_next_unread_pm()
-        assert return_value == 2
-        assert model.last_unread_pm == 2
+        unread_pm = model.get_next_unread_pm()
 
-    def test_get_next_unread_pm_no_unread(self, model):
-        model.unread_counts = {"unread_pms": {}}
-        return_value = model.get_next_unread_pm()
-        assert return_value is None
-        assert model.last_unread_pm is None
+        assert unread_pm == next_unread_pm
 
     @pytest.mark.parametrize(
         "message_id, expected_value",
