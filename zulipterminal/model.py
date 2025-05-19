@@ -2174,3 +2174,12 @@ class Model:
                         self.controller.raise_exception_in_main_thread(
                             sys.exc_info(), critical=False
                         )
+
+    def is_guest_user(self, user_id: int) -> bool:
+        if self.initial_data.get("realm_enable_guest_user_indicator", None):
+            user = self.get_user_info(user_id)
+            if not user:
+                raise RuntimeError("Invalid user ID.")
+            role = user["role"]
+            return role == 600
+        return False
