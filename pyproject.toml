@@ -185,7 +185,6 @@ select = [
     "PLW", # pylint warning
     "RUF100", # Checks noqa rules are used
     "SIM", # SIMplify
-    "T20", # prinT present
     "W", # Warnings (pycodestyle)
     "UP", # pyUPgrade
     "YTT", # Year TwentyTwenty (flake8-2020), sys.version checks
@@ -202,6 +201,8 @@ select = [
 "tools/*" = ["E501", "T20"]
 # T20: Expect print output from CLI from run.py
 "zulipterminal/cli/run.py" = ["T20"]
+# N802: Allow upper-case in functions including eg. GUI
+"zulipterminal/platform_code.py" = ["N802"]
 # N802: Allow upper-case in test function names, eg. for commands, such as test_keypress_ENTER
 # N803: Allow upper-case in test function argument names, eg. ZFL, API
 # N806: Allow upper-case in test function variables

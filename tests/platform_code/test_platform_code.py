@@ -16,7 +16,7 @@ MODULE = "zulipterminal.platform_code"
 @pytest.mark.parametrize(
     "platform, is_notification_sent",
     [
-        # platform: Literal["WSL", "MacOS", "Linux", "unsupported"]
+        # platform: Literal["WSL", "MacOS", "Linux", "Unsupported"]
         pytest.param(
             "WSL",
             True,
@@ -24,7 +24,7 @@ MODULE = "zulipterminal.platform_code"
         ),
         ("MacOS", True),
         ("Linux", True),
-        ("unsupported", False),  # Unsupported OS
+        ("Unsupported", False),  # Unsupported OS
     ],
 )
 def test_notify(
