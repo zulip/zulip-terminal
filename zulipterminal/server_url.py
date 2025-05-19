@@ -53,7 +53,7 @@ def near_stream_message_url(server_url: str, message: Message) -> str:
     return full_url
 
 
-def near_pm_message_url(server_url: str, message: Message) -> str:
+def near_dm_message_url(server_url: str, message: Message) -> str:
     """
     Returns the complete encoded URL of a message from #narrow/pm-with.
     Referred from zerver/lib/url_encoding.py.
@@ -61,12 +61,12 @@ def near_pm_message_url(server_url: str, message: Message) -> str:
     message_id = str(message["id"])
     str_user_ids = [str(recipient["id"]) for recipient in message["display_recipient"]]
 
-    pm_str = ",".join(str_user_ids) + "-pm"
+    dm_str = ",".join(str_user_ids) + "-pm"
     parts = [
         server_url,
         "#narrow",
         "pm-with",
-        pm_str,
+        dm_str,
         "near",
         message_id,
     ]
@@ -83,5 +83,5 @@ def near_message_url(server_url: str, message: Message) -> str:
     if message["type"] == "stream":
         url = near_stream_message_url(server_url, message)
     else:
-        url = near_pm_message_url(server_url, message)
+        url = near_dm_message_url(server_url, message)
     return url

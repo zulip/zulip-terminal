@@ -178,7 +178,7 @@ def test_index_starred(
     model.narrow = [["is", "starred"]]
     model.is_search_narrow.return_value = False
     expected_index: Dict[str, Any] = dict(
-        empty_index, private_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
+        empty_index, direct_msg_ids={537287, 537288}, starred_msg_ids=msgs_with_stars
     )
     for msg_id, msg in expected_index["messages"].items():
         if msg_id in msgs_with_stars and "starred" not in msg["flags"]:
@@ -211,7 +211,7 @@ def test_index_mentioned_messages(
     model.is_search_narrow.return_value = False
     expected_index: Dict[str, Any] = dict(
         empty_index,
-        private_msg_ids={537287, 537288},
+        direct_msg_ids={537287, 537288},
         mentioned_msg_ids=(mentioned_messages | wildcard_mentioned_messages),
     )
 
