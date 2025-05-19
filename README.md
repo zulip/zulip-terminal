@@ -799,6 +799,46 @@ $ telnet 127.0.0.1 6899
 in another terminal, where `127.0.0.1` is the IP address and `6899` is port you
 find in `./debug.log`.
 
+#### Remote debugging example
+
+Here's a complete example of how to debug a specific issue:
+
+1. Let's say you suspect an issue when sending messages. Find the function in the codebase that handles this (e.g., in `zulipterminal/ui/ui.py`).
+
+2. Add the debugger statement just before the suspicious code:
+   ```python
+   def send_message(self):
+       from pudb.remote import set_trace
+       set_trace()  # This will pause execution here
+       # Rest of the function...
+   ```
+
+3. Run Zulip Terminal with debug mode enabled:
+   ```bash
+   zulip-term -d
+   ```
+
+4. When you trigger the send_message function, check debug.log for telnet connection details:
+   ```bash
+   tail -f debug.log
+   ```
+
+5. Connect with telnet and you'll get an interactive debugger to step through the code.
+
+#### Profiling for performance issues
+
+If you're experiencing performance problems, you can run Zulip Terminal with profiling enabled:
+
+```bash
+zulip-term --profile
+```
+
+This will create a profile output file which you can analyze using:
+
+```bash
+snakeviz zulip-terminal.prof
+```
+
 #### There's no effect in Zulip Terminal after making local changes!
 
 This likely means that you have installed both normal and development versions
