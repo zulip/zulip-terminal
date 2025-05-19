@@ -518,8 +518,8 @@ class TestController:
             "search_within_topic_narrow",
         ],
     )
-    @pytest.mark.parametrize("msg_ids", [({200, 300, 400}), (set()), ({100})])
-    def test_search_message(
+    @pytest.mark.parametrize("msg_ids", [({200, 300, 400}), ({100})])
+    def test_search_message__hits(
         self,
         initial_narrow: List[Any],
         final_narrow: List[Any],
@@ -548,6 +548,60 @@ class TestController:
             num_after=0, num_before=30, anchor=10000000000
         )
         create_msg.assert_called_once_with(controller.model, msg_ids)
+        assert controller.model.index == dict(index_search_messages, search=msg_ids)
+
+    @pytest.mark.parametrize(
+        "initial_narrow, final_narrow",
+        [
+            ([], [["search", "FOO"]]),
+            ([["search", "BOO"]], [["search", "FOO"]]),
+            ([["stream", "PTEST"]], [["stream", "PTEST"], ["search", "FOO"]]),
+            (
+                [["pm-with", "foo@zulip.com"], ["search", "BOO"]],
+                [["pm-with", "foo@zulip.com"], ["search", "FOO"]],
+            ),
+            (
+                [["stream", "PTEST"], ["topic", "RDS"]],
+                [["stream", "PTEST"], ["topic", "RDS"], ["search", "FOO"]],
+            ),
+        ],
+        ids=[
+            "Default_all_msg_search",
+            "redo_default_search",
+            "search_within_stream",
+            "pm_search_again",
+            "search_within_topic_narrow",
+        ],
+    )
+    def test_search_message__no_hits(
+        self,
+        initial_narrow: List[Any],
+        final_narrow: List[Any],
+        controller: Controller,
+        mocker: MockerFixture,
+        index_search_messages: Index,
+        msg_ids: Set[int] = set(),
+    ) -> None:
+        get_message = mocker.patch(MODEL + ".get_messages")
+        create_msg = mocker.patch(MODULE + ".create_msg_box_list")
+        mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=msg_ids)
+        controller.model.index = index_search_messages  # Any initial search index
+        controller.view.message_view = mocker.patch("urwid.ListBox")
+        controller.model.narrow = initial_narrow
+
+        def set_msg_ids(*args: Any, **kwargs: Any) -> None:
+            controller.model.index["search"].update(msg_ids)
+
+        get_message.side_effect = set_msg_ids
+        assert controller.model.index["search"] == {500}
+
+        controller.search_messages("FOO")
+
+        assert controller.model.narrow == final_narrow
+        get_message.assert_called_once_with(
+            num_after=0, num_before=30, anchor=10000000000
+        )
+        create_msg.assert_not_called()
         assert controller.model.index == dict(index_search_messages, search=msg_ids)
 
     @pytest.mark.parametrize(

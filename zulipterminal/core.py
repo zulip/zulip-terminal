@@ -95,6 +95,7 @@ class Controller:
 
         self.active_conversation_info: Dict[str, Any] = {}
         self.is_typing_notification_in_progress = False
+        self.is_in_empty_narrow = False
 
         self.show_loading()
         client_identifier = f"ZulipTerminal/{ZT_VERSION} {platform()}"
@@ -510,13 +511,15 @@ class Controller:
             self, question, callback, location="center"
         )
 
-    def search_messages(self, text: str) -> None:
+    def search_messages(self, text: str) -> bool:
         # Search for a text in messages
         self.model.index["search"].clear()
         self.model.set_search_narrow(text)
 
         self.model.get_messages(num_after=0, num_before=30, anchor=10000000000)
         msg_id_list = self.model.get_message_ids_in_current_narrow()
+        if len(msg_id_list) == 0:
+            return False
 
         w_list = create_msg_box_list(self.model, msg_id_list)
         self.view.message_view.log.clear()
@@ -524,6 +527,7 @@ class Controller:
         focus_position = 0
         if 0 <= focus_position < len(w_list):
             self.view.message_view.set_focus(focus_position)
+        return True
 
     def save_draft_confirmation_popup(self, draft: Composition) -> None:
         question = urwid.Text(
@@ -605,6 +609,7 @@ class Controller:
         if len(msg_id_list) == 0 or (anchor is not None and anchor not in msg_id_list):
             self.model.get_messages(num_before=30, num_after=10, anchor=anchor)
             msg_id_list = self.model.get_message_ids_in_current_narrow()
+        self.is_in_empty_narrow = bool(len(msg_id_list) == 0)
 
         w_list = create_msg_box_list(self.model, msg_id_list, focus_msg_id=anchor)
 
