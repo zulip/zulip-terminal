@@ -1080,7 +1080,7 @@ class TestMessageBox:
             ([STATUS_INACTIVE, "alice", " ", "DAYDATETIME"], {"timestamp": 0}),
         ],
         ids=[
-            "show_author_as_authors_different",
+            "show_authors_with_different_name_as_different",
             "merge_messages_as_only_slightly_earlier_message",
             "dont_merge_messages_as_much_earlier_message",
         ],
@@ -1116,12 +1116,67 @@ class TestMessageBox:
         all_to_vary = dict(to_vary_in_last_message, **stars["last"])
         last_msg = dict(message, **all_to_vary)
 
+        # Marking this as false so as to not fail
+        # under the condition of same username which needs user id appended to it
+        # since that is not what we are testing here.
+        self.model.is_user_name_duplicate = mocker.Mock(return_value=False)
+
         msg_box = MessageBox(this_msg, self.model, last_msg)
 
         expected_header[2] = output_date_time
         if current_year > 2018:
             expected_header[2] = "2018 - " + expected_header[2]
         expected_header[3] = "*" if starred_msg == "this" else " "
+
+        view_components = msg_box.main_view()
+
+        assert len(view_components) == 2
+        assert isinstance(view_components[0], Columns)
+        assert [w.text for w in view_components[0].widget_list] == expected_header
+        assert isinstance(view_components[1], Padding)
+
+    @pytest.mark.parametrize(
+        "message",
+        [
+            {
+                "id": 4,
+                "sender_id": 4,
+                "type": "stream",
+                "display_recipient": "Verona",
+                "stream_id": 5,
+                "subject": "Test topic",
+                "flags": [],
+                "is_me_message": False,
+                "content": "<p>what are you planning to do this week</p>",
+                "reactions": [],
+                "sender_full_name": "alice",
+                "timestamp": 1532103879,
+            }
+        ],
+    )
+    @pytest.mark.parametrize(
+        "expected_header, to_vary_in_last_message",
+        [
+            (
+                [" ", "alice (4)", " ", " "],
+                {"sender_id": 5},
+            ),
+        ],
+        ids=[
+            "show_authors_with_same_name_different_ids_as_different",
+        ],
+    )
+    def test_main_view_content_header_without_header_for_same_name_different_user_id(
+        self,
+        mocker,
+        message,
+        expected_header,
+        to_vary_in_last_message,
+    ):
+        this_msg = dict(message)
+        last_msg = dict(message, **to_vary_in_last_message)
+
+        msg_box = MessageBox(this_msg, self.model, last_msg)
 
         view_components = msg_box.main_view()
 
