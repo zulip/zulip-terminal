@@ -4,6 +4,7 @@ Marks the entry point into the application
 
 import argparse
 import configparser
+import contextlib
 import logging
 import os
 import stat
@@ -311,36 +312,60 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
+    zulip_key_path = os.path.join(
+        os.path.dirname(os.path.abspath(zuliprc_path)), "zulip_key"
+    )
+
     preferred_realm_url, login_id, api_key = login_data
     save_zuliprc_failure = _write_zuliprc(
-        zuliprc_path,
-        login_id=login_id,
+        to_path=zuliprc_path,
+        key_path=zulip_key_path,
         api_key=api_key,
+        login_id=login_id,
         server_url=preferred_realm_url,
     )
     if not save_zuliprc_failure:
-        print(f"Generated API key saved at {zuliprc_path}")
+        print(f"Generated config file saved at {zuliprc_path}")
     else:
         exit_with_error(save_zuliprc_failure)
 
 
 def _write_zuliprc(
-    to_path: str, *, login_id: str, api_key: str, server_url: str
+    to_path: str, *, key_path: str, login_id: str, api_key: str, server_url: str
 ) -> str:
     """
-    Writes a zuliprc file, returning a non-empty error string on failure
-    Only creates new private files; errors if file already exists
+    Writes both zuliprc and zulip_key files securely.
+    Ensures atomicity: if one file fails to write, cleans up the other.
+    Returns an empty string on success, or a descriptive error message on failure.
     """
+    zuliprc_created = False
+
     try:
+        # Write zuliprc
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
-            f.write(f"[api]\nemail={login_id}\nkey={api_key}\nsite={server_url}")
+            f.write(
+                f"[api]\nemail={login_id}\npasscmd=cat zulip_key\nsite={server_url}"
+            )
+        zuliprc_created = True
+        # Write zulip_key
+        with open(
+            os.open(key_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
+        ) as f:
+            f.write(api_key)
+
         return ""
+
     except FileExistsError:
-        return f"zuliprc already exists at {to_path}"
+        filename = to_path if not zuliprc_created else key_path
+        return f"FileExistsError: {filename} already exists"
     except OSError as ex:
-        return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
+        if zuliprc_created:
+            with contextlib.suppress(Exception):
+                os.remove(to_path)
+        filename = key_path if zuliprc_created else to_path
+        return f"{ex.__class__.__name__}: could not create {filename} ({ex})"
 
 
 def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
@@ -366,12 +391,12 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
             in_color(
                 "red",
                 "ERROR: Please ensure your zuliprc is NOT publicly accessible:\n"
-                "  {0}\n"
-                "(it currently has permissions '{1}')\n"
+                f"  {zuliprc_path}\n"
+                f"(it currently has permissions '{stat.filemode(mode)}')\n"
                 "This can often be achieved with a command such as:\n"
-                "  chmod og-rwx {0}\n"
+                f"  chmod og-rwx {zuliprc_path}\n"
                 "Consider regenerating the [api] part of your zuliprc to ensure "
-                "your account is secure.".format(zuliprc_path, stat.filemode(mode)),
+                "your account is secure.",
             )
         )
         sys.exit(1)
@@ -687,8 +712,8 @@ def main(options: Optional[List[str]] = None) -> None:
             # Dump stats only after temporary file is closed (for Win NT+ case)
             prof.dump_stats(profile_path)
             print(
-                "Profile data saved to {0}.\n"
-                "You can visualize it using e.g. `snakeviz {0}`".format(profile_path)
+                f"Profile data saved to {profile_path}.\n"
+                f"You can visualize it using e.g. `snakeviz {profile_path}`"
             )
 
         sys.exit(1)
