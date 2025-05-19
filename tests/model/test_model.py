@@ -1664,14 +1664,14 @@ class TestModel:
         )
 
         # Setup mocks before calling get_messages
-        messages_successful_response["anchor"] = 0
         self.client.get_messages.return_value = messages_successful_response
         mocker.patch(MODULE + ".index_messages", return_value=index_all_messages)
 
         model = Model(self.controller)
+        messages_successful_response["anchor"] = 0
         model.get_messages(num_before=num_before, num_after=num_after, anchor=0)
         self.client.get_messages.return_value = messages_successful_response
-        assert model.index["pointer"][repr(model.narrow)] == 0
+        assert repr(model.narrow) not in model.index["pointer"]
 
         # TEST `query_range` < no of messages received
         # RESET model._have_last_message value
