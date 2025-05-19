@@ -182,6 +182,11 @@ class Model:
         self.users: List[MinimalUserData] = []
         self._update_users_data_from_initial_data()
 
+        self.new_user_input = True
+        self._start_presence_updates()
+        while len(self.users) == 0:
+            time.sleep(0.01)
+
         self.stream_dict: Dict[int, Any] = {}
         self.muted_streams: Set[int] = set()
         self.pinned_streams: List[StreamData] = []
@@ -240,9 +245,6 @@ class Model:
                 "pm_content_in_desktop_notifications"
             ],
         )
-
-        self.new_user_input = True
-        self._start_presence_updates()
 
     def user_settings(self) -> UserSettings:
         return deepcopy(self._user_settings)
@@ -443,7 +445,10 @@ class Model:
             response = self._notify_server_of_presence()
             if response["result"] == "success":
                 self.initial_data["presences"] = response["presences"]
+
+                self._presence_timestamp = response.get("server_timestamp", time.time())
                 self._update_users_data_from_initial_data()
+
                 if hasattr(self.controller, "view"):
                     view = self.controller.view
                     view.users_view.update_user_list(user_list=self.users)
@@ -1207,6 +1212,7 @@ class Model:
     def _update_users_data_from_initial_data(self) -> None:
         # Dict which stores the active/idle status of users (by email)
         presences = self.initial_data["presences"]
+        server_timestamp = self._presence_timestamp
 
         # Construct a dict of each user in the realm to look up by email
         # and a user-id to email mapping
@@ -1251,25 +1257,27 @@ class Model:
                 * UserStatus, an arbitrary one is chosen.
                 """
                 aggregate_status: UserStatus = "offline"
-                for client in presences[email].items():
-                    client_name = client[0]
-                    status = client[1]["status"]
-                    timestamp = client[1]["timestamp"]
-                    if client_name == "aggregated":
-                        continue
-                    elif (
-                        time.time() - timestamp
+                server_aggregate_status = "offline"
+                for client_name, client_presence in presences[email].items():
+                    status = client_presence["status"]
+                    timestamp = client_presence["timestamp"]
+                    if (
+                        server_timestamp - timestamp
                     ) < self.server_presence_offline_threshold_secs:
-                        if status == "active":
-                            aggregate_status = "active"
-                        if status == "idle" and aggregate_status != "active":
-                            aggregate_status = status
-                        if status == "offline" and (
-                            aggregate_status != "active" and aggregate_status != "idle"
-                        ):
-                            aggregate_status = status
+                        if client_name == "aggregated":
+                            server_aggregate_status = status
+                        else:
+                            if status == "active":
+                                aggregate_status = "active"
+                            if status == "idle" and aggregate_status != "active":
+                                aggregate_status = status
+                            if status == "offline" and (
+                                aggregate_status != "active"
+                                and aggregate_status != "idle"
+                            ):
+                                aggregate_status = status
 
-                status = aggregate_status
+                status = server_aggregate_status
             else:
                 # Set status of users not in the  `presence` list
                 # as 'inactive'. They will not be displayed in the
