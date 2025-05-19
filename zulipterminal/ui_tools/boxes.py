@@ -985,6 +985,22 @@ class WriteBox(urwid.Pile):
                     header.focus_col = self.FOCUS_HEADER_BOX_STREAM
             else:
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+        elif is_command_key('AUTOCOMPLETE', key) and hasattr(
+                            self, 'msg_write_box'):
+            if self.focus_position == self.FOCUS_CONTAINER_MESSAGE:
+                text_box = self.msg_write_box if hasattr(
+                    self, 'focus_position') else None
+            elif self.focus_position == self.FOCUS_CONTAINER_HEADER:
+                header = self.header_write_box
+                text_box = header[header.focus_col]
+            if text_box:
+                text_len = len(text_box.edit_text)
+                new_edit_pos = text_len
+                for i in range(text_box.edit_pos, text_len):
+                    if text_box.edit_text[i] in [' ', '\n']:
+                        new_edit_pos = i
+                        break
+                text_box.set_edit_pos(new_edit_pos)
 
         key = super().keypress(size, key)
         return key
