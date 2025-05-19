@@ -2,11 +2,12 @@
 UI to render a Zulip message for display, and respond contextually to actions
 """
 
+import re
 import typing
 from collections import defaultdict
 from datetime import date, datetime
 from time import time
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict, List, Match, NamedTuple, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import dateutil.parser
@@ -409,6 +410,9 @@ class MessageBox(urwid.Pile):
                     metadata["bq_len"] -= 1
                     continue
                 markup.append(element)
+            elif tag == "span" and "alert-word" in element.get("class", []):
+                if tag_text:
+                    markup.append(("msg_code", tag_text))
             elif tag == "div" and (set(tag_classes) & set(unrendered_div_classes)):
                 # UNRENDERED DIV CLASSES
                 # NOTE: Though `matches` is generalized for multiple
@@ -646,6 +650,8 @@ class MessageBox(urwid.Pile):
         else:
             recipient_header = None
 
+        self.alerted_words: Optional[Any] = self.model.get_alert_words()
+
         # Content Header
         message = {
             key: {
@@ -792,7 +798,11 @@ class MessageBox(urwid.Pile):
 
         # Transform raw message content into markup (As needed by urwid.Text)
         content, self.message_links, self.time_mentions = self.transform_content(
-            self.message["content"], self.model.server_url
+            self.message["content"],
+            self.model.server_url,
+            self.alerted_words,
+            "has_alert_word" in self.message["flags"]
+            # self.message["flags"],
         )
         self.content.set_text(content)
 
@@ -873,14 +883,58 @@ class MessageBox(urwid.Pile):
 
         return author_is_present
 
+    @staticmethod
+    def transform_content_alert_words(content: str, alerted_list: List[str]) -> Any:
+        alert_regex_replacements = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            # Accept quotes with or without HTML escaping
+            '"': r"(?:\"|&quot;)",
+            "'": r"(?:\'|&#39;)",
+        }
+
+        before_punctuation = r"\s|^|>|[\\(\".,';\\[]"
+
+        after_punctuation = r"(?=\s|$|<|[\\)\"?!:.,';\]!])"
+
+        clean: str
+
+        def replace_callback(match: Union[Match[str]]) -> str:
+            before,word,after = match.group(1,2,3)
+            offset = match.start()
+            matched_content = match.string
+            pre_match = matched_content[:offset]
+            check_string = pre_match + match.group()
+            in_tag = check_string.rfind("<") > check_string.rfind(">")
+            if in_tag:
+                return f"{before}{word}{after}"
+            return f"{before}<span class='alert-word'>{word}</span>{after}"
+
+        for word in alerted_list:
+            clean = "".join(alert_regex_replacements.get(c, c) for c in word)
+            regex = f"({before_punctuation})({clean})({after_punctuation})"
+            content = re.sub(regex, replace_callback, content, flags=re.IGNORECASE)
+
+        return content
+
     @classmethod
     def transform_content(
-        cls, content: Any, server_url: str
+        cls,
+        content: Any,
+        server_url: str,
+        alerted_list: List[str] = list(),
+        alert_word_present: bool = False,
     ) -> Tuple[
         Tuple[None, Any],
         Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],
     ]:
+        #This method is translated from web/src/aler_tword.js of zulip/zulip
+
+        if alert_word_present:
+            content = cls.transform_content_alert_words(content, alerted_list)
+
         soup = BeautifulSoup(content, "lxml")
         body = soup.find(name="body")
 

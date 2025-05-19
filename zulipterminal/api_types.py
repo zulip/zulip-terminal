@@ -624,6 +624,11 @@ class UpdateDisplaySettingsEvent(TypedDict):
 
 
 # -----------------------------------------------------------------------------
+class AlertWordEvent(TypedDict):
+    type: Literal["alert_words"]
+    alert_words: List[str]
+
+
 Event = Union[
     MessageEvent,
     UpdateMessageContentEvent,
@@ -639,6 +644,7 @@ Event = Union[
     UpdateUserSettingsEvent,
     UpdateGlobalNotificationsEvent,
     RealmUserEvent,
+    AlertWordEvent,
 ]
 
 ###############################################################################
