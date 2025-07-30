@@ -239,10 +239,13 @@ jobs:
           - {PYTHON: 3.9, OS: ubuntu-latest, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.10", OS: ubuntu-latest, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.11", OS: ubuntu-latest, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.12", OS: ubuntu-latest, NAME: "CPython 3.12 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.13", OS: ubuntu-latest, NAME: "CPython 3.13 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.7', OS: ubuntu-latest, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.8', OS: ubuntu-latest, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-latest, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.10', OS: ubuntu-latest, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.13', OS: ubuntu-latest, NAME: "PyPy 3.13 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
@@ -259,6 +262,9 @@ jobs:
           python-version: ${{ matrix.env.PYTHON }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
+      - name: set up libxml2 and libxslt -dev  packages
+        if: ${{ matrix.env.OS }} == ubuntu-latest
+        run: sudo apt install libxml2-dev libxslt-dev -y
       - name: Output Python version
         run: python --version
       - name: Upgrade pip
