@@ -597,7 +597,9 @@ class TestController:
             controller.active_conversation_info = {}
 
         Timer(0.1, mock_typing).start()
-        Thread(controller.show_typing_notification()).start()
+        thread = Thread(target=controller.show_typing_notification)
+        thread.start()
+        thread.join(timeout=1)
 
         if active_conversation_info:
             set_footer_text.assert_has_calls(
