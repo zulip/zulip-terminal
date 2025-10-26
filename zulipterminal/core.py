@@ -451,7 +451,6 @@ class Controller:
 
         # Until conversation becomes "inactive" like when a `stop` event is sent
         while self.active_conversation_info:
-            time.sleep(0.5) #To reproduce flakey test
             sender_name = self.active_conversation_info["sender_name"]
             self.view.set_footer_text(
                 [

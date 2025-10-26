@@ -610,8 +610,8 @@ class TestController:
                     mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
                 ]
             )
-            set_footer_text.assert_called_with()
+            set_footer_text.assert_called()
         else:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
-        assert controller.active_conversation_info == {} 
+        assert controller.active_conversation_info == {}
