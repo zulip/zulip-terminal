@@ -594,7 +594,7 @@ class TestController:
         # Control sleep so loop runs predictably
         sleep_calls = 0
 
-        def fake_sleep(_):
+        def fake_sleep(_: float) -> None:
             nonlocal sleep_calls
             sleep_calls += 1
             if sleep_calls == 2:
