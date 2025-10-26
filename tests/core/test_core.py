@@ -1,7 +1,7 @@
 import os
 import webbrowser
 from platform import platform
-from threading import Thread, Timer
+from threading import Thread
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pyperclip
