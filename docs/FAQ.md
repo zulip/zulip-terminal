@@ -146,7 +146,7 @@ Full rendered message (<kbd>f</kbd>).
 
 If you experience problems related to small sizes that are not resolved using
 the above, please check
-[#1005](https://www.github.com/zulip/zulip-terminal/issues/1005)) for any
+[#1005](https://www.github.com/zulip/zulip-terminal/issues/1005) for any
 unresolved such issues and report them there.
 
 ## Are there any themes available, other than the default one?
