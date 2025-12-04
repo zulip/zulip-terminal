@@ -21,6 +21,8 @@
 Zulip Terminal is the official terminal client for Zulip, providing a
 [text-based user interface (TUI)](https://en.wikipedia.org/wiki/Text-based_user_interface).
 
+This is a small test change to verify my contribution workflow.
+
 Specific aims include:
 * Providing a broadly similar user experience to the Zulip web client,
   ultimately supporting all of its features
