@@ -308,9 +308,7 @@ def cli_detect(argv: list[str] | None = None) -> int:
             if args.normalize is True:
                 if best_guess.encoding.startswith("utf") is True:
                     print(
-                        '"{}" file does not need to be normalized, as it already came from unicode.'.format(
-                            my_file.name
-                        ),
+                        f'"{my_file.name}" file does not need to be normalized, as it already came from unicode.',
                         file=sys.stderr,
                     )
                     if my_file.closed is False:
@@ -329,9 +327,7 @@ def cli_detect(argv: list[str] | None = None) -> int:
                 elif (
                     args.force is False
                     and query_yes_no(
-                        'Are you sure to normalize "{}" by replacing it ?'.format(
-                            my_file.name
-                        ),
+                        f'Are you sure to normalize "{my_file.name}" by replacing it ?',
                         "no",
                     )
                     is False

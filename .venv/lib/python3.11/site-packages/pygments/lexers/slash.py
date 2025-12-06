@@ -27,7 +27,6 @@ class SlashLanguageLexer(ExtendedRegexLexer):
             ctx.stack.pop()
         yield match.start(), String.Interpol, '}'
         ctx.pos = match.end()
-        pass
 
     tokens = {
         "root": [

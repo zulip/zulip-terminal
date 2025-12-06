@@ -1016,7 +1016,7 @@ class TestWriteBox:
         for stream in streams_to_pin:
             write_box.view.unpinned_streams.remove(stream)
         write_box.view.pinned_streams = streams_to_pin
-        write_box.stream_id = stream_categories.get("current_stream", None)
+        write_box.stream_id = stream_categories.get("current_stream")
         write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = {
             stream["stream_id"]

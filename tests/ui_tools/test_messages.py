@@ -1181,7 +1181,9 @@ class TestMessageBox:
             "author_field_not_present",
         ],
     )
-    def test_main_view_generates_MOVED_label(self, mocker, messages_successful_response):
+    def test_main_view_generates_MOVED_label(
+        self, mocker, messages_successful_response
+    ):
         messages = messages_successful_response["messages"]
         for message in messages:
             # Ensure legacy edited index does not trigger EDITED

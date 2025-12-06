@@ -42,7 +42,7 @@ from configparser import SafeConfigParser
 #               | other sender|  x  |    |        |
 # public mode   +-------------+-----+----+--------+----
 #               | self sender |     |    |        |
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List
 
 from sleekxmpp import JID, ClientXMPP, InvalidJID
 from sleekxmpp.stanza import Message as JabberMessage

@@ -62,9 +62,7 @@ def from_bytes(
 
     if not isinstance(sequences, (bytearray, bytes)):
         raise TypeError(
-            "Expected object of type bytes or bytearray, got: {}".format(
-                type(sequences)
-            )
+            f"Expected object of type bytes or bytearray, got: {type(sequences)}"
         )
 
     if explain:
@@ -123,16 +121,12 @@ def from_bytes(
     if is_too_small_sequence:
         logger.log(
             TRACE,
-            "Trying to detect encoding from a tiny portion of ({}) byte(s).".format(
-                length
-            ),
+            f"Trying to detect encoding from a tiny portion of ({length}) byte(s).",
         )
     elif is_too_large_sequence:
         logger.log(
             TRACE,
-            "Using lazy str decoding because the payload is quite large, ({}) byte(s).".format(
-                length
-            ),
+            f"Using lazy str decoding because the payload is quite large, ({length}) byte(s).",
         )
 
     prioritized_encodings: list[str] = []
@@ -405,9 +399,7 @@ def from_bytes(
         if target_languages:
             logger.log(
                 TRACE,
-                "{} should target any language(s) of {}".format(
-                    encoding_iana, str(target_languages)
-                ),
+                f"{encoding_iana} should target any language(s) of {str(target_languages)}",
             )
 
         cd_ratios = []
@@ -429,9 +421,7 @@ def from_bytes(
         if cd_ratios_merged:
             logger.log(
                 TRACE,
-                "We detected language {} using {}".format(
-                    cd_ratios_merged, encoding_iana
-                ),
+                f"We detected language {cd_ratios_merged} using {encoding_iana}",
             )
 
         current_match = CharsetMatch(

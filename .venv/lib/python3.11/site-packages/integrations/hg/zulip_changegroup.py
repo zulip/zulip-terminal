@@ -30,18 +30,12 @@ def format_summary_line(
 
     if web_url:
         shortlog_base_url = web_url.rstrip("/") + "/shortlog/"
-        summary_url = "{shortlog}{tip}?revcount={revcount}".format(
-            shortlog=shortlog_base_url, tip=tip - 1, revcount=revcount
-        )
-        formatted_commit_count = "[{revcount} commit{s}]({url})".format(
-            revcount=revcount, s=plural, url=summary_url
-        )
+        summary_url = f"{shortlog_base_url}{tip - 1}?revcount={revcount}"
+        formatted_commit_count = f"[{revcount} commit{plural}]({summary_url})"
     else:
         formatted_commit_count = f"{revcount} commit{plural}"
 
-    return "**{user}** pushed {commits} to **{branch}** (`{tip}:{node}`):\n\n".format(
-        user=user, commits=formatted_commit_count, branch=branch, tip=tip, node=node[:12]
-    )
+    return f"**{user}** pushed {formatted_commit_count} to **{branch}** (`{tip}:{node[:12]}`):\n\n"
 
 
 def format_commit_lines(web_url: str, repo: repo, base: int, tip: int) -> str:

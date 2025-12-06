@@ -171,9 +171,11 @@ def sort_unread_topics(
     return sorted(
         unread_topics.keys(),
         key=lambda stream_topic: (
-            stream_list.index(stream_topic[0])
-            if stream_topic[0] in stream_list
-            else len(stream_list),
+            (
+                stream_list.index(stream_topic[0])
+                if stream_topic[0] in stream_list
+                else len(stream_list)
+            ),
             stream_topic[1],
         ),
     )
@@ -604,7 +606,7 @@ def match_stream(
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.
-    assert data == sorted(  # noqa: C414 (nested sort)
+    assert data == sorted(
         sorted(data, key=lambda data: data[1].lower()),
         key=lambda data: data[1] in pinned_stream_names,
         reverse=True,
@@ -838,7 +840,7 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
     command = [tool, media_path]
     try:
         process = subprocess.run(
-            command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            command, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
         if exit_status != successful_GUI_return_code():

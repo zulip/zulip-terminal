@@ -581,9 +581,11 @@ class WriteBox(urwid.Pile):
 
         # Append user_id's to users with the same names.
         user_names_with_distinct_duplicates = [
-            f"{user['full_name']}|{user['user_id']}"
-            if user_names_counter[user["full_name"]] > 1
-            else user["full_name"]
+            (
+                f"{user['full_name']}|{user['user_id']}"
+                if user_names_counter[user["full_name"]] > 1
+                else user["full_name"]
+            )
             for user in sorted_matching_users
         ]
 

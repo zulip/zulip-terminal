@@ -317,13 +317,7 @@ def parse_zephyr_body(zephyr_data: str, notice_format: str) -> Tuple[str, str]:
             # Logic based off of owl_zephyr_get_message in barnowl
             fields = body.split("\x00")
             if len(fields) == 5:
-                body = "New transaction [{}] entered in {}\nFrom: {} ({})\nSubject: {}".format(
-                    fields[0],
-                    fields[1],
-                    fields[2],
-                    fields[4],
-                    fields[3],
-                )
+                body = f"New transaction [{fields[0]}] entered in {fields[1]}\nFrom: {fields[2]} ({fields[4]})\nSubject: {fields[3]}"
     except ValueError:
         (zsig, body) = ("", zephyr_data)
     # Clean body of any null characters, since they're invalid in our protocol.
@@ -710,9 +704,7 @@ Feedback button or at support@zulip.com."""
             # Forward messages sent to '(instance "WHITESPACE")' back to the
             # appropriate WHITESPACE instance for bidirectional mirroring
             instance = match_whitespace_instance.group(1)
-        elif instance == f"instance {zephyr_class}" or instance == "test instance {}".format(
-            zephyr_class,
-        ):
+        elif instance == f"instance {zephyr_class}" or instance == f"test instance {zephyr_class}":
             # Forward messages to e.g. -c -i white-magic back from the
             # place we forward them to
             if instance.startswith("test"):
@@ -1146,11 +1138,11 @@ def parse_args() -> Tuple[optparse.Values, List[str]]:
 
 
 def die_gracefully(signal: int, frame: FrameType) -> None:
-    if CURRENT_STATE == States.ZulipToZephyr or CURRENT_STATE == States.ChildSending:
+    if States.ZulipToZephyr == CURRENT_STATE or States.ChildSending == CURRENT_STATE:
         # this is a child process, so we want os._exit (no clean-up necessary)
         os._exit(1)
 
-    if CURRENT_STATE == States.ZephyrToZulip and not options.use_sessions:
+    if States.ZephyrToZulip == CURRENT_STATE and not options.use_sessions:
         try:
             # zephyr=>zulip processes may have added subs, so run cancelSubs
             zephyr._z.cancelSubs()

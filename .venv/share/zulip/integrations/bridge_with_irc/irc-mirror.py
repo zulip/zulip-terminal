@@ -47,7 +47,7 @@ if __name__ == "__main__":
         traceback.print_exc()
         print(
             "You have unsatisfied dependencies. Install all missing dependencies with "
-            "{} --provision".format(sys.argv[0])
+            f"{sys.argv[0]} --provision"
         )
         sys.exit(1)
 

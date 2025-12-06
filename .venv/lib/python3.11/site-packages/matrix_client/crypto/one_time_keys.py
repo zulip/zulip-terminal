@@ -1,4 +1,4 @@
-class OneTimeKeysManager(object):
+class OneTimeKeysManager:
     """Handles one-time keys accounting for an OlmDevice."""
 
     def __init__(self, target_keys_number, signed_keys_proportion, keys_threshold):

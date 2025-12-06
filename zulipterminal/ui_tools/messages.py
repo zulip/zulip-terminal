@@ -289,12 +289,16 @@ class MessageBox(urwid.Pile):
 
             reaction_texts = [
                 (
-                    "reaction_mine"
-                    if my_user_id in [id[0] for id in ids]
-                    else "reaction",
-                    f" :{reaction}: {len(ids)} "
-                    if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
-                    else f" :{reaction}: {', '.join([id[1] for id in ids])} ",
+                    (
+                        "reaction_mine"
+                        if my_user_id in [id[0] for id in ids]
+                        else "reaction"
+                    ),
+                    (
+                        f" :{reaction}: {len(ids)} "
+                        if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
+                        else f" :{reaction}: {', '.join([id[1] for id in ids])} "
+                    ),
                 )
                 for reaction, ids in reaction_stats.items()
             ]
@@ -687,7 +691,7 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             text_keys = ("author", "star", "time", "status")
-            text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
+            text: Dict[str, urwid_MarkupTuple] = dict.fromkeys(text_keys, (None, " "))
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("msg_sender", message["this"]["author"])
@@ -890,9 +894,7 @@ class MessageBox(urwid.Pile):
         return author_is_present
 
     @classmethod
-    def transform_content(
-        cls, content: Any, server_url: str
-    ) -> Tuple[
+    def transform_content(cls, content: Any, server_url: str) -> Tuple[
         Tuple[None, Any],
         Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],

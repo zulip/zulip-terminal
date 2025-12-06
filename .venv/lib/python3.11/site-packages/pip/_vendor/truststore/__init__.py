@@ -26,9 +26,9 @@ if _sys.version_info < (3, 13) and _sys.implementation.name not in ("cpython", "
                 "truststore requires peer certificate chain APIs to be available"
             ) from None
 
-        del _ssl, _sslobj, _sslmem  # noqa: F821
+        del _ssl, _sslobj, _sslmem
 
-from ._api import SSLContext, extract_from_ssl, inject_into_ssl  # noqa: E402
+from ._api import SSLContext, extract_from_ssl, inject_into_ssl
 
 del _api, _sys  # type: ignore[name-defined] # noqa: F821
 

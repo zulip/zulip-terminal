@@ -297,9 +297,7 @@ def main() -> None:
             print(f"Wrote sample configuration to '{options.sample_config}'")
         else:
             print(
-                "Wrote sample configuration to '{}' using zuliprc file '{}'".format(
-                    options.sample_config, options.zuliprc
-                )
+                f"Wrote sample configuration to '{options.sample_config}' using zuliprc file '{options.zuliprc}'"
             )
         sys.exit(0)
     elif not options.config:

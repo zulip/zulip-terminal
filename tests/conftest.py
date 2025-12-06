@@ -1085,7 +1085,7 @@ def empty_index(
             topics=defaultdict(list),
             search=set(),
             messages=defaultdict(
-                lambda: {},
+                dict,
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,
