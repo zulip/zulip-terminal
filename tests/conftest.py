@@ -903,6 +903,7 @@ def initial_data(
             }
         ],
         "result": "success",
+        "alert_words": [],
         "queue_id": "1522420755:786",
         "realm_users": users_fixture,
         "cross_realm_bots": [
