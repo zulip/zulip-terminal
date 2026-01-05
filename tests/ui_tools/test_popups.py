@@ -284,7 +284,7 @@ class TestAboutView:
 
     def test_copied_content(self) -> None:
         expected_output = f"""#### Application
-Zulip Terminal: {ZT_VERSION}
+Zulip Terminal: {ZT_VERSION}\nTerminal Size: Unknown
 
 #### Server
 Version: {MINIMUM_SUPPORTED_SERVER_VERSION[0]}

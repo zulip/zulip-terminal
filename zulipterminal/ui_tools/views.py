@@ -2,6 +2,7 @@
 UI views for larger elements such as Streams, Messages, Topics, Help, etc
 """
 
+import os
 import threading
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -1116,8 +1117,18 @@ class AboutView(PopUpView):
             else []
         )
 
+        # Get terminal size
+        try:
+            size = os.get_terminal_size()
+            term_size = f"{size.lines} lines x {size.columns} cols"
+        except OSError:
+            term_size = "Unknown"
+
         contents = [
-            ("Application", [("Zulip Terminal", zt_version)]),
+            (
+                "Application",
+                [("Zulip Terminal", zt_version), ("Terminal Size", term_size)],
+            ),
             ("Server", [("Version", server_version)] + self.feature_level_content),
             (
                 "Application Configuration",
