@@ -1711,7 +1711,7 @@ class TestModel:
                 {
                     "result": "success",
                     "msg": "",
-                    "raw_content": "Feels **great** to be back!",
+                    "message": {"content": "Feels **great** to be back!"},
                 },
                 "Feels **great** to be back!",
                 False,
@@ -1740,7 +1740,9 @@ class TestModel:
 
         return_value = model.fetch_raw_message_content(message_id)
 
-        self.client.get_raw_message.assert_called_once_with(message_id)
+        self.client.get_raw_message.assert_called_once_with(
+            message_id, apply_markdown=False
+        )
         assert self.display_error_if_present.called == display_error_called
         assert return_value == expected_raw_content
 

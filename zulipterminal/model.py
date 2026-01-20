@@ -880,9 +880,9 @@ class Model:
         """
         Fetches raw message content of a message using its ID.
         """
-        response = self.client.get_raw_message(message_id)
+        response = self.client.get_raw_message(message_id, apply_markdown=False)
         if response["result"] == "success":
-            return response["raw_content"]
+            return response["message"]["content"]
         display_error_if_present(response, self.controller)
 
         return None
