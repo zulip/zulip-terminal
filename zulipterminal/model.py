@@ -1889,7 +1889,7 @@ class Model:
             message = self.index["messages"][message_id]
             message["submessages"].append(
                 {
-                    "type": event["type"],
+                    "type": "submessage",
                     "msg_type": event["msg_type"],
                     "message_id": event["message_id"],
                     "submessage_id": event["submessage_id"],
