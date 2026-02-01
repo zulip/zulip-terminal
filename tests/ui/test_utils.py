@@ -6,7 +6,6 @@ from pytest_mock import MockerFixture
 from zulipterminal.api_types import Message
 from zulipterminal.ui_tools.utils import create_msg_box_list, is_muted
 
-
 MODULE = "zulipterminal.ui_tools.utils"
 
 

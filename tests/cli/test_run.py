@@ -23,7 +23,6 @@ from zulipterminal.cli.run import (
 from zulipterminal.model import ServerConnectionFailure
 from zulipterminal.version import ZT_VERSION
 
-
 MODULE = "zulipterminal.cli.run"
 CONTROLLER = MODULE + ".Controller"
 

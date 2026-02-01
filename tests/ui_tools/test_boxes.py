@@ -33,7 +33,6 @@ from zulipterminal.ui_tools.boxes import (
 )
 from zulipterminal.urwid_types import urwid_Size
 
-
 MODULE = "zulipterminal.ui_tools.boxes"
 WRITEBOX = MODULE + ".WriteBox"
 

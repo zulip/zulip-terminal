@@ -1,13 +1,13 @@
 """
 Styles and their colour mappings in each theme, with helper functions
 """
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pygments.token import STANDARD_TYPES, _TokenType
 
 from zulipterminal.config.color import Background, term16
 from zulipterminal.themes import gruvbox_dark, gruvbox_light, zt_blue, zt_dark, zt_light
-
 
 StyleSpec = Union[
     Tuple[Optional[str], str, str],

@@ -1,6 +1,7 @@
 """
 Types from the Zulip API, translated into python, to improve type checking
 """
+
 # NOTE: Only modify this file if it leads to a better match to the types used
 #       in the API at http://zulip.com/api
 
@@ -13,7 +14,6 @@ from zulip import EditPropagateMode  # one/all/later
 from zulip import EmojiType  # [unicode/realm/zulip_extra + _emoji]
 from zulip import MessageFlag  # superset of below, may only be changed indirectly
 from zulip import ModifiableMessageFlag  # directly modifiable read/starred/collapsed
-
 
 # This marks imported names that are intended for importing elsewhere
 __all__ = [
@@ -181,6 +181,15 @@ class SubscriptionSettingChange(TypedDict):
 ## TODO: Improve this typing to split private and stream message data
 
 
+class Submessage(TypedDict):
+    type: str
+    msg_type: str
+    message_id: int
+    submessage_id: int
+    sender_id: int
+    content: str
+
+
 class Message(TypedDict, total=False):
     id: int
     sender_id: int
@@ -195,7 +204,7 @@ class Message(TypedDict, total=False):
     subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
+    submessages: List[Submessage]
     flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str

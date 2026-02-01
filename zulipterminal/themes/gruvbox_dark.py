@@ -14,7 +14,6 @@ from pygments.styles.solarized import SolarizedDarkStyle
 from zulipterminal.config.color import Background
 from zulipterminal.themes.colors_gruvbox import DefaultBoldColor as Color
 
-
 # fmt: off
 
 STYLES = {

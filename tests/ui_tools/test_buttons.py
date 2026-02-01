@@ -22,7 +22,6 @@ from zulipterminal.ui_tools.buttons import (
 )
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
-
 MODULE = "zulipterminal.ui_tools.buttons"
 MSGLINKBUTTON = MODULE + ".MessageLinkButton"
 

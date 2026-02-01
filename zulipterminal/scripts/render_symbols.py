@@ -5,7 +5,6 @@ from urwid import set_encoding
 
 from zulipterminal.config import symbols
 
-
 set_encoding("utf-8")
 
 palette = [

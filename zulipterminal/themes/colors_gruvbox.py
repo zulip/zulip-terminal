@@ -8,10 +8,10 @@ This file uses the official gruvbox colors where possible.
 For color reference see:
     https://github.com/morhetz/gruvbox/blob/master/colors/gruvbox.vim
 """
+
 from enum import Enum
 
 from zulipterminal.config.color import color_properties
-
 
 # fmt: off
 # NOTE: The 24bit color codes use 256 color which can be

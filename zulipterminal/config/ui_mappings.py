@@ -17,7 +17,6 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.helper import StreamAccessType, UserStatus
 
-
 EDIT_MODE_CAPTIONS: Dict[EditPropagateMode, str] = {
     "change_one": "Change only this message topic",
     "change_later": "Also change later messages to this topic",

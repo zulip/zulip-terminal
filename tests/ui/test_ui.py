@@ -9,7 +9,6 @@ from zulipterminal.config.keys import keys_for_command
 from zulipterminal.ui import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH, View
 from zulipterminal.urwid_types import urwid_Box
 
-
 CONTROLLER = "zulipterminal.core.Controller"
 MODULE = "zulipterminal.ui"
 VIEW = MODULE + ".View"

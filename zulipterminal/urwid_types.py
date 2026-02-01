@@ -4,7 +4,6 @@ Types from the urwid API, to improve type checking
 
 from typing import Optional, Tuple, Union
 
-
 # FIXME: These should likely be migrated at least partially to urwid stubs
 
 urwid_Fixed = Tuple[()]  # noqa: N816

@@ -9,7 +9,6 @@ from zulipterminal.platform_code import (
     successful_GUI_return_code,
 )
 
-
 MODULE = "zulipterminal.platform_code"
 
 

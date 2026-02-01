@@ -25,7 +25,6 @@ from zulipterminal.model import (
     UserSettings,
 )
 
-
 MODULE = "zulipterminal.model"
 MODEL = MODULE + ".Model"
 CONTROLLER = "zulipterminal.core.Controller"
@@ -716,9 +715,11 @@ class TestModel:
             else model.user_id + 1
         )
         full_existing_reactions = [
-            dict(er, user={user_key: id})
-            if user_key is not None
-            else dict(user_id=id, emoji_code=er["emoji_code"])
+            (
+                dict(er, user={user_key: id})
+                if user_key is not None
+                else dict(user_id=id, emoji_code=er["emoji_code"])
+            )
             for er in existing_reactions
         ]
         message = dict(id=msg_id, reactions=full_existing_reactions)

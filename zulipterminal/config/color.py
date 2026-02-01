@@ -23,7 +23,6 @@ from pygments.token import (
     Whitespace,
 )
 
-
 # fmt: off
 # Background is treated as transparent by default
 # This avoids the need for a dummy default color

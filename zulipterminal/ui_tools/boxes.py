@@ -52,7 +52,6 @@ from zulipterminal.helper import (
 from zulipterminal.ui_tools.buttons import EditModeButton
 from zulipterminal.urwid_types import urwid_Size
 
-
 # This constant defines the maximum character length of a message
 # in the compose box that does not trigger a confirmation popup.
 MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP: Final = 15
@@ -581,9 +580,11 @@ class WriteBox(urwid.Pile):
 
         # Append user_id's to users with the same names.
         user_names_with_distinct_duplicates = [
-            f"{user['full_name']}|{user['user_id']}"
-            if user_names_counter[user["full_name"]] > 1
-            else user["full_name"]
+            (
+                f"{user['full_name']}|{user['user_id']}"
+                if user_names_counter[user["full_name"]] > 1
+                else user["full_name"]
+            )
             for user in sorted_matching_users
         ]
 

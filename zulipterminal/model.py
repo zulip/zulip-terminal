@@ -53,6 +53,7 @@ from zulipterminal.api_types import (
     RealmUser,
     StreamComposition,
     StreamMessageUpdateRequest,
+    Submessage,
     Subscription,
     SubscriptionSettingChange,
     TypingStatusChange,
@@ -1408,7 +1409,7 @@ class Model:
             SubscriptionSettingChange(
                 stream_id=stream_id,
                 property="is_muted",
-                value=not self.is_muted_stream(stream_id)
+                value=not self.is_muted_stream(stream_id),
                 # True for muting and False for unmuting.
             )
         ]
@@ -1887,16 +1888,15 @@ class Model:
         message_id = event["message_id"]
         if message_id in self.index["messages"]:
             message = self.index["messages"][message_id]
-            message["submessages"].append(
-                {
-                    "type": event["type"],
-                    "msg_type": event["msg_type"],
-                    "message_id": event["message_id"],
-                    "submessage_id": event["submessage_id"],
-                    "sender_id": event["sender_id"],
-                    "content": event["content"],
-                }
-            )
+            submessage: Submessage = {
+                "type": event["type"],
+                "msg_type": event["msg_type"],
+                "message_id": event["message_id"],
+                "submessage_id": event["submessage_id"],
+                "sender_id": event["sender_id"],
+                "content": event["content"],
+            }
+            message["submessages"].append(submessage)
             self.index["messages"][message_id] = message
             self._update_rendered_view(message_id)
 

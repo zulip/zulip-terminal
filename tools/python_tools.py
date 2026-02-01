@@ -2,7 +2,6 @@
 
 import glob
 
-
 tools_exclusions = {
     f"tools/{name}"
     for name in {

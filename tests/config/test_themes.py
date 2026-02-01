@@ -28,7 +28,6 @@ from zulipterminal.config.themes import (
     validate_colors,
 )
 
-
 MODULE = "zulipterminal.config.themes"
 
 expected_complete_themes = {
@@ -48,9 +47,11 @@ def test_all_themes() -> None:
 @pytest.mark.parametrize(
     "theme_name",
     [
-        theme
-        if theme in expected_complete_themes
-        else pytest.param(theme, marks=pytest.mark.xfail(reason="incomplete"))
+        (
+            theme
+            if theme in expected_complete_themes
+            else pytest.param(theme, marks=pytest.mark.xfail(reason="incomplete"))
+        )
         for theme in THEMES
     ],
 )

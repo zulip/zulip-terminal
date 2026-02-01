@@ -32,7 +32,6 @@ from zulipterminal.version import (
     SUPPORTED_SERVER_VERSIONS,
 )
 
-
 # --------------- Autouse Fixtures -----------------------------------------
 
 
@@ -422,7 +421,7 @@ def zulip_emoji() -> "OrderedDict[str, Dict[str, Any]]":
 
 
 def display_recipient_factory(
-    recipient_details_list: List[Tuple[int, str]]
+    recipient_details_list: List[Tuple[int, str]],
 ) -> List[Dict[str, Any]]:
     """
     Generate display_recipient field for (PM/group) messages

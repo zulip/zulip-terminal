@@ -1,14 +1,30 @@
-from typing import Dict, List, Union
+from typing import Any, Callable, Dict, List, Union
 
 import pytest
 from pytest import param as case
 
+from zulipterminal.api_types import Submessage
 from zulipterminal.widget import (
-    Submessage,
     find_widget_type,
     process_poll_widget,
     process_todo_widget,
 )
+
+
+def normalize_submessages(
+    raw_submessages: List[Dict[str, Any]],
+    make_submessage: Callable[..., Submessage],
+) -> List[Submessage]:
+    return [
+        make_submessage(
+            content=entry["content"],
+            message_id=entry["message_id"],
+            sender_id=entry["sender_id"],
+            submessage_id=entry.get("submessage_id", entry.get("id", 0)),
+            msg_type=entry["msg_type"],
+        )
+        for entry in raw_submessages
+    ]
 
 
 @pytest.mark.parametrize(
@@ -62,13 +78,16 @@ from zulipterminal.widget import (
             ],
             "todo",
         ),
-        case([{}], "unknown"),
+        case([], "unknown"),
     ],
 )
 def test_find_widget_type(
-    submessages: List[Submessage], expected_widget_type: str
+    submessages: List[Dict[str, Any]],
+    expected_widget_type: str,
+    make_submessage: Callable[..., Submessage],
 ) -> None:
-    widget_type = find_widget_type(submessages)
+    normalized_submessages = normalize_submessages(submessages, make_submessage)
+    widget_type = find_widget_type(normalized_submessages)
 
     assert widget_type == expected_widget_type
 
@@ -340,14 +359,16 @@ def test_find_widget_type(
     ],
 )
 def test_process_todo_widget(
-    submessages: List[Submessage],
+    submessages: List[Dict[str, Any]],
     expected_title: str,
     expected_tasks: Dict[str, Dict[str, Union[str, bool]]],
+    make_submessage: Callable[..., Submessage],
 ) -> None:
-    title, tasks = process_todo_widget(submessages)
+    normalized_submessages = normalize_submessages(submessages, make_submessage)
+    result = process_todo_widget(normalized_submessages)
 
-    assert title == expected_title
-    assert tasks == expected_tasks
+    assert result["title"] == expected_title
+    assert result["tasks"] == expected_tasks
 
 
 @pytest.mark.parametrize(
@@ -655,11 +676,13 @@ def test_process_todo_widget(
     ],
 )
 def test_process_poll_widget(
-    submessages: List[Submessage],
+    submessages: List[Dict[str, Any]],
     expected_poll_question: str,
-    expected_options: Dict[str, Dict[str, Union[str, List[str]]]],
+    expected_options: Dict[str, Dict[str, Union[str, List[int]]]],
+    make_submessage: Callable[..., Submessage],
 ) -> None:
-    poll_question, options = process_poll_widget(submessages)
+    normalized_submessages = normalize_submessages(submessages, make_submessage)
+    result = process_poll_widget(normalized_submessages)
 
-    assert poll_question == expected_poll_question
-    assert options == expected_options
+    assert result["question"] == expected_poll_question
+    assert result["options"] == expected_options

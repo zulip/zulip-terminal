@@ -4,11 +4,11 @@ ZT DARK
 This theme uses the default color scheme.
 For further details on themefiles look at the theme contribution guide.
 """
+
 from pygments.styles.material import MaterialStyle
 
 from zulipterminal.config.color import Background
 from zulipterminal.config.color import DefaultBoldColor as Color
-
 
 # fmt: off
 STYLES = {

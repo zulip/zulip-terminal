@@ -5,7 +5,6 @@ from pytest_mock import MockerFixture
 
 from zulipterminal.config import keys
 
-
 AVAILABLE_COMMANDS = list(keys.KEY_BINDINGS.keys())
 
 USED_KEYS = {key for values in keys.KEY_BINDINGS.values() for key in values["keys"]}

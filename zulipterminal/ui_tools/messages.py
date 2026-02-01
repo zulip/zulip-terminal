@@ -39,7 +39,6 @@ from zulipterminal.widget import (
     process_todo_widget,
 )
 
-
 if typing.TYPE_CHECKING:
     from zulipterminal.model import Model
 
@@ -289,12 +288,16 @@ class MessageBox(urwid.Pile):
 
             reaction_texts = [
                 (
-                    "reaction_mine"
-                    if my_user_id in [id[0] for id in ids]
-                    else "reaction",
-                    f" :{reaction}: {len(ids)} "
-                    if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
-                    else f" :{reaction}: {', '.join([id[1] for id in ids])} ",
+                    (
+                        "reaction_mine"
+                        if my_user_id in [id[0] for id in ids]
+                        else "reaction"
+                    ),
+                    (
+                        f" :{reaction}: {len(ids)} "
+                        if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
+                        else f" :{reaction}: {', '.join([id[1] for id in ids])} "
+                    ),
                 )
                 for reaction, ids in reaction_stats.items()
             ]
@@ -736,7 +739,9 @@ class MessageBox(urwid.Pile):
             widget_type = find_widget_type(self.message.get("submessages", []))
 
             if widget_type == "todo":
-                title, tasks = process_todo_widget(self.message.get("submessages", []))
+                todo_result = process_todo_widget(self.message.get("submessages", []))
+                title = todo_result["title"]
+                tasks = todo_result["tasks"]
 
                 todo_widget = "<strong>To-do</strong>\n" + f"<strong>{title}</strong>"
 
@@ -758,9 +763,9 @@ class MessageBox(urwid.Pile):
                 self.message["content"] = todo_widget
 
             elif widget_type == "poll":
-                poll_question, poll_options = process_poll_widget(
-                    self.message.get("submessages", [])
-                )
+                poll_result = process_poll_widget(self.message.get("submessages", []))
+                poll_question = poll_result["question"]
+                poll_options = poll_result["options"]
 
                 # TODO: ZT doesn't yet support adding poll questions after the
                 # creation of the poll. So, if the poll question is not provided,
@@ -874,9 +879,7 @@ class MessageBox(urwid.Pile):
         return author_is_present
 
     @classmethod
-    def transform_content(
-        cls, content: Any, server_url: str
-    ) -> Tuple[
+    def transform_content(cls, content: Any, server_url: str) -> Tuple[
         Tuple[None, Any],
         Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],

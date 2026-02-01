@@ -22,7 +22,6 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.ui_tools.messages import MessageBox
 
-
 MODULE = "zulipterminal.ui_tools.messages"
 
 

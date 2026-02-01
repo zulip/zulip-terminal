@@ -22,7 +22,6 @@ from zulipterminal.helper import (
     sort_unread_topics,
 )
 
-
 MODULE = "zulipterminal.helper"
 MODEL = "zulipterminal.model.Model"
 SERVER_URL = "https://chat.zulip.org"

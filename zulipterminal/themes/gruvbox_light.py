@@ -8,11 +8,11 @@ is released.
 
 For further details on themefiles look at the theme contribution guide
 """
+
 from pygments.styles.solarized import SolarizedLightStyle
 
 from zulipterminal.config.color import Background
 from zulipterminal.themes.colors_gruvbox import DefaultBoldColor as Color
-
 
 # fmt: off
 

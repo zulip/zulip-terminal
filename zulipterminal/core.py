@@ -50,7 +50,6 @@ from zulipterminal.ui_tools.views import (
 )
 from zulipterminal.version import ZT_VERSION
 
-
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
 SCROLL_PROMPT = "(up/down scrolls)"
@@ -119,9 +118,11 @@ class Controller:
         # Register new ^C handler
         signal.signal(
             signal.SIGINT,
-            self.prompting_exit_handler
-            if self.exit_confirmation
-            else self.no_prompt_exit_handler,
+            (
+                self.prompting_exit_handler
+                if self.exit_confirmation
+                else self.no_prompt_exit_handler
+            ),
         )
 
     def raise_exception_in_main_thread(

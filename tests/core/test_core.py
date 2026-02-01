@@ -14,7 +14,6 @@ from zulipterminal.core import Controller
 from zulipterminal.helper import Index
 from zulipterminal.version import ZT_VERSION
 
-
 MODULE = "zulipterminal.core"
 MODEL = MODULE + ".Model"
 VIEW = MODULE + ".View"

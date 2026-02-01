@@ -22,7 +22,6 @@ from zulipterminal.ui_tools.views import (
     UsersView,
 )
 
-
 SUBDIR = "zulipterminal.ui_tools"
 VIEWS = SUBDIR + ".views"
 MESSAGEVIEW = VIEWS + ".MessageView"

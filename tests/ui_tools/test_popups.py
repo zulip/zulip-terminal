@@ -32,7 +32,6 @@ from zulipterminal.ui_tools.views import (
 from zulipterminal.urwid_types import urwid_Size
 from zulipterminal.version import MINIMUM_SUPPORTED_SERVER_VERSION, ZT_VERSION
 
-
 MODULE = "zulipterminal.ui_tools.views"
 LISTWALKER = MODULE + ".urwid.SimpleFocusListWalker"
 
@@ -170,9 +169,9 @@ class TestPopUpView:
         mocker.patch(
             MODULE + ".is_command_key",
             side_effect=(
-                lambda command, key: False
-                if command == self.command
-                else is_command_key(command, key)
+                lambda command, key: (
+                    False if command == self.command else is_command_key(command, key)
+                )
             ),
         )
 
