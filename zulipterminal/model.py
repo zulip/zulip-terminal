@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 
 import zulip
 from bs4 import BeautifulSoup
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
@@ -1889,10 +1889,9 @@ class Model:
             message = self.index["messages"][message_id]
             message["submessages"].append(
                 {
-                    "type": event["type"],
-                    "msg_type": event["msg_type"],
+                    "id": event["submessage_id"],
+                    "msg_type": cast(Literal["widget"], event["msg_type"]),
                     "message_id": event["message_id"],
-                    "submessage_id": event["submessage_id"],
                     "sender_id": event["sender_id"],
                     "content": event["content"],
                 }
