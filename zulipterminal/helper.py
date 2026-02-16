@@ -171,12 +171,6 @@ def sort_unread_topics(
     *,
     topic_order_by_stream: Optional[Dict[int, List[str]]] = None,
 ) -> List[Tuple[int, str]]:
-    """
-    Sort unread topics by stream order (left panel) and, within each stream,
-    by topic list order (most recent first) when topic_order_by_stream is
-    provided, otherwise by topic name for backward compatibility.
-    """
-
     def sort_key(stream_topic: Tuple[int, str]) -> Tuple[int, int, str]:
         stream_id, topic_name = stream_topic
         stream_rank = (
@@ -184,10 +178,7 @@ def sort_unread_topics(
             if stream_id in stream_list
             else len(stream_list)
         )
-        if (
-            topic_order_by_stream is not None
-            and stream_id in topic_order_by_stream
-        ):
+        if topic_order_by_stream is not None and stream_id in topic_order_by_stream:
             topic_list = topic_order_by_stream[stream_id]
             topic_rank = (
                 topic_list.index(topic_name)
@@ -195,7 +186,7 @@ def sort_unread_topics(
                 else len(topic_list)
             )
         else:
-            topic_rank = 0 
+            topic_rank = 0
         return (stream_rank, topic_rank, topic_name)
 
     return sorted(unread_topics.keys(), key=sort_key)
@@ -204,13 +195,8 @@ def sort_unread_topics(
 def _set_count_in_model(
     new_count: int, changed_messages: List[Message], unread_counts: UnreadCounts
 ) -> None:
-    """
-    This function doesn't explicitly set counts in model,
-    but updates `unread_counts` (which can update the model
-    if it's passed in, but is not tied to it).
-    """
-    # broader unread counts (for all_*) are updated
-    # later conditionally in _set_count_in_view.
+# broader unread counts (for all_*) are updated
+# later conditionally in _set_count_in_view.
     KeyT = TypeVar("KeyT")
 
     def update_unreads(unreads: Dict[KeyT, int], key: KeyT) -> None:
