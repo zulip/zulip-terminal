@@ -225,23 +225,39 @@ class Model:
         # "user_settings" only present in ZFl 89+ (v5.0)
         user_settings = self.initial_data.get("user_settings", None)
         # TODO: Support multiple settings locations via settings migration #1108
+
+        # Determine twenty_four_hour_time with proper fallbacks:
+        if user_settings is None:
+            t24 = self.initial_data.get("twenty_four_hour_time")
+        else:
+            t24 = user_settings.get("twenty_four_hour_time")
+        if t24 is None:
+            t24 = False
+        twenty_four_hour_time = bool(t24)
+
+        # Determine send_private_typing_notifications (default to True if not provided)
+        if user_settings is None:
+            send_private_typing_notifications = True
+        else:
+            send_private_typing_notifications = user_settings.get(
+                "send_private_typing_notifications", True
+            )
+
+        # Determine pm_content_in_desktop_notifications with fallback to initial_data
+        if user_settings is None:
+            pm_content_in_desktop_notifications = self.initial_data.get(
+                "pm_content_in_desktop_notifications", False
+            )
+        else:
+            pm_content_in_desktop_notifications = user_settings.get(
+                "pm_content_in_desktop_notifications",
+                self.initial_data.get("pm_content_in_desktop_notifications", False),
+            )
+
         self._user_settings = UserSettings(
-            send_private_typing_notifications=(
-                True
-                if user_settings is None
-                else user_settings["send_private_typing_notifications"]
-            ),  # ZFL 105, Zulip 5.0
-            # these settings were removed from the top-level object in ZFL 439 (v12.0)
-            twenty_four_hour_time=(
-                self.initial_data["twenty_four_hour_time"]
-                if user_settings is None
-                else user_settings["twenty_four_hour_time"]
-            ),
-            pm_content_in_desktop_notifications=(
-                self.initial_data["pm_content_in_desktop_notifications"]
-                if user_settings is None
-                else user_settings["pm_content_in_desktop_notifications"]
-            ),
+            send_private_typing_notifications=send_private_typing_notifications,
+            twenty_four_hour_time=twenty_four_hour_time,
+            pm_content_in_desktop_notifications=pm_content_in_desktop_notifications,
         )
 
         self.new_user_input = True
