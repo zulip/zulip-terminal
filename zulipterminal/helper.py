@@ -195,8 +195,8 @@ def sort_unread_topics(
 def _set_count_in_model(
     new_count: int, changed_messages: List[Message], unread_counts: UnreadCounts
 ) -> None:
-# broader unread counts (for all_*) are updated
-# later conditionally in _set_count_in_view.
+    # broader unread counts (for all_*) are updated
+    # later conditionally in _set_count_in_view.
     KeyT = TypeVar("KeyT")
 
     def update_unreads(unreads: Dict[KeyT, int], key: KeyT) -> None:
