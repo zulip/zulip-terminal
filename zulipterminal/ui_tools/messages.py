@@ -24,6 +24,7 @@ from zulipterminal.config.symbols import (
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
     QUOTED_TEXT_MARKER,
+    SECTION_DIVIDER_LINE,
     STARRED_MESSAGES_MARKER,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
@@ -58,7 +59,7 @@ class MessageBox(urwid.Pile):
         self.model = model
         self.message = message
         self.header: List[Any] = []
-        self.content: urwid.Text = urwid.Text("")
+        self.content: urwid.Widget = urwid.Text("")
         self.footer: List[Any] = []
         self.stream_name = ""
         self.stream_id: Optional[int] = None
@@ -383,7 +384,6 @@ class MessageBox(urwid.Pile):
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
             # TODO: Some of these could be implemented
             "br": "",  # No indicator of absence
-            "hr": "RULER",
             "img": "IMAGE",
         }
         unrendered_div_classes = {  # In pairs of 'div_class': 'text'
@@ -635,9 +635,27 @@ class MessageBox(urwid.Pile):
 
                 source_text = f"Original text was {tag_text.strip()}"
                 metadata["time_mentions"].append((time_string, source_text))
+            elif tag == "hr":
+                markup.append("__HR__")  # Horizontal rule
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
         return markup, metadata["message_links"], metadata["time_mentions"]
+
+    @staticmethod
+    def build_content_widget(markup: Tuple[None, Any]) -> urwid.Widget:
+        widgets = []
+        temp_chunk: List[Any] = []
+        for item in markup[1]:
+            if item == "__HR__":
+                if temp_chunk:
+                    widgets.append(urwid.Text(temp_chunk))
+                    temp_chunk = []
+                widgets.append(urwid.Divider(SECTION_DIVIDER_LINE))
+            else:
+                temp_chunk.append(item)
+        if temp_chunk:
+            widgets.append(urwid.Text(temp_chunk))
+        return widgets[0] if len(widgets) == 1 else urwid.Pile(widgets)
 
     def main_view(self) -> List[Any]:
         # Recipient Header
@@ -794,7 +812,7 @@ class MessageBox(urwid.Pile):
         content, self.message_links, self.time_mentions = self.transform_content(
             self.message["content"], self.model.server_url
         )
-        self.content.set_text(content)
+        self.content = self.build_content_widget(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7

@@ -418,8 +418,8 @@ class TestMessageBox:
             ),
             case("<br>", [], id="br"),
             case("<br/>", [], id="br2"),
-            case("<hr>", ["[RULER NOT RENDERED]"], id="hr"),
-            case("<hr/>", ["[RULER NOT RENDERED]"], id="hr2"),
+            case("<hr>", ["__HR__"], id="hr"),
+            case("<hr/>", ["__HR__"], id="hr2"),
             case("<img>", ["[IMAGE NOT RENDERED]"], id="img"),
             case("<img/>", ["[IMAGE NOT RENDERED]"], id="img2"),
             case(
