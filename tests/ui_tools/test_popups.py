@@ -1488,39 +1488,45 @@ class TestStreamInfoView:
             self.controller.copy_to_clipboard.assert_not_called()
 
     @pytest.mark.parametrize(
-        "rendered_description, expected_markup",
+        "rendered_description, expected_text, expected_attrib",
         [
             (
                 "<p>Simple</p>",
-                (None, ["", "", "Simple"]),
+                "Simple",
+                [],
             ),
             (
                 '<p>A city in Italy <a href="http://genericlink.com">ABC</a>'
                 "<strong>Bold</strong>",
-                (
-                    None,
-                    [
-                        "",
-                        "",
-                        "A city in Italy ",
-                        ("msg_link", "ABC"),
-                        " ",
-                        ("msg_link_index", "[1]"),
-                        ("msg_bold", "Bold"),
-                    ],
-                ),
+                "A city in Italy ABC [1]Bold",
+                [
+                    (None, 16),
+                    ("msg_link", 3),
+                    (None, 1),
+                    ("msg_link_index", 3),
+                    ("msg_bold", 4),
+                ],
             ),
         ],
     )
     def test_markup_description(
-        self, rendered_description: str, expected_markup: Tuple[None, Any]
+        self,
+        rendered_description: str,
+        expected_text: str,
+        expected_attrib: List[Tuple[Optional[str], int]],
     ) -> None:
         model = self.controller.model
         model.stream_dict[self.stream_id]["rendered_description"] = rendered_description
 
         stream_info_view = StreamInfoView(self.controller, self.stream_id)
+        assert isinstance(stream_info_view.markup_desc, Pile)
+        assert len(stream_info_view.markup_desc.contents) == 1
 
-        assert stream_info_view.markup_desc == expected_markup
+        desc_widget, _ = stream_info_view.markup_desc.contents[0]
+        assert isinstance(desc_widget, Text)
+        rendered_text, rendered_attrib = desc_widget.get_text()
+        assert rendered_text == expected_text
+        assert rendered_attrib == expected_attrib
 
     @pytest.mark.parametrize(
         "message_links, expected_text, expected_attrib, expected_footlinks_width",

@@ -23,8 +23,8 @@ from zulipterminal.config.symbols import (
     MENTIONED_MESSAGES_MARKER,
     MESSAGE_CONTENT_MARKER,
     MESSAGE_HEADER_DIVIDER,
+    MESSAGE_RULE_LINE,
     QUOTED_TEXT_MARKER,
-    SECTION_DIVIDER_LINE,
     STARRED_MESSAGES_MARKER,
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
@@ -46,6 +46,14 @@ if typing.TYPE_CHECKING:
 
 # Usernames to show before just showing reaction counts
 MAXIMUM_USERNAMES_VISIBLE = 3
+
+
+# Internal temp token for <hr> while building content widgets.
+class _HrToken:
+    pass
+
+
+_HR_TOKEN = _HrToken()
 
 
 class _MessageEditState(NamedTuple):
@@ -378,7 +386,7 @@ class MessageBox(urwid.Pile):
     ) -> Tuple[List[Any], Dict[str, Tuple[str, int, bool]], List[Tuple[str, str]]]:
         # Ensure a string is provided, in case the soup finds none
         # This could occur if eg. an image is removed or not shown
-        markup: List[Union[str, Tuple[Optional[str], Any]]] = [""]
+        markup: List[Union[str, Tuple[Optional[str], Any], _HrToken]] = [""]
         if soup is None:  # This is not iterable, so return promptly
             return markup, metadata["message_links"], metadata["time_mentions"]
         unrendered_tags = {  # In pairs of 'tag_name': 'text'
@@ -636,26 +644,10 @@ class MessageBox(urwid.Pile):
                 source_text = f"Original text was {tag_text.strip()}"
                 metadata["time_mentions"].append((time_string, source_text))
             elif tag == "hr":
-                markup.append("__HR__")  # Horizontal rule
+                markup.append(_HR_TOKEN)  # Horizontal rule
             else:
                 markup.extend(cls.soup2markup(element, metadata)[0])
         return markup, metadata["message_links"], metadata["time_mentions"]
-
-    @staticmethod
-    def build_content_widget(markup: Tuple[None, Any]) -> urwid.Widget:
-        widgets = []
-        temp_chunk: List[Any] = []
-        for item in markup[1]:
-            if item == "__HR__":
-                if temp_chunk:
-                    widgets.append(urwid.Text(temp_chunk))
-                    temp_chunk = []
-                widgets.append(urwid.Divider(SECTION_DIVIDER_LINE))
-            else:
-                temp_chunk.append(item)
-        if temp_chunk:
-            widgets.append(urwid.Text(temp_chunk))
-        return widgets[0] if len(widgets) == 1 else urwid.Pile(widgets)
 
     def main_view(self) -> List[Any]:
         # Recipient Header
@@ -809,10 +801,9 @@ class MessageBox(urwid.Pile):
                 self.message["content"] = poll_widget
 
         # Transform raw message content into markup (As needed by urwid.Text)
-        content, self.message_links, self.time_mentions = self.transform_content(
+        self.content, self.message_links, self.time_mentions = self.transform_content(
             self.message["content"], self.model.server_url
         )
-        self.content = self.build_content_widget(content)
 
         if self.message["id"] in self.model.index["edited_messages"]:
             edited_label_size = 7
@@ -894,11 +885,7 @@ class MessageBox(urwid.Pile):
     @classmethod
     def transform_content(
         cls, content: Any, server_url: str
-    ) -> Tuple[
-        Tuple[None, Any],
-        Dict[str, Tuple[str, int, bool]],
-        List[Tuple[str, str]],
-    ]:
+    ) -> Tuple[urwid.Pile, Dict[str, Tuple[str, int, bool]], List[Tuple[str, str]],]:
         soup = BeautifulSoup(content, "lxml")
         body = soup.find(name="body")
 
@@ -912,7 +899,25 @@ class MessageBox(urwid.Pile):
             metadata["bq_len"] = cls.indent_quoted_content(soup, QUOTED_TEXT_MARKER)
 
         markup, message_links, time_mentions = cls.soup2markup(body, metadata)
-        return (None, markup), message_links, time_mentions
+        return cls.build_content_widget(markup), message_links, time_mentions
+
+    @staticmethod
+    def build_content_widget(markup: List[Any]) -> urwid.Pile:
+        widgets = []
+        temp_chunk: List[Any] = []
+        for item in markup:
+            if isinstance(item, _HrToken):
+                if temp_chunk:
+                    widgets.append(urwid.Text(temp_chunk))
+                    temp_chunk = []
+                widgets.append(urwid.Divider(MESSAGE_RULE_LINE))
+            else:
+                temp_chunk.append(item)
+
+        if temp_chunk:
+            widgets.append(urwid.Text(temp_chunk))
+
+        return urwid.Pile(widgets)
 
     @staticmethod
     def indent_quoted_content(soup: Any, padding_char: str) -> int:
