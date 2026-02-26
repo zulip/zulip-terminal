@@ -1153,6 +1153,39 @@ class TestMessageBox:
         assert isinstance(view_components[1], Padding)
 
     @pytest.mark.parametrize(
+        "message",
+        [
+            {
+                "id": 4,
+                "type": "stream",
+                "display_recipient": "Verona",
+                "stream_id": 5,
+                "subject": "Test topic",
+                "flags": [],
+                "is_me_message": False,
+                "content": "<p>what are you planning to do this week</p>",
+                "reactions": [],
+                "sender_full_name": "alice",
+                "timestamp": 1532103879,
+            }
+        ],
+    )
+    def test_search_results_always_have_header(
+        self,
+        mocker,
+        message,
+    ):
+        self.model.is_search_narrow.return_value = True
+
+        msg_box = MessageBox(message, self.model, message)
+        view_components = msg_box.main_view()
+
+        assert len(view_components) == 3
+        assert isinstance(view_components[0], Columns)
+        assert isinstance(view_components[1], Columns)
+        assert isinstance(view_components[2], Padding)
+
+    @pytest.mark.parametrize(
         "to_vary_in_each_message",
         [
             {"sender_full_name": "bob"},

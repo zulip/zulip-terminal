@@ -120,6 +120,9 @@ class MessageBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def need_recipient_header(self) -> bool:
+        if self.model.is_search_narrow():
+            return True
+
         # Prevent redundant information in recipient bar
         if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
             return False
