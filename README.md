@@ -304,16 +304,22 @@ email, from the [Stream information popup](docs/hotkeys.md#stream-list-actions).
 
 #### Linux
 
-On Linux, this module makes use of `xclip` or `xsel` commands, which should
-already come with the OS.
-If none of these commands are installed on your system, then install any ONE
-using:
+On Linux, this module makes use of `xclip`, `xsel`, or `wl-clipboard` utilities,
+where `xclip` and `xsel` are for use in X11 environments (of the two, `xclip` is
+recommended over `xsel`) and `wl-clipboard` is for use in Wayland environments.
+(If you are not certain which system you are using, check the `$WAYLAND_DISPLAY`
+environment variable; in Wayland this will generally be set to something like
+`wayland-0`, while in X11 the variable will be unset.)
+
+If none of these commands are installed on your system, then install ONE of the
+above utilities using the package manager appropriate for your system, for
+example:
 ```
-sudo apt-get install xclip [Recommended]
+sudo apt-get install xclip
 ```
-OR
+or
 ```
-sudo apt-get install xsel
+sudo apt-get install wl-clipboard
 ```
 
 #### OSX and WSL

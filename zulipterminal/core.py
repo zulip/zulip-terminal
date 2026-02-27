@@ -582,10 +582,15 @@ class Controller:
                 " which could not find a copy/paste mechanism for your system. :("
                 "\nThis error should only appear on Linux. You can fix this by"
                 " installing any ONE of the copy/paste mechanisms below:\n",
-                ("msg_bold", "- xclip\n- xsel"),
-                "\n\nvia something like:\n",
-                ("ui_code", "apt-get install xclip [Recommended]\n"),
-                ("ui_code", "apt-get install xsel"),
+                "- On X11: ",
+                ("msg_bold", "xclip"),
+                " (recommended) or ",
+                ("msg_bold", "xsel\n"),
+                "- On Wayland: ",
+                ("msg_bold", "wl-clipboard"),
+                "\n\nvia something like one of the following:\n",
+                ("ui_code", "apt-get install xclip\n"),
+                ("ui_code", "apt-get install wl-clipboard"),
             ]
             self.show_pop_up(
                 NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"
