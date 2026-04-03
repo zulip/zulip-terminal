@@ -22,3 +22,4 @@ zuliprc
 .vscode/*
 # PyCharm
 .idea
+.aider*
