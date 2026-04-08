@@ -30,10 +30,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Install with type-checking tools, stubs & minimal test libraries
-        run: pip install .[typing,testing_minimal]
+        run: uv pip install --system -e ".[typing,testing-minimal]"
       - name: Run mypy
         run: ./tools/run-mypy
 
@@ -47,12 +46,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Install with linting tools
-        run: pip install .[linting]
+        run: uv pip install --system -e ".[linting]"
       - name: Run ruff
-        run: ruff zulipterminal/ tests/ setup.py `tools/python_tools.py`
+        run: ruff zulipterminal/ tests/ `tools/python_tools.py`
 
   isort:
     runs-on: ubuntu-latest
@@ -64,11 +62,10 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Install with linting tools & minimal test libraries
         # NOTE: Install pytest so that isort recognizes it as a known library
-        run: pip install .[linting,minimal_testing]
+        run: uv pip install --system -e ".[linting,testing-minimal]"
       - name: Run isort
         run: ./tools/run-isort-check
 
@@ -82,12 +79,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Install with linting tools
-        run: pip install .[linting]
+        run: uv pip install --system -e ".[linting]"
       - name: Check code & tests meet black standards
-        run: black --check zulipterminal/ tests/ setup.py `tools/python_tools.py`
+        run: black --check zulipterminal/ tests/ `tools/python_tools.py`
 
   spellcheck:
     runs-on: ubuntu-latest
@@ -99,10 +95,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Install with linting tools
-        run: pip install .[linting]
+        run: uv pip install --system -e ".[linting]"
       - name: Check spelling
         run: ./tools/run-spellcheck
 
@@ -116,10 +111,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Minimal install
-        run: pip install .
+        run: uv pip install --system -e .
       - name: Run lint-hotkeys
         run: ./tools/lint-hotkeys
 
@@ -133,10 +127,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Minimal install
-        run: pip install .
+        run: uv pip install --system -e .
       - name: Run lint-docstring
         run: ./tools/lint-docstring
 
@@ -158,11 +151,11 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
+        if: github.event_name == 'pull_request'
       - name: Install with gitlint
         if: github.event_name == 'pull_request'
-        run: pip install .[gitlint]
+        run: uv pip install --system -e ".[gitlint]"
       - name: Run gitlint
         if: github.event_name == 'pull_request'
         run:
@@ -180,16 +173,13 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: 3.7
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Output Python version
         run: python --version
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
       - name: Ensure regular package installs from checkout
-        run: pip install .
+        run: uv pip install --system -e .
       - name: Install test dependencies
-        run: pip install .[testing]
+        run: uv pip install --system -e ".[testing]"
       - name: Run tests with pytest
         run: pytest --cov-report=xml
       - name: Upload coverage to Codecov
@@ -221,14 +211,14 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
+        if: github.event_name == 'pull_request'
       - name: Run check-branch
         if: github.event_name == 'pull_request'
         # Note that we install at each step since dependencies may change
         run:
           git fetch https://github.com/zulip/zulip-terminal main;
-          CHECK="pip install .[linting,testing,typing] && ./tools/lint-all && pytest" ./tools/check-branch FETCH_HEAD
+          CHECK="uv pip install --system -e '.[linting,testing,typing]' && ./tools/lint-all && pytest" ./tools/check-branch FETCH_HEAD
 
   pytest-on-other-platforms:
     needs: isolated-commits
@@ -259,22 +249,19 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.env.PYTHON }}
-          cache: 'pip'
-          cache-dependency-path: 'setup.py'
+      - uses: astral-sh/setup-uv@v7
       - name: Output Python version
         run: python --version
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
       - name: Ensure libxml-related libraries are installed (some pypy versions don't have wheels)
         if: startsWith(matrix.env.PYTHON, 'pypy-')
         run: sudo apt install libxml2-dev libxslt1-dev
       - name: Ensure regular package installs from checkout
-        run: pip install .
+        run: uv pip install --system -e .
       - name: Check we detect the python environment correctly
         run: python -c "from zulipterminal.platform_code import detected_python_short; import os; e, d = os.environ['PYTHON'], detected_python_short(); assert d == e, f'{d} != {e}'"
       - name: Check we detect the platform correctly
         run: python -c "from zulipterminal.platform_code import detected_platform; import os; e, d = os.environ['EXPECT'], detected_platform(); assert d == e, f'{d} != {e}'"
       - name: Install test dependencies
-        run: pip install .[testing]
+        run: uv pip install --system -e ".[testing]"
       - name: Run tests with pytest
         run: pytest --cov-report=

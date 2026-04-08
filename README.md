@@ -88,13 +88,13 @@ or using an automated option such as [pipx](https://pypi.python.org/pypi/pipx)
 * **Stable releases** - These are available on PyPI as the package
   [zulip-term](https://pypi.python.org/pypi/zulip-term)
 
-  To install, run a command like: `pip3 install zulip-term`
+  To install, run a command like: `uv tool install zulip-term`
 
 * **Latest (git) versions** - The latest development version can be installed
   from the git repository `main` branch
 
   To install, run a command like:
-  `pip3 install git+https://github.com/zulip/zulip-terminal.git@main`
+  `uv tool install git+https://github.com/zulip/zulip-terminal.git@main`
 
 We also provide some sample Dockerfiles to build docker images in
 [docker/](https://github.com/zulip/zulip-terminal/tree/main/docker).
@@ -103,9 +103,10 @@ We also provide some sample Dockerfiles to build docker images in
 
 With the python 3.6+ required for running, the following should work on most
 systems:
-1. `python3 -m venv zt_venv`
-   (creates a virtual environment named `zt_venv` in the current directory)
-2. `source zt_venv/bin/activate`
+
+1. `uv venv .venv`
+   (creates a virtual environment named `.venv` in the current directory)
+2. `source .venv/bin/activate`
    (activates the virtual environment; this assumes a bash-like shell)
 3. Run one of the install commands above.
 
@@ -438,85 +439,43 @@ section of Zulip's Git guide.
 
 ### Setting up a development environment
 
-Various options are available; we are exploring the benefits of each and would
-appreciate feedback on which you use or feel works best.
-
-Note that the tools used in each case are typically the same, but are called in
-different ways.
-
 The following commands should be run in the repository directory, created by a
 process similar to that in the previous section.
 
-#### Pipenv
-
-1. Install pipenv
-   (see the [recommended installation notes](https://pipenv.readthedocs.io/en/latest/installation);
-   pipenv can be installed in a virtual environment, if you wish)
-```
-$ pip3 install --user pipenv
-```
-2. Initialize the pipenv virtual environment for zulip-term (using the default
-   python 3; use eg. `--python 3.6` to be more specific)
+1. Install uv
+   (see [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/))
+2. Set up the local environment with all development tools
 
 ```
-$ pipenv --three
-```
-
-3. Install zulip-term, with the development requirements
-
-```
-$ pipenv install --dev
-$ pipenv run pip3 install -e '.[dev]'
-```
-
-4. Connect the gitlint commit-message hook
-
-```
-$ pipenv run gitlint install-hook
-```
-
-#### Pip
-
-1. Manually create & activate a virtual environment; any method should work,
-   such as that used in the above simple installation
-
-    1. `python3 -m venv zt_venv` (creates a venv named `zt_venv` in the current directory)
-    2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
-
-2. Install zulip-term, with the development requirements
-```
-$ pip3 install -e '.[dev]'
+$ uv sync --extra dev
 ```
 
 3. Connect the gitlint commit-message hook
 ```
-$ gitlint install-hook
+$ uv run gitlint install-hook
 ```
 
-#### make/pip
+If you have `make` installed, this provides a short wrapper around uv:
 
-This is the newest and simplest approach, if you have `make` installed:
-
-1. `make` (sets up an installed virtual environment in `zt_venv` in the current directory)
-2. `source zt_venv/bin/activate` (activates the venv; this assumes a bash-like shell)
-3. `gitlint install-hook` (connect the gitlint commit-message hook)
+1. `make` (creates/synchronizes `.venv` with the development dependencies)
+2. `source .venv/bin/activate` (activates the venv; this assumes a bash-like shell)
+3. `uv run gitlint install-hook` (connect the gitlint commit-message hook)
 
 ### Development tasks
 
-Once you have a development environment set up, you might find the following useful, depending upon your type of environment:
+Once you have a development environment set up, you might find the following useful:
 
-| Task | Make & Pip | Pipenv |
-|-|-|-|
-| Run normally | `zulip-term` | `pipenv run zulip-term` |
-| Run in debug mode | `zulip-term -d` | `pipenv run zulip-term -d` |
-| Run with profiling | `zulip-term --profile` | `pipenv run zulip-term --profile` |
-| Run all linters | `./tools/lint-all` | `pipenv run ./tools/lint-all` |
-| Run all tests | `pytest` | `pipenv run pytest` |
-| Build test coverage report | `pytest --cov-report html:cov_html --cov=./` | `pipenv run pytest --cov-report html:cov_html --cov=./` |
+| Task                       | command                                             |
+| -------------------------- | --------------------------------------------------- |
+| Run normally               | `uv run zulip-term`                                 |
+| Run in debug mode          | `uv run zulip-term -d`                              |
+| Run with profiling         | `uv run zulip-term --profile`                       |
+| Run all linters            | `uv run ./tools/lint-all`                           |
+| Run all tests              | `uv run pytest`                                     |
+| Build test coverage report | `uv run pytest --cov-report html:cov_html --cov=./` |
 
-If using make with pip, running `make` will ensure the development environment
-is up to date with the specified dependencies, useful after fetching from git
-and rebasing.
+If using make, running `make` will ensure the development environment is up to
+date with the specified dependencies, useful after fetching from git and rebasing.
 
 ### Editing the source
 
@@ -708,7 +667,7 @@ The tool can check specific commits manually, eg. `gitlint` for the latest
 commit, or `gitlint --commits main..` for commits leading from `main`.
 However, we highly recommend running `gitlint install-hook` to install the
 `gitlint` commit-message hook
-(or `pipenv run gitlint install-hook` with pipenv setups).
+(or `uv run gitlint install-hook` with uv setups).
 
 If the hook is installed as described above, then after completing the text for
 a commit, it will be checked by gitlint against the style we have set up, and
@@ -804,12 +763,5 @@ find in `./debug.log`.
 This likely means that you have installed both normal and development versions
 of zulip-terminal.
 
-To ensure you run the development version:
-* If using pipenv, call `pipenv run zulip-term` from the cloned/downloaded
-  `zulip-terminal` directory;
+To ensure you run the development version, use `uv run zulip-term`.
 
-* If using pip (pip3), ensure you have activated the correct virtual
-  environment (venv); depending on how your shell is configured, the name of
-the venv may appear in the command prompt.
-Note that not including the `-e` in the pip3 command will also cause this
-problem.
