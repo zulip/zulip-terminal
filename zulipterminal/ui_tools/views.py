@@ -902,24 +902,23 @@ class LeftColumnView(urwid.Pile):
         )
 
     def update_stream_view(self) -> None:
-        # Preserve focus position and search state before rebuilding the
-        # stream list, so that an external pinning event does not disrupt
-        # the user's current position or active search (see issue #1487).
-        old_focus_index = 0
+        old_stream_id = None
         old_search_text = ""
         if hasattr(self.view, "stream_w"):
-            _, old_focus_index = self.view.stream_w.log.get_focus()
+            widget, _ = self.view.stream_w.log.get_focus()
+            if widget is not None and hasattr(widget, "stream_id"):
+                old_stream_id = widget.stream_id
             old_search_text = self.view.stream_w.stream_search_box.edit_text
 
         self.stream_v = self.streams_view()
 
-        # Restore focus. Clamp in case the list shrank after a pin/unpin event.
-        new_len = len(self.view.stream_w.log)
-        if new_len > 0:
-            clamped = min(old_focus_index or 0, new_len - 1)
-            self.view.stream_w.log.set_focus(clamped)
+        # Restore focus by finding the same stream in the rebuilt list.
+        if old_stream_id is not None:
+            for i, widget in enumerate(self.view.stream_w.log):
+                if hasattr(widget, "stream_id") and widget.stream_id == old_stream_id:
+                    self.view.stream_w.log.set_focus(i)
+                    break
 
-        # Restore search text so an in-progress search is not interrupted.
         if old_search_text:
             self.view.stream_w.stream_search_box.set_edit_text(old_search_text)
 
