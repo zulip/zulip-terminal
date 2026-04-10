@@ -323,6 +323,12 @@ class StreamsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         self.focus_index_before_search = 0
+        # Initialize search_lock before super().__init__() to prevent an
+        # AttributeError if an external pinning event triggers update_streams
+        # (via @asynch) before construction completes (see issue #1487).
+        self.search_lock = threading.Lock()
+        self.empty_search = False
+
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(
             self, "SEARCH_STREAMS", self.update_streams
@@ -333,8 +339,6 @@ class StreamsView(urwid.Frame):
                 [self.stream_search_box, urwid.Divider(SECTION_DIVIDER_LINE)]
             ),
         )
-        self.search_lock = threading.Lock()
-        self.empty_search = False
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -898,7 +902,27 @@ class LeftColumnView(urwid.Pile):
         )
 
     def update_stream_view(self) -> None:
+        # Preserve focus position and search state before rebuilding the
+        # stream list, so that an external pinning event does not disrupt
+        # the user's current position or active search (see issue #1487).
+        old_focus_index = 0
+        old_search_text = ""
+        if hasattr(self.view, "stream_w"):
+            _, old_focus_index = self.view.stream_w.log.get_focus()
+            old_search_text = self.view.stream_w.stream_search_box.edit_text
+
         self.stream_v = self.streams_view()
+
+        # Restore focus. Clamp in case the list shrank after a pin/unpin event.
+        new_len = len(self.view.stream_w.log)
+        if new_len > 0:
+            clamped = min(old_focus_index or 0, new_len - 1)
+            self.view.stream_w.log.set_focus(clamped)
+
+        # Restore search text so an in-progress search is not interrupted.
+        if old_search_text:
+            self.view.stream_w.stream_search_box.set_edit_text(old_search_text)
+
         if not self.is_in_topic_view:
             self.show_stream_view()
 
