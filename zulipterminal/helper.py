@@ -32,7 +32,12 @@ from urllib.parse import unquote
 import requests
 from typing_extensions import Literal, ParamSpec, TypedDict
 
-from zulipterminal.api_types import Composition, EmojiType, Message
+from zulipterminal.api_types import (
+    RESOLVED_TOPIC_PREFIX,
+    Composition,
+    EmojiType,
+    Message,
+)
 from zulipterminal.config.keys import primary_display_key_for_command
 from zulipterminal.config.regexes import (
     REGEX_COLOR_3_DIGIT,
@@ -573,10 +578,18 @@ def match_topics(topic_names: List[str], search_text: str) -> List[str]:
     delimiters = "-_/"
     trans = str.maketrans(delimiters, len(delimiters) * " ")
     for full_topic_name in topic_names:
-        # "abc def-gh" --> ["abc def gh", "def", "gh"]
-        words_to_be_matched = [full_topic_name] + full_topic_name.translate(
-            trans
-        ).split()[1:]
+        if full_topic_name.startswith(RESOLVED_TOPIC_PREFIX):
+            unresolved_name = full_topic_name[len(RESOLVED_TOPIC_PREFIX) :]
+            # "✔ abc def-gh" --> ["✔ abc def-gh", "abc def-gh", "def", "gh"]
+            words_to_be_matched = [
+                full_topic_name,
+                unresolved_name,
+            ] + unresolved_name.translate(trans).split()[1:]
+        else:
+            # "abc def-gh" --> ["abc def-gh", "def", "gh"]
+            words_to_be_matched = [full_topic_name] + full_topic_name.translate(
+                trans
+            ).split()[1:]
 
         for word in words_to_be_matched:
             if word.lower().startswith(search_text.lower()):

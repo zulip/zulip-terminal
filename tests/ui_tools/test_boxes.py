@@ -144,6 +144,10 @@ class TestWriteBox:
             ("#**Stream 1>", -6, True, "#**Stream 1>This is a topic**"),
             ("#**Stream 1>", -7, True, "#**Stream 1>Topic 1**"),
             ("#**Stream 1>", -8, True, None),
+            # Resolved topic phrase matching
+            ("#**Stream 1>Topic 1", 0, True, "#**Stream 1>Topic 1**"),
+            ("#**Stream 1>Topic 1", 1, True, "#**Stream 1>✔ Topic 1**"),
+            ("#**Stream 1>Topic 1", 2, True, None),
             # Fenced prefix
             ("#**Stream 1**>T", 0, True, "#**Stream 1>Topic 1**"),
             # Unfenced prefix
@@ -1412,6 +1416,7 @@ class TestWriteBox:
             ("spa", ["Hello from out-er_space!"]),
             ("✔", ["✔ Topic 1"]),
             ("✔ ", ["✔ Topic 1"]),
+            ("Topic 1", ["Topic 1", "✔ Topic 1"]),
         ],
         ids=[
             "no_search_text",
@@ -1422,6 +1427,7 @@ class TestWriteBox:
             "second_split_in_third_word",
             "resolved_topic_prefix_char",
             "resolved_topic_prefix_with_space",
+            "phrase_match_resolved_topic",
         ],
     )
     def test__topic_box_autocomplete(
