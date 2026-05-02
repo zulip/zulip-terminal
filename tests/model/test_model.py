@@ -524,6 +524,72 @@ class TestModel:
         assert current_ids == model.get_message_ids_in_current_narrow()
 
     @pytest.mark.parametrize(
+        "stream_id, topic, index, expected_user_ids",
+        [
+            (
+                1,
+                "general chat",
+                {
+                    "topic_msg_ids": {
+                        1: {
+                            "general chat": {101, 102, 103},
+                        }
+                    },
+                    "messages": {
+                        101: {"sender_id": 1},
+                        102: {"sender_id": 2},
+                        103: {"sender_id": 1},
+                    },
+                },
+                {1, 2},
+            ),
+            (
+                2,
+                "bug reports",
+                {
+                    "topic_msg_ids": {
+                        2: {
+                            "bug reports": {201, 202},
+                            "announcements": {203},
+                        }
+                    },
+                    "messages": {
+                        201: {"sender_id": 3},
+                        202: {"sender_id": 4},
+                        203: {"sender_id": 1},
+                    },
+                },
+                {3, 4},
+            ),
+            (
+                3,
+                "design",
+                {
+                    "topic_msg_ids": {
+                        1: {
+                            "general chat": {101},
+                        },
+                        3: {
+                            "design": {301, 302},
+                        },
+                    },
+                    "messages": {
+                        101: {"sender_id": 1},
+                        301: {"sender_id": 5},
+                        302: {"sender_id": 2},
+                    },
+                },
+                {5, 2},
+            ),
+        ],
+    )
+    def test_get_user_ids_in_topic_narrow(
+        self, mocker, model, index, stream_id, topic, expected_user_ids
+    ):
+        model.index = index
+        assert expected_user_ids == model.get_user_ids_in_topic_narrow(stream_id, topic)
+
+    @pytest.mark.parametrize(
         "response, expected_index, return_value",
         [
             (

@@ -388,6 +388,18 @@ class Model:
             ids = index["mentioned_msg_ids"]
         return ids.copy()
 
+    def get_user_ids_in_topic_narrow(self, stream_id: int, topic: str) -> Set[int]:
+        """
+        Gets sender ids for messages in topic narrow excluding the current user.
+        """
+        index = self.index
+        messages = index["messages"]
+        topic_msg_ids = index["topic_msg_ids"][stream_id].get(topic, set())
+        sender_ids = {messages[msg_id]["sender_id"] for msg_id in topic_msg_ids} - {
+            self.user_id
+        }
+        return sender_ids
+
     def current_narrow_contains_message(self, message: Message) -> bool:
         """
         Determine if a message conceptually belongs to a narrow
