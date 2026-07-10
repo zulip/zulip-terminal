@@ -53,6 +53,7 @@ class TestWriteBox:
         users_fixture: List[Dict[str, Any]],
         user_groups_fixture: List[Dict[str, Any]],
         streams_fixture: List[Dict[str, Any]],
+        stream_dict: Dict[int, Dict[str, Any]],
         unicode_emojis: "OrderedDict[str, Dict[str, Any]]",
         user_dict: Dict[str, MinimalUserData],
     ) -> WriteBox:
@@ -61,6 +62,7 @@ class TestWriteBox:
         write_box = WriteBox(self.view)
         write_box.view.users = users_fixture
         write_box.model.user_dict = user_dict
+        write_box.model.stream_dict = stream_dict
         write_box.model.max_stream_name_length = 60
         write_box.model.max_topic_length = 60
         write_box.model.max_message_length = 10000

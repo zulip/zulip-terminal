@@ -354,11 +354,16 @@ class WriteBox(urwid.Pile):
         )
         self.title_write_box.set_completer_delims("")
 
+        max_stream_name_length = max(
+            (len(stream["name"]) for stream in self.model.stream_dict.values()),
+            default=0,
+        )
+
         # NOTE: stream marker should be set during initialization
         self.header_write_box = urwid.Columns(
             [
                 ("pack", urwid.Text(("default", "?"))),
-                self.stream_write_box,
+                (max_stream_name_length + 1, self.stream_write_box),
                 ("pack", urwid.Text(STREAM_TOPIC_SEPARATOR)),
                 self.title_write_box,
             ],
