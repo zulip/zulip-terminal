@@ -28,7 +28,7 @@ from zulipterminal.config.ui_sizes import (
 )
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
-from zulipterminal.platform_code import PLATFORM
+from zulipterminal.platform_code import detected_platform
 from zulipterminal.ui import Screen, View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
@@ -413,7 +413,7 @@ class Controller:
         # Don't try to open web browser if running without a GUI
         # TODO: Explore and eventually support opening links in text-browsers.
         if (
-            PLATFORM == "Linux"
+            detected_platform() == "Linux"
             and not os.environ.get("DISPLAY")
             and os.environ.get("TERM")
         ):
