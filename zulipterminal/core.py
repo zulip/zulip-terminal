@@ -577,24 +577,33 @@ class Controller:
                     [f"{text_category} copied, but the clipboard text does not match"]
                 )
         except pyperclip.PyperclipException:
-            body = [
-                "Zulip terminal uses 'pyperclip', for copying texts to your clipboard,"
-                " which could not find a copy/paste mechanism for your system. :("
-                "\nThis error should only appear on Linux. You can fix this by"
-                " installing any ONE of the copy/paste mechanisms below:\n",
-                "- On X11: ",
-                ("msg_bold", "xclip"),
-                " (recommended) or ",
-                ("msg_bold", "xsel\n"),
-                "- On Wayland: ",
-                ("msg_bold", "wl-clipboard"),
-                "\n\nvia something like one of the following:\n",
-                ("ui_code", "apt-get install xclip\n"),
-                ("ui_code", "apt-get install wl-clipboard"),
-            ]
-            self.show_pop_up(
-                NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"
-            )
+            platform = detected_platform()
+            if platform == "Linux":
+                # pyperclip requires one of these tools under linux
+                body = [
+                    "Copying text failed: No external copy/paste tools found.",
+                    "\n\n",
+                    "You can fix this by installing one of the tools below:",
+                    "\n",
+                    "- On X11: ",
+                    ("msg_bold", "xclip"),
+                    " (recommended) or ",
+                    ("msg_bold", "xsel"),
+                    "\n",
+                    "- On Wayland: ",
+                    ("msg_bold", "wl-clipboard"),
+                    "\n\n",
+                    "via something like one of the following:\n",
+                    ("ui_code", "apt-get install xclip\n"),
+                    ("ui_code", "apt-get install wl-clipboard"),
+                ]
+            else:
+                # assume pyperclip gives no error on other supported platforms
+                body = []
+            if body:
+                self.show_pop_up(
+                    NoticeView(self, body, 60, "UTILITY PACKAGE MISSING"), "area:error"
+                )
 
     def _narrow_to(self, anchor: Optional[int], **narrow: Any) -> None:
         already_narrowed = self.model.set_narrow(**narrow)

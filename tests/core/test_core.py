@@ -394,9 +394,19 @@ class TestController:
                 [f"{text_category} copied, but the clipboard text does not match"]
             )
 
+    @pytest.mark.parametrize(
+        ("platform", "expected_show_popup"),
+        [("Linux", True), ("WSL", False), ("Mac0S", False), ("unsupported", False)],
+    )
     def test_copy_to_clipboard_exception(
-        self, mocker: MockerFixture, controller: Controller, text_category: str = "Test"
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        platform: str,
+        expected_show_popup: bool,
+        text_category: str = "Test",
     ) -> None:
+        mocker.patch(MODULE + ".detected_platform", return_value=platform)
         popup = mocker.patch(MODULE + ".Controller.show_pop_up")
         mocker.patch(
             MODULE + ".pyperclip.copy", side_effect=pyperclip.PyperclipException()
@@ -407,8 +417,7 @@ class TestController:
 
         controller.copy_to_clipboard("copy text", text_category)
 
-        popup.assert_called_once()
-        assert popup.call_args_list[0][0][1] == "area:error"
+        assert popup.call_count == (1 if expected_show_popup else 0)
 
     @pytest.mark.parametrize(
         "url, webbrowser_name, expected_webbrowser_name",
