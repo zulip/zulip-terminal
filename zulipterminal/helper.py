@@ -40,7 +40,7 @@ from zulipterminal.config.regexes import (
     REGEX_QUOTED_FENCE_LENGTH,
 )
 from zulipterminal.platform_code import (
-    PLATFORM,
+    detected_platform,
     normalized_file_path,
     successful_GUI_return_code,
 )
@@ -788,13 +788,14 @@ def process_media(controller: Any, link: str) -> None:
     tool = ""
 
     # TODO: Add support for other platforms as well.
-    if PLATFORM == "WSL":
+    platform = detected_platform()
+    if platform == "WSL":
         tool = "explorer.exe"
         # Modifying path to backward slashes instead of forward slashes
         media_path = media_path.replace("/", "\\")
-    elif PLATFORM == "Linux":
+    elif platform == "Linux":
         tool = "xdg-open"
-    elif PLATFORM == "MacOS":
+    elif platform == "MacOS":
         tool = "open"
     else:
         controller.report_error("Media not supported for this platform")

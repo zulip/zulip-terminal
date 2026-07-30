@@ -42,7 +42,7 @@ from zulipterminal.helper import (
     match_stream,
     match_user,
 )
-from zulipterminal.platform_code import PLATFORM, detected_python_in_full
+from zulipterminal.platform_code import detected_platform, detected_python_in_full
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.boxes import PanelSearchBox
 from zulipterminal.ui_tools.buttons import (
@@ -1136,7 +1136,10 @@ class AboutView(PopUpView):
             ),
             (
                 "Detected Environment",
-                [("Platform", PLATFORM), ("Python", detected_python_in_full())],
+                [
+                    ("Platform", detected_platform()),
+                    ("Python", detected_python_in_full()),
+                ],
             ),
         ]
 

@@ -191,8 +191,8 @@ class TestAboutView:
         server_version, server_feature_level = MINIMUM_SUPPORTED_SERVER_VERSION
 
         # FIXME: Since we don't test on WSL explicitly, for now
-        #        treat PLATFORM as WSL in order for it to be supported
-        mocker.patch(MODULE + ".PLATFORM", "WSL")
+        #        treat detected_platform as WSL in order for it to be supported
+        mocker.patch(MODULE + ".detected_platform", return_value="WSL")
 
         mocker.patch(MODULE + ".detected_python_in_full", lambda: "[Python version]")
 

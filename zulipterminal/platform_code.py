@@ -55,7 +55,7 @@ else:
 MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
-def detected_platform() -> str:
+def detected_platform() -> AllPlatforms:
     return PLATFORM
 
 

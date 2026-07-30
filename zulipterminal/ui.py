@@ -23,7 +23,7 @@ from zulipterminal.config.symbols import (
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
 from zulipterminal.helper import asynch
-from zulipterminal.platform_code import MOUSE_SELECTION_KEY, PLATFORM
+from zulipterminal.platform_code import MOUSE_SELECTION_KEY, detected_platform
 from zulipterminal.ui_tools.boxes import MessageSearchBox, WriteBox
 from zulipterminal.ui_tools.views import (
     LeftColumnView,
@@ -355,7 +355,7 @@ class View(urwid.WidgetWrap):
 
 class Screen(urwid.raw_display.Screen):
     def write(self, data: Any) -> None:
-        if PLATFORM == "WSL":
+        if detected_platform() == "WSL":
             # replace urwid's SI/SO, which produce artifacts under WSL.
             # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
             # Above link describes the change.
