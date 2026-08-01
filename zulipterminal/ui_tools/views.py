@@ -2,6 +2,7 @@
 UI views for larger elements such as Streams, Messages, Topics, Help, etc
 """
 
+import shutil
 import threading
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -1116,6 +1117,13 @@ class AboutView(PopUpView):
             else []
         )
 
+        # ADDED THIS: Get terminal size for display in AboutView
+        try:
+            cols, rows = shutil.get_terminal_size()
+            terminal_size = f"{cols}x{rows}"
+        except OSError:
+            terminal_size = "Unknown"
+
         contents = [
             ("Application", [("Zulip Terminal", zt_version)]),
             ("Server", [("Version", server_version)] + self.feature_level_content),
@@ -1136,19 +1144,28 @@ class AboutView(PopUpView):
             ),
             (
                 "Detected Environment",
-                [("Platform", PLATFORM), ("Python", detected_python_in_full())],
+                [
+                    ("Platform", PLATFORM),
+                    ("Python", detected_python_in_full()),
+                    ("Terminal size", terminal_size),  # ADDED THIS
+                ],
             ),
         ]
-
         # Prepare string version of contents to support copying to clipboard
         sections = []
         for section_title, properties in contents:
+            props = properties
+            if section_title == "Detected Environment":
+                props = [
+                    (label, value)
+                    for (label, value) in properties
+                    if label != "Terminal size"
+                ]
             formatted_properties = "\n".join(
-                f"{label}: {value}" for label, value in properties
+                f"{label}: {value}" for (label, value) in props
             )
             sections.append(f"#### {section_title}\n{formatted_properties}")
         self.copy_info = "\n\n".join(sections)
-
         about_keys = "[" + ", ".join(display_keys_for_command("COPY_ABOUT_INFO")) + "]"
         contents.append((f"Copy information to clipboard {about_keys}", []))
 
