@@ -716,9 +716,11 @@ class TestModel:
             else model.user_id + 1
         )
         full_existing_reactions = [
-            dict(er, user={user_key: id})
-            if user_key is not None
-            else dict(user_id=id, emoji_code=er["emoji_code"])
+            (
+                dict(er, user={user_key: id})
+                if user_key is not None
+                else dict(user_id=id, emoji_code=er["emoji_code"])
+            )
             for er in existing_reactions
         ]
         message = dict(id=msg_id, reactions=full_existing_reactions)
@@ -2176,7 +2178,7 @@ class TestModel:
         event = {
             "type": "message",
             "message": response,
-            "flags": response["flags"] if "flags" in response else [],
+            "flags": response.get("flags", []),
         }
 
         model._handle_message_event(event)
@@ -3162,7 +3164,6 @@ class TestModel:
                     "submessage_id": 1,
                     "sender_id": 27294,
                     "content": '{"type":"strike","key":"0,canned"}',
-                    "id": 1,
                 },
                 [
                     {
@@ -3178,12 +3179,10 @@ class TestModel:
                         ),
                     },
                     {
-                        "type": "submessage",
-                        "msg_type": "widget",
-                        "message_id": 1958326,
-                        "submessage_id": 1,
+                        "id": 1,
                         "sender_id": 27294,
                         "content": '{"type":"strike","key":"0,canned"}',
+                        "msg_type": "widget",
                     },
                 ],
                 id="submessage_strike_event_todo_widget",
@@ -3243,15 +3242,13 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
-                        "msg_type": "widget",
-                        "message_id": 1958326,
-                        "submessage_id": 12185,
+                        "id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee",'
                             '"desc":"","completed":false}'
                         ),
+                        "msg_type": "widget",
                     },
                 ],
                 id="submessage_new_task_event_todo_widget",
@@ -3278,16 +3275,13 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
-                        "msg_type": "widget",
-                        "message_id": 1958326,
-                        "submessage_id": 12185,
+                        "id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee"'
                             ',"desc":"","completed":false}'
                         ),
-                        "id": 0,
+                        "msg_type": "widget",
                     },
                 ],
                 {
@@ -3323,27 +3317,22 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
-                        "msg_type": "widget",
-                        "message_id": 1958326,
-                        "submessage_id": 12185,
+                        "id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee"'
                             ',"desc":"","completed":false}'
                         ),
-                        "id": 0,
+                        "msg_type": "widget",
                     },
                     {
-                        "type": "submessage",
-                        "msg_type": "widget",
-                        "message_id": 1958326,
-                        "submessage_id": 12186,
+                        "id": 12186,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task_list_title",'
                             '"title":"Today\'s Work [Updated]"}'
                         ),
+                        "msg_type": "widget",
                     },
                 ],
                 id="submessage_new_task_list_title_event_todo_widget",
@@ -4666,9 +4655,7 @@ class TestModel:
         self, mocker, model, unread_topics, current_topic, next_unread_topic
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
-        model.unread_counts = {
-            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
-        }
+        model.unread_counts = {"unread_topics": dict.fromkeys(unread_topics, 1)}
 
         current_message_id = 10  # Arbitrary value due to mock below
         model.stream_topic_from_message_id = mocker.Mock(return_value=current_topic)
@@ -4694,14 +4681,13 @@ class TestModel:
         ]
 
         # date data unimportant (if present)
-        model._muted_topics = {
-            stream_topic: None
-            for stream_topic in [
+        model._muted_topics = dict.fromkeys(
+            [
                 ("Stream 2", "muted topic2"),
                 ("Stream 2", "topic2 muted"),
                 ("Stream 3", "topic3 muted"),
             ]
-        }
+        )
 
         unread_topic = model.next_unread_topic_from_message_id(current_message_id)
 
@@ -4728,9 +4714,7 @@ class TestModel:
         next_unread_topic,
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
-        model.unread_counts = {
-            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
-        }
+        model.unread_counts = {"unread_topics": dict.fromkeys(unread_topics, 1)}
         model.pinned_streams = [
             {"name": "Stream 1", "id": 1},
             {"name": "Stream 2", "id": 2},

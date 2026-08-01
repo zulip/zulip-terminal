@@ -127,9 +127,7 @@ def render_table(table_element: Any) -> StyledTableData:
     column_alignments, cells = parse_html_table(table_element)
 
     # Calculate the width required for each column.
-    column_widths = [
-        len(max(column, key=lambda string: len(string))) for column in zip(*cells)
-    ]
+    column_widths = [len(max(column, key=len)) for column in zip(*cells)]
 
     top_border = row_with_only_border("┌", "─", "┬", "┐", column_widths)
     middle_border = row_with_only_border("├", "─", "┼", "┤", column_widths)

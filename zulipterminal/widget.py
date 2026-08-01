@@ -1,86 +1,158 @@
-"""
-Process widgets (submessages) like polls, todo lists, etc.
-"""
+"""Process widgets (polls, todos) with strongly-typed submessages."""
 
 import json
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Union, cast
 
-
-Submessage = Dict[str, Union[int, str]]
+from zulipterminal.api_types import (
+    PollOption,
+    PollWidgetResult,
+    RawPollWidget,
+    RawTodoWidget,
+    Submessage,
+    TodoTask,
+    TodoWidgetResult,
+)
 
 
 def find_widget_type(submessages: List[Submessage]) -> str:
-    if submessages and "content" in submessages[0]:
-        content = submessages[0]["content"]
+    """
+    Identify the widget type from the first submessage.
 
-        if isinstance(content, str):
-            try:
-                loaded_content = json.loads(content)
-                return loaded_content.get("widget_type", "unknown")
-            except json.JSONDecodeError:
-                return "unknown"
-        else:
-            return "unknown"
-    else:
+    Parses the content JSON of the first submessage and extracts
+    the widget_type field to determine what kind of widget this
+    represents (e.g., 'poll', 'todo', etc.).
+
+    Parameters
+    ----------
+    submessages : List[Submessage]
+        List of submessages to inspect. The first submessage's
+        content is parsed to determine the widget type.
+
+    Returns
+    -------
+    str
+        A string representing the widget type ('poll', 'todo', etc.),
+        or 'unknown' if the widget type cannot be determined.
+    """
+    if not submessages:
         return "unknown"
 
+    content = submessages[0].get("content")
 
-def process_todo_widget(
-    todo_list: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, bool]]]]:
-    title = ""
-    tasks = {}
+    if not content or not isinstance(content, str):
+        return "unknown"
+
+    try:
+        loaded_content = json.loads(content)
+        if isinstance(loaded_content, dict):
+            return str(loaded_content.get("widget_type", "unknown"))
+    except (json.JSONDecodeError, TypeError):
+        return "unknown"
+
+    return "unknown"
+
+
+def process_todo_widget(todo_list: List[Submessage]) -> TodoWidgetResult:
+    """
+    Process submessages for a todo list widget.
+
+    Extracts and structures todo task information from a list of
+    submessages. Handles various todo operations including widget
+    creation, task addition, task completion toggling, and title
+    updates.
+
+    Parameters
+    ----------
+    todo_list : List[Submessage]
+        List of submessages containing todo widget operations.
+        Each submessage has msg_type='widget' with JSON-encoded
+        content describing todo operations.
+
+    Returns
+    -------
+    TodoWidgetResult
+        A TypedDict containing:
+        - 'title': str - The title of the todo list
+        - 'tasks': Dict[str, TodoTask] - Map of task IDs to task details
+    """
+    title: str = ""
+    tasks: Dict[str, TodoTask] = {}
 
     for entry in todo_list:
-        content = entry.get("content")
-        sender_id = entry.get("sender_id")
-        msg_type = entry.get("msg_type")
+        content = entry["content"]
+        sender_id = entry["sender_id"]
+        msg_type = entry["msg_type"]
 
         if msg_type == "widget" and isinstance(content, str):
-            widget = json.loads(content)
+            raw = json.loads(content)
+            widget = cast(Union[RawTodoWidget, Dict[str, Any]], raw)
 
             if widget.get("widget_type") == "todo":
                 if "extra_data" in widget and widget["extra_data"] is not None:
-                    title = widget["extra_data"].get("task_list_title", "")
+                    extra_data = cast(Dict[str, Any], widget["extra_data"])
+                    title = cast(str, extra_data.get("task_list_title", ""))
                     if title == "":
-                        # Webapp uses "Task list" as default title
                         title = "Task list"
-                    # Process initial tasks
-                    for i, task in enumerate(widget["extra_data"].get("tasks", [])):
-                        # Initial tasks get  ID as "index,canned"
+                    for i, task in enumerate(extra_data.get("tasks", [])):
                         task_id = f"{i},canned"
-                        tasks[task_id] = {
-                            "task": task["task"],
-                            "desc": task.get("desc", ""),
-                            "completed": False,
-                        }
+                        # Explicitly cast to TodoTask to satisfy TypedDict requirements
+                        tasks[task_id] = cast(
+                            TodoTask,
+                            {
+                                "task": str(task["task"]),
+                                "desc": str(task.get("desc", "")),
+                                "completed": False,
+                            },
+                        )
 
             elif widget.get("type") == "new_task":
-                # New tasks get ID as "key,sender_id"
                 task_id = f"{widget['key']},{sender_id}"
-                tasks[task_id] = {
-                    "task": widget["task"],
-                    "desc": widget.get("desc", ""),
-                    "completed": False,
-                }
+                # Explicitly cast to TodoTask to satisfy TypedDict requirements
+                tasks[task_id] = cast(
+                    TodoTask,
+                    {
+                        "task": str(widget["task"]),
+                        "desc": str(widget.get("desc", "")),
+                        "completed": False,
+                    },
+                )
 
             elif widget.get("type") == "strike":
-                # Strike event - toggle task completion state
-                task_id = widget["key"]
+                task_id = str(widget["key"])
                 if task_id in tasks:
                     tasks[task_id]["completed"] = not tasks[task_id]["completed"]
 
             elif widget.get("type") == "new_task_list_title":
-                title = widget["title"]
+                title = cast(str, widget.get("title", ""))
 
-    return title, tasks
+    return {"title": title, "tasks": tasks}
 
 
-def process_poll_widget(
-    poll_content: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, List[str]]]]]:
-    poll_question = ""
-    options = {}
+def process_poll_widget(poll_content: List[Submessage]) -> PollWidgetResult:
+    """
+    Process submessages for a poll widget.
+
+    Extracts and structures poll information from a list of submessages.
+    Handles various poll operations including poll creation, option
+    addition, and user votes.
+
+    Parameters
+    ----------
+    poll_content : List[Submessage]
+        List of submessages containing poll widget operations.
+        Each submessage has msg_type='widget' with JSON-encoded
+        content describing poll operations.
+
+    Returns
+    -------
+    PollWidgetResult
+        A TypedDict containing:
+        - 'question': str - The poll question text
+        - 'options': Dict[str, PollOption] - Map of option IDs to
+          poll options with their current vote lists
+    """
+    poll_question: str = ""
+    options: Dict[str, PollOption] = {}
 
     for entry in poll_content:
         content = entry["content"]
@@ -88,11 +160,12 @@ def process_poll_widget(
         msg_type = entry["msg_type"]
 
         if msg_type == "widget" and isinstance(content, str):
-            widget = json.loads(content)
+            raw = json.loads(content)
+            widget = cast(Union[RawPollWidget, Dict[str, Any]], raw)
 
             if widget.get("widget_type") == "poll":
                 poll_question = widget["extra_data"]["question"]
-                for i, option in enumerate(widget["extra_data"]["options"]):
+                for i, option in enumerate(widget["extra_data"].get("options", [])):
                     option_id = f"canned,{i}"
                     options[option_id] = {"option": option, "votes": []}
 
@@ -115,4 +188,4 @@ def process_poll_widget(
                 option_id = f"{sender_id},{idx}"
                 options[option_id] = {"option": new_option, "votes": []}
 
-    return poll_question, options
+    return {"question": poll_question, "options": options}

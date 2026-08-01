@@ -17,7 +17,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | unicode_emojis.py   | Unicode emoji data, synchronized semi-regularly with the server source                  |
 |                        | urwid_types.py      | Types from the urwid API, to improve type checking                                      |
 |                        | version.py          | Keeps track of the version of the current code                                          |
-|                        | widget.py           | Process widgets (submessages) like polls, todo lists, etc.                              |
+|                        | widget.py           | Process widgets (polls, todos) with strongly-typed submessages.                         |
 |                        |                     |                                                                                         |
 | zulipterminal/cli      | run.py              | Marks the entry point into the application                                              |
 |                        |                     |                                                                                         |

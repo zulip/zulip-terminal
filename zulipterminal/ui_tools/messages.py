@@ -289,12 +289,16 @@ class MessageBox(urwid.Pile):
 
             reaction_texts = [
                 (
-                    "reaction_mine"
-                    if my_user_id in [id[0] for id in ids]
-                    else "reaction",
-                    f" :{reaction}: {len(ids)} "
-                    if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
-                    else f" :{reaction}: {', '.join([id[1] for id in ids])} ",
+                    (
+                        "reaction_mine"
+                        if my_user_id in [id[0] for id in ids]
+                        else "reaction"
+                    ),
+                    (
+                        f" :{reaction}: {len(ids)} "
+                        if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
+                        else f" :{reaction}: {', '.join([id[1] for id in ids])} "
+                    ),
                 )
                 for reaction, ids in reaction_stats.items()
             ]
@@ -650,9 +654,7 @@ class MessageBox(urwid.Pile):
         message = {
             key: {
                 "is_starred": "starred" in msg["flags"],
-                "author": (
-                    msg["sender_full_name"] if "sender_full_name" in msg else None
-                ),
+                "author": (msg.get("sender_full_name", None)),
                 "time": (
                     self.model.formatted_local_time(
                         msg["timestamp"], show_seconds=False
@@ -687,7 +689,7 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             text_keys = ("author", "star", "time", "status")
-            text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
+            text: Dict[str, urwid_MarkupTuple] = dict.fromkeys(text_keys, (None, " "))
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("msg_sender", message["this"]["author"])
@@ -736,7 +738,9 @@ class MessageBox(urwid.Pile):
             widget_type = find_widget_type(self.message.get("submessages", []))
 
             if widget_type == "todo":
-                title, tasks = process_todo_widget(self.message.get("submessages", []))
+                todo = process_todo_widget(self.message.get("submessages", []))
+                title = todo["title"]
+                tasks = todo["tasks"]
 
                 todo_widget = "<strong>To-do</strong>\n" + f"<strong>{title}</strong>"
 
@@ -758,9 +762,9 @@ class MessageBox(urwid.Pile):
                 self.message["content"] = todo_widget
 
             elif widget_type == "poll":
-                poll_question, poll_options = process_poll_widget(
-                    self.message.get("submessages", [])
-                )
+                poll = process_poll_widget(self.message.get("submessages", []))
+                poll_question = poll["question"]
+                poll_options = poll["options"]
 
                 # TODO: ZT doesn't yet support adding poll questions after the
                 # creation of the poll. So, if the poll question is not provided,

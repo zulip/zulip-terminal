@@ -1,6 +1,7 @@
 """
 Types from the Zulip API, translated into python, to improve type checking
 """
+
 # NOTE: Only modify this file if it leads to a better match to the types used
 #       in the API at http://zulip.com/api
 
@@ -19,6 +20,9 @@ from zulip import ModifiableMessageFlag  # directly modifiable read/starred/coll
 __all__ = [
     "EditPropagateMode",
     "EmojiType",
+    "Submessage",
+    "TodoWidgetResult",
+    "PollWidgetResult",
 ]
 
 
@@ -180,6 +184,67 @@ class SubscriptionSettingChange(TypedDict):
 
 ## TODO: Improve this typing to split private and stream message data
 
+###############################################################################
+# Submessage / widget-related TypedDicts
+# These capture the small, well-known subset of fields present on a
+# Zulip submessage and the strongly-typed representation returned by our
+# widget processing helpers.
+
+
+class Submessage(TypedDict):
+    id: int
+    sender_id: int
+    content: str
+    msg_type: str
+
+
+class TodoTask(TypedDict):
+    task: str
+    desc: str
+    completed: bool
+
+
+class TodoWidgetResult(TypedDict):
+    title: str
+    tasks: Dict[str, "TodoTask"]
+
+
+class PollOption(TypedDict):
+    option: str
+    votes: List[int]
+
+
+class PollWidgetResult(TypedDict):
+    question: str
+    options: Dict[str, "PollOption"]
+
+
+# Suggested TypedDicts for the raw JSON payloads embedded in
+# submessage.content. These help validate the structure right after
+# JSON extraction and make subsequent code easier for mypy to reason
+# about. Fields are marked NotRequired where specific events use them.
+
+
+class RawTodoWidget(TypedDict, total=False):
+    widget_type: Literal["todo"]
+    extra_data: NotRequired[Dict[str, Any]]
+    type: NotRequired[Literal["new_task", "strike", "new_task_list_title"]]
+    key: NotRequired[Union[str, int]]
+    task: NotRequired[str]
+    desc: NotRequired[str]
+    title: NotRequired[str]
+
+
+class RawPollWidget(TypedDict, total=False):
+    widget_type: Literal["poll"]
+    extra_data: NotRequired[Dict[str, Any]]
+    type: NotRequired[Literal["question", "vote", "new_option"]]
+    key: NotRequired[str]
+    vote: NotRequired[int]
+    option: NotRequired[str]
+    idx: NotRequired[int]
+    question: NotRequired[str]
+
 
 class Message(TypedDict, total=False):
     id: int
@@ -195,7 +260,10 @@ class Message(TypedDict, total=False):
     subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
+    # Each submessage has a small set of well-known fields. Define a
+    # TypedDict for clearer typing below and reference it here so mypy
+    # can track widget data from extraction to rendering.
+    submessages: List["Submessage"]
     flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str

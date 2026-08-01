@@ -12,6 +12,7 @@ zulip_term.egg-info
 *.log
 zt_venv/*
 zulip-terminal-venv/*
+.env
 
 ## Config files
 zuliprc

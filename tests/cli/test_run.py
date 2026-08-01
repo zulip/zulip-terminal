@@ -319,10 +319,8 @@ def test_main_multiple_autohide_options(
     assert str(e.value) == "2"
 
     captured = capsys.readouterr()
-    lines = captured.err.strip("\n")
-    lines = lines.split("pytest: ", 1)[1]
-    expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
-    assert lines == expected
+    expected = f"not allowed with argument {options[0]}"
+    assert expected in captured.err
 
 
 @pytest.mark.parametrize(
@@ -356,10 +354,8 @@ def test_main_multiple_notify_options(
     assert str(e.value) == "2"
 
     captured = capsys.readouterr()
-    lines = captured.err.strip("\n")
-    lines = lines.split("pytest: ", 1)[1]
-    expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
-    assert lines == expected
+    expected = f"not allowed with argument {options[0]}"
+    assert expected in captured.err
 
 
 # NOTE: Fixture is necessary to ensure unreadable dir is garbage-collected

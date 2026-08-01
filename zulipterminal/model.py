@@ -1408,7 +1408,7 @@ class Model:
             SubscriptionSettingChange(
                 stream_id=stream_id,
                 property="is_muted",
-                value=not self.is_muted_stream(stream_id)
+                value=not self.is_muted_stream(stream_id),
                 # True for muting and False for unmuting.
             )
         ]
@@ -1881,7 +1881,31 @@ class Model:
 
     def _handle_submessage_event(self, event: Event) -> None:
         """
-        Handle change to submessages on a message (todo, poll etc.)
+        Handle a submessage event (e.g., poll or todo widget updates).
+
+        Processes submessage events from the server and appends the new
+        submessage to the corresponding message's submessage list.
+        A submessage represents an interactive widget (poll, todo list, etc.)
+        or an update to an existing widget.
+
+        Parameters
+        ----------
+        event : Event
+            A submessage event with structure:
+            {
+                'type': 'submessage',
+                'message_id': int,
+                'submessage_id': int,
+                'sender_id': int,
+                'content': str,
+                'msg_type': str
+            }
+
+        Returns
+        -------
+        None
+            Updates self.index['messages'][message_id]['submessages'] in place
+            and triggers a view update for the message.
         """
         assert event["type"] == "submessage"
         message_id = event["message_id"]
@@ -1889,12 +1913,10 @@ class Model:
             message = self.index["messages"][message_id]
             message["submessages"].append(
                 {
-                    "type": event["type"],
-                    "msg_type": event["msg_type"],
-                    "message_id": event["message_id"],
-                    "submessage_id": event["submessage_id"],
+                    "id": event["submessage_id"],
                     "sender_id": event["sender_id"],
                     "content": event["content"],
+                    "msg_type": event["msg_type"],
                 }
             )
             self.index["messages"][message_id] = message

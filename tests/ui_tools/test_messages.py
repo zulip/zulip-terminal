@@ -1096,7 +1096,7 @@ class TestMessageBox:
     ):
         mocked_date = mocker.patch(MODULE + ".date")
         mocked_date.today.return_value = date(current_year, 1, 1)
-        mocked_date.side_effect = lambda *args, **kw: date(*args, **kw)
+        mocked_date.side_effect = date
 
         output_date_time = "Fri Jul 20 21:54"  # corresponding to timestamp
 

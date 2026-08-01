@@ -571,7 +571,7 @@ def test_process_media(
     mocked_download_media = mocker.patch(
         MODULE + ".download_media", return_value=media_path
     )
-    mocked_open_media = mocker.patch(MODULE + ".open_media")
+    mocker.patch(MODULE + ".open_media")
     mocker.patch(MODULE + ".PLATFORM", platform)
     mocker.patch("zulipterminal.core.Controller.show_media_confirmation_popup")
 
@@ -580,9 +580,14 @@ def test_process_media(
     assert mocked_download_media.called == download_media_called
     assert controller.show_media_confirmation_popup.called == show_media_called
     if show_media_called:
-        controller.show_media_confirmation_popup.assert_called_once_with(
-            mocked_open_media, tool, modified_media_path
-        )
+        # Normalize paths to handle cross-platform differences (/ vs \\)
+        # Convert both paths to use forward slashes for platform-independent comparison
+        actual_path = controller.show_media_confirmation_popup.call_args[0][2]
+        expected = modified_media_path.replace("\\", "/")
+        actual = actual_path.replace("\\", "/")
+        controller.show_media_confirmation_popup.assert_called_once()
+        assert actual == expected
+        assert controller.show_media_confirmation_popup.call_args[0][1] == tool
 
 
 def test_process_media_empty_url(

@@ -26,6 +26,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 from urllib.parse import unquote
 
@@ -39,11 +40,7 @@ from zulipterminal.config.regexes import (
     REGEX_COLOR_6_DIGIT,
     REGEX_QUOTED_FENCE_LENGTH,
 )
-from zulipterminal.platform_code import (
-    PLATFORM,
-    normalized_file_path,
-    successful_GUI_return_code,
-)
+from zulipterminal.platform_code import PLATFORM, normalized_file_path
 
 
 StreamAccessType = Literal["public", "private", "web-public"]
@@ -129,7 +126,8 @@ initial_index = Index(
     topics=defaultdict(list),
     search=set(),
     # mypy bug: https://github.com/python/mypy/issues/7217
-    messages=defaultdict(lambda: Message()),
+    # Use lambda with cast because TypedDict (Message) cannot be instantiated directly
+    messages=defaultdict(lambda: cast(Message, {})),
 )
 
 
@@ -171,9 +169,11 @@ def sort_unread_topics(
     return sorted(
         unread_topics.keys(),
         key=lambda stream_topic: (
-            stream_list.index(stream_topic[0])
-            if stream_topic[0] in stream_list
-            else len(stream_list),
+            (
+                stream_list.index(stream_topic[0])
+                if stream_topic[0] in stream_list
+                else len(stream_list)
+            ),
             stream_topic[1],
         ),
     )
@@ -604,8 +604,8 @@ def match_stream(
 
     # Assert that the data is sorted, in a non-decreasing order, and ordered by
     # their pinning status.
-    assert data == sorted(  # noqa: C414 (nested sort)
-        sorted(data, key=lambda data: data[1].lower()),
+    assert data == sorted(
+        data,
         key=lambda data: data[1] in pinned_stream_names,
         reverse=True,
     )
@@ -809,7 +809,7 @@ def download_media(
     """
     Helper to download media from given link. Returns the path to downloaded media.
     """
-    media_name = url.split("/")[-1]
+    media_name = url.rsplit("/", maxsplit=1)[-1]
     client = controller.client
     auth = requests.auth.HTTPBasicAuth(client.email, client.api_key)
 
@@ -837,19 +837,23 @@ def open_media(controller: Any, tool: str, media_path: str) -> None:
     error = []
     command = [tool, media_path]
     try:
+        # Run the command and capture the result
         process = subprocess.run(
             command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         exit_status = process.returncode
-        if exit_status != successful_GUI_return_code():
+
+        # Standardize: 0 is almost always success for these tools
+        if exit_status != 0:
             error = [
                 " The tool ",
                 ("footer_contrast", tool),
-                " did not run successfully" ". Exited with ",
+                " did not run successfully. Exited with ",
                 ("footer_contrast", str(exit_status)),
             ]
     except FileNotFoundError:
         error = [" The tool ", ("footer_contrast", tool), " could not be found"]
 
+    # Only report if an error was actually generated
     if error:
         controller.report_error(error)

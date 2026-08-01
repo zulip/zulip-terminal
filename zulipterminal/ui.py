@@ -186,11 +186,9 @@ class View(urwid.WidgetWrap):
         # the focus is changed again either vertically or horizontally.
         self.body._contents.set_focus_changed_callback(self.message_view.read_message)
 
-        title_text = " {full_name} ({email}) - {server_name} ({url}) ".format(
-            full_name=self.model.user_full_name,
-            email=self.model.user_email,
-            server_name=self.model.server_name,
-            url=self.model.server_url,
+        title_text = (
+            f" {self.model.user_full_name} ({self.model.user_email}) - "
+            f"{self.model.server_name} ({self.model.server_url}) "
         )
 
         title_bar = urwid.Columns(

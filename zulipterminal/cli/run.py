@@ -366,12 +366,12 @@ def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
             in_color(
                 "red",
                 "ERROR: Please ensure your zuliprc is NOT publicly accessible:\n"
-                "  {0}\n"
-                "(it currently has permissions '{1}')\n"
+                f"  {zuliprc_path}\n"
+                f"(it currently has permissions '{stat.filemode(mode)}')\n"
                 "This can often be achieved with a command such as:\n"
-                "  chmod og-rwx {0}\n"
+                f"  chmod og-rwx {zuliprc_path}\n"
                 "Consider regenerating the [api] part of your zuliprc to ensure "
-                "your account is secure.".format(zuliprc_path, stat.filemode(mode)),
+                "your account is secure.",
             )
         )
         sys.exit(1)
@@ -687,8 +687,8 @@ def main(options: Optional[List[str]] = None) -> None:
             # Dump stats only after temporary file is closed (for Win NT+ case)
             prof.dump_stats(profile_path)
             print(
-                "Profile data saved to {0}.\n"
-                "You can visualize it using e.g. `snakeviz {0}`".format(profile_path)
+                f"Profile data saved to {profile_path}.\n"
+                f"You can visualize it using e.g. `snakeviz {profile_path}`"
             )
 
         sys.exit(1)

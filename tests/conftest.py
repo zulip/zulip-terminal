@@ -1,6 +1,6 @@
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import pytest
 from pytest_mock import MockerFixture
@@ -11,6 +11,7 @@ from zulipterminal.api_types import (
     CustomProfileField,
     Message,
     MessageType,
+    Submessage,
 )
 from zulipterminal.config.keys import (
     ZT_TO_URWID_CMD_MAPPING,
@@ -231,6 +232,33 @@ def logged_on_user() -> Dict[str, Any]:
 
 
 @pytest.fixture
+def submessage_factory() -> "Callable[..., Submessage]":
+    """Factory for creating `Submessage`-shaped dicts for tests.
+
+    Usage:
+       submsg = submessage_factory(id=1, sender_id=100, content='{}', msg_type='widget')
+
+    All fields default to reasonable values so tests can override only
+    the fields they care about.
+    """
+
+    def _factory(
+        id: int = 1,
+        sender_id: int = 1001,
+        content: str = "",
+        msg_type: str = "widget",
+    ) -> Submessage:
+        return {
+            "id": id,
+            "sender_id": sender_id,
+            "content": content,
+            "msg_type": msg_type,
+        }
+
+    return _factory
+
+
+@pytest.fixture
 def general_stream() -> Dict[str, Any]:
     return {
         "name": "Some general stream",
@@ -422,7 +450,7 @@ def zulip_emoji() -> "OrderedDict[str, Dict[str, Any]]":
 
 
 def display_recipient_factory(
-    recipient_details_list: List[Tuple[int, str]]
+    recipient_details_list: List[Tuple[int, str]],
 ) -> List[Dict[str, Any]]:
     """
     Generate display_recipient field for (PM/group) messages
@@ -1076,7 +1104,7 @@ def empty_index(
             topics=defaultdict(list),
             search=set(),
             messages=defaultdict(
-                lambda: {},
+                lambda: cast(Message, {}),  # <--- This is the fix
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,

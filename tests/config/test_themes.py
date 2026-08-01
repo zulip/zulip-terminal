@@ -48,9 +48,11 @@ def test_all_themes() -> None:
 @pytest.mark.parametrize(
     "theme_name",
     [
-        theme
-        if theme in expected_complete_themes
-        else pytest.param(theme, marks=pytest.mark.xfail(reason="incomplete"))
+        (
+            theme
+            if theme in expected_complete_themes
+            else pytest.param(theme, marks=pytest.mark.xfail(reason="incomplete"))
+        )
         for theme in THEMES
     ],
 )
@@ -131,9 +133,7 @@ def test_complete_and_incomplete_themes__single_theme_completeness(
 
     class FakeTheme:
         Color = FakeColor
-        STYLES = {
-            style: (FakeColor.COLOR_1, FakeColor.COLOR_2) for style in REQUIRED_STYLES
-        }
+        STYLES = dict.fromkeys(REQUIRED_STYLES, (FakeColor.COLOR_1, FakeColor.COLOR_2))
         META: Dict[str, Any] = {
             "pygments": {
                 "styles": None,

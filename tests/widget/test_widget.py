@@ -1,10 +1,10 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, cast
 
 import pytest
 from pytest import param as case
 
+from zulipterminal.api_types import PollOption, Submessage
 from zulipterminal.widget import (
-    Submessage,
     find_widget_type,
     process_poll_widget,
     process_todo_widget,
@@ -344,10 +344,10 @@ def test_process_todo_widget(
     expected_title: str,
     expected_tasks: Dict[str, Dict[str, Union[str, bool]]],
 ) -> None:
-    title, tasks = process_todo_widget(submessages)
+    result = process_todo_widget(submessages)
 
-    assert title == expected_title
-    assert tasks == expected_tasks
+    assert result["title"] == expected_title
+    assert result["tasks"] == expected_tasks
 
 
 @pytest.mark.parametrize(
@@ -659,7 +659,7 @@ def test_process_poll_widget(
     expected_poll_question: str,
     expected_options: Dict[str, Dict[str, Union[str, List[str]]]],
 ) -> None:
-    poll_question, options = process_poll_widget(submessages)
+    result = process_poll_widget(submessages)
 
-    assert poll_question == expected_poll_question
-    assert options == expected_options
+    assert result["question"] == expected_poll_question
+    assert result["options"] == cast(Dict[str, PollOption], expected_options)
