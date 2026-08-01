@@ -28,8 +28,11 @@ from zulipterminal.config.ui_sizes import (
 )
 from zulipterminal.helper import asynch, suppress_output
 from zulipterminal.model import Model
-from zulipterminal.platform_code import PLATFORM
-from zulipterminal.ui import Screen, View
+from zulipterminal.platform_code import (
+    check_running_in_GUI_environment,
+    generate_screen,
+)
+from zulipterminal.ui import View
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.ui_tools.views import (
     AboutView,
@@ -104,7 +107,7 @@ class Controller:
         # Start polling for events after view is rendered.
         self.model.poll_for_events()
 
-        screen = Screen()
+        screen = generate_screen()
         screen.set_terminal_properties(colors=self.color_depth)
         self.loop = urwid.MainLoop(self.view, self.theme, screen=screen)
 
@@ -412,17 +415,9 @@ class Controller:
         """
         # Don't try to open web browser if running without a GUI
         # TODO: Explore and eventually support opening links in text-browsers.
-        if (
-            PLATFORM == "Linux"
-            and not os.environ.get("DISPLAY")
-            and os.environ.get("TERM")
-        ):
-            self.report_error(
-                [
-                    "No DISPLAY environment variable specified. This could "
-                    "likely mean the ZT host is running without a GUI."
-                ]
-            )
+        error = check_running_in_GUI_environment()
+        if error:
+            self.report_error([error])
             return
         try:
             # Checks for a runnable browser in the system and returns

@@ -2,10 +2,13 @@
 Detection of supported platforms & platform-specific functions
 """
 
+import os
 import platform
+import re
 import subprocess
-from typing import Tuple
+from typing import Any, Tuple
 
+import urwid
 from typing_extensions import Literal
 
 
@@ -37,7 +40,7 @@ def detected_python_short() -> str:
 
 # PLATFORM DETECTION
 SupportedPlatforms = Literal["Linux", "MacOS", "WSL"]
-AllPlatforms = Literal[SupportedPlatforms, "unsupported"]
+AllPlatforms = Literal[SupportedPlatforms, "Unsupported"]
 
 raw_platform = platform.system()
 
@@ -45,10 +48,22 @@ PLATFORM: AllPlatforms
 
 if raw_platform == "Linux":
     PLATFORM = "WSL" if "microsoft" in platform.release().lower() else "Linux"
+    # platform.release() seems to give kernel version - hence microsoft for WSL?
+    # TODO: In future freedesktop_os_release() can give more detail (python 3.10)
+    PLATFORM_DETAIL = f"kernel {platform.release()}"
 elif raw_platform == "Darwin":
     PLATFORM = "MacOS"
+    # platform.release() gives kernel version, but this gives OS & architecture
+    mac_ver = platform.mac_ver()
+    PLATFORM_DETAIL = f"{mac_ver[0]} on {mac_ver[2]}"
+elif raw_platform == "Windows":
+    PLATFORM = "Unsupported"
+    # platform.win32_ver() gives more information as a tuple
+    # Note that this includes Windows here, since it is not a supported native platform
+    PLATFORM_DETAIL = f"Windows {platform.release()}"
 else:
-    PLATFORM = "unsupported"
+    PLATFORM = "Unsupported"
+    PLATFORM_DETAIL = platform.release()
 
 
 # PLATFORM DEPENDENT HELPERS
@@ -56,7 +71,30 @@ MOUSE_SELECTION_KEY = "Fn + Alt" if PLATFORM == "MacOS" else "Shift"
 
 
 def detected_platform() -> str:
+    print(f"{PLATFORM} ({PLATFORM_DETAIL})")
     return PLATFORM
+
+
+class WSLScreen(urwid.raw_display.Screen):
+    def write(self, data: Any) -> None:
+        # replace urwid's SI/SO, which produce artifacts under WSL.
+        # https://github.com/urwid/urwid/issues/264#issuecomment-358633735
+        # Above link describes the change.
+        data = re.sub("[\x0e\x0f]", "", data)
+        super().write(data)
+
+
+def generate_screen() -> urwid.raw_display.Screen:
+    return WSLScreen() if PLATFORM == "WSL" else urwid.raw_display.Screen()
+
+
+def check_running_in_GUI_environment() -> str:
+    if PLATFORM == "Linux" and not os.environ.get("DISPLAY") and os.environ.get("TERM"):
+        return (
+            "No DISPLAY environment variable specified. "
+            "This could likely mean the ZT host is running without a GUI."
+        )
+    return ""
 
 
 def notify(title: str, text: str) -> str:
@@ -89,7 +127,7 @@ def notify(title: str, text: str) -> str:
     return ""
 
 
-def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
+def successful_GUI_return_code() -> int:
     """
     Returns success return code for GUI commands, which are OS specific.
     """
