@@ -196,6 +196,8 @@ class TestAboutView:
 
         mocker.patch(MODULE + ".detected_python_in_full", lambda: "[Python version]")
 
+        terminal_size = "24 rows x 80 cols"
+
         self.about_view = AboutView(
             self.controller,
             "About",
@@ -209,6 +211,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size=terminal_size,
         )
 
     @pytest.mark.parametrize(
@@ -260,6 +263,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size="24 rows x 80 cols",
         )
 
         assert len(about_view.feature_level_content) == (
@@ -300,7 +304,8 @@ Transparency: disabled
 
 #### Detected Environment
 Platform: WSL
-Python: [Python version]"""
+Python: [Python version]
+Terminal Size: 24 rows x 80 cols"""
         assert self.about_view.copy_info == expected_output
 
 
