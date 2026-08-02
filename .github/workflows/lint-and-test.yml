@@ -149,7 +149,7 @@ jobs:
         run: echo "PR_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - name: 'Checkout PR branch and all PR commits'
         if: github.event_name == 'pull_request'
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
@@ -177,7 +177,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Python version
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # 7.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # 7.0
         with:
           python-version: 3.7
           cache: 'pip'
@@ -256,7 +256,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install Python version ${{ matrix.env.PYTHON }}
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # 7.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # 7.0
         with:
           python-version: ${{ matrix.env.PYTHON }}
           cache: 'pip'
