@@ -166,27 +166,35 @@ def asynch(func: Callable[ParamT, None]) -> Callable[ParamT, None]:
 
 
 def sort_unread_topics(
-    unread_topics: Dict[Tuple[int, str], int], stream_list: List[int]
+    unread_topics: Dict[Tuple[int, str], int],
+    stream_list: List[int],
+    *,
+    topic_order_by_stream: Optional[Dict[int, List[str]]] = None,
 ) -> List[Tuple[int, str]]:
-    return sorted(
-        unread_topics.keys(),
-        key=lambda stream_topic: (
-            stream_list.index(stream_topic[0])
-            if stream_topic[0] in stream_list
-            else len(stream_list),
-            stream_topic[1],
-        ),
-    )
+    def sort_key(stream_topic: Tuple[int, str]) -> Tuple[int, int, str]:
+        stream_id, topic_name = stream_topic
+        stream_rank = (
+            stream_list.index(stream_id)
+            if stream_id in stream_list
+            else len(stream_list)
+        )
+        if topic_order_by_stream is not None and stream_id in topic_order_by_stream:
+            topic_list = topic_order_by_stream[stream_id]
+            topic_rank = (
+                topic_list.index(topic_name)
+                if topic_name in topic_list
+                else len(topic_list)
+            )
+        else:
+            topic_rank = 0
+        return (stream_rank, topic_rank, topic_name)
+
+    return sorted(unread_topics.keys(), key=sort_key)
 
 
 def _set_count_in_model(
     new_count: int, changed_messages: List[Message], unread_counts: UnreadCounts
 ) -> None:
-    """
-    This function doesn't explicitly set counts in model,
-    but updates `unread_counts` (which can update the model
-    if it's passed in, but is not tied to it).
-    """
     # broader unread counts (for all_*) are updated
     # later conditionally in _set_count_in_view.
     KeyT = TypeVar("KeyT")
