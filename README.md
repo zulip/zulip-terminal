@@ -101,7 +101,7 @@ We also provide some sample Dockerfiles to build docker images in
 
 ### Installing into an isolated Python virtual environment
 
-With the python 3.6+ required for running, the following should work on most
+Zulip Terminal currently supports Python 3.8–3.11. With a supported Python 3.x installed, the following should work on most
 systems:
 1. `python3 -m venv zt_venv`
    (creates a virtual environment named `zt_venv` in the current directory)
@@ -462,7 +462,7 @@ process similar to that in the previous section.
 $ pip3 install --user pipenv
 ```
 2. Initialize the pipenv virtual environment for zulip-term (using the default
-   python 3; use eg. `--python 3.6` to be more specific)
+   python 3; use eg. `--python 3.10` to be more specific (any supported 3.8–3.11 version)
 
 ```
 $ pipenv --three
