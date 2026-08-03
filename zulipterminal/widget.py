@@ -3,23 +3,24 @@ Process widgets (submessages) like polls, todo lists, etc.
 """
 
 import json
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List
 
-
-Submessage = Dict[str, Union[int, str]]
+from zulipterminal.api_types import (
+    PollOptionInfo,
+    PollWidgetResult,
+    Submessage,
+    TodoTaskInfo,
+    TodoWidgetResult,
+)
 
 
 def find_widget_type(submessages: List[Submessage]) -> str:
     if submessages and "content" in submessages[0]:
         content = submessages[0]["content"]
-
-        if isinstance(content, str):
-            try:
-                loaded_content = json.loads(content)
-                return loaded_content.get("widget_type", "unknown")
-            except json.JSONDecodeError:
-                return "unknown"
-        else:
+        try:
+            loaded_content = json.loads(content)
+            return loaded_content.get("widget_type", "unknown")
+        except json.JSONDecodeError:
             return "unknown"
     else:
         return "unknown"
@@ -27,9 +28,9 @@ def find_widget_type(submessages: List[Submessage]) -> str:
 
 def process_todo_widget(
     todo_list: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, bool]]]]:
+) -> TodoWidgetResult:
     title = ""
-    tasks = {}
+    tasks: Dict[str, TodoTaskInfo] = {}
 
     for entry in todo_list:
         content = entry.get("content")
@@ -73,14 +74,14 @@ def process_todo_widget(
             elif widget.get("type") == "new_task_list_title":
                 title = widget["title"]
 
-    return title, tasks
+    return {"title": title, "tasks": tasks}
 
 
 def process_poll_widget(
     poll_content: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, List[str]]]]]:
+) -> PollWidgetResult:
     poll_question = ""
-    options = {}
+    options: Dict[str, PollOptionInfo] = {}
 
     for entry in poll_content:
         content = entry["content"]
@@ -115,4 +116,4 @@ def process_poll_widget(
                 option_id = f"{sender_id},{idx}"
                 options[option_id] = {"option": new_option, "votes": []}
 
-    return poll_question, options
+    return {"question": poll_question, "options": options}
