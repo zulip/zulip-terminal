@@ -449,9 +449,18 @@ class Controller:
         self.is_typing_notification_in_progress = True
         dots = itertools.cycle(["", ".", "..", "..."])
 
-        # Until conversation becomes "inactive" like when a `stop` event is sent
-        while self.active_conversation_info:
-            sender_name = self.active_conversation_info["sender_name"]
+        # Until conversation becomes "inactive" like when a `stop` event is sent.
+        # A `stop` event handled concurrently (model._handle_typing_event)
+        # reassigns self.active_conversation_info to a new {}, rather than
+        # mutating the current dict, so each iteration takes its own
+        # reference up front and uses only that - reading self.
+        # active_conversation_info a second time to index "sender_name"
+        # could otherwise race with that reassignment and raise a KeyError.
+        while True:
+            active_conversation_info = self.active_conversation_info
+            if not active_conversation_info:
+                break
+            sender_name = active_conversation_info["sender_name"]
             self.view.set_footer_text(
                 [
                     ("footer_contrast", " " + sender_name + " "),
