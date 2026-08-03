@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 
 import zulip
 from bs4 import BeautifulSoup
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 from zulipterminal import unicode_emojis
 from zulipterminal.api_types import (
@@ -99,6 +99,9 @@ class UserSettings(TypedDict):
     send_private_typing_notifications: bool
     twenty_four_hour_time: bool
     pm_content_in_desktop_notifications: bool
+
+
+DIRECT_MESSAGE_TYPE_FEATURE_LEVEL = 174
 
 
 class Model:
@@ -540,8 +543,13 @@ class Model:
 
     def send_private_message(self, recipients: List[int], content: str) -> bool:
         if recipients:
+            direct_message_type: Literal["private", "direct"] = (
+                "direct"
+                if self.server_feature_level >= DIRECT_MESSAGE_TYPE_FEATURE_LEVEL
+                else "private"
+            )
             composition = PrivateComposition(
-                type="private",
+                type=direct_message_type,
                 to=recipients,
                 content=content,
                 read_by_sender=True,
