@@ -1047,8 +1047,11 @@ class PopUpView(urwid.Frame):
                     widgets.append(urwid.Text(row))
                 elif isinstance(row, tuple):
                     label, data = row
+                    data_widget = data
+                    if not isinstance(data, urwid.Widget):
+                        data_widget = urwid.Text(data)
                     strip = urwid.Columns(
-                        [(column_widths[0], urwid.Text(label)), urwid.Text(data)],
+                        [(column_widths[0], urwid.Text(label)), data_widget],
                         dividechars=dividechars,
                     )
                     widgets.append(
@@ -1447,7 +1450,7 @@ class StreamInfoView(PopUpView):
             rendered_desc,
             self.controller.model.server_url,
         )
-        desc = urwid.Text(self.markup_desc)
+        desc = self.markup_desc
 
         # NOTE: This is treated as a member to make it easier to test
         self._stream_info_content = [
@@ -1503,6 +1506,8 @@ class StreamInfoView(PopUpView):
             padded=False,
             wrap="space",
         )
+        max_popup_cols, _ = self.controller.maximum_popup_dimensions()
+        desc_width = desc.pack((max_popup_cols,))[0]
 
         # Manual because calculate_table_widths does not support checkboxes.
         # Add 4 to checkbox label to accommodate the checkbox itself.
@@ -1510,7 +1515,7 @@ class StreamInfoView(PopUpView):
             popup_width,
             len(muted_setting.label) + 4,
             len(pinned_setting.label) + 4,
-            desc.pack()[0],
+            desc_width,
             footlinks_width,
             len(visual_notification.label) + 4,
         )
