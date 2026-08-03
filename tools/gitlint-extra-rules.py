@@ -1,62 +1,48 @@
 from typing import Any, List, Optional
-
 from gitlint.options import ListOption
 from gitlint.rules import CommitRule, RuleViolation
 
-
 class EndsWithDot(CommitRule):
+    """
+    Rule to ensure that the commit message title ends with a period ('.').
+    """
     name = "title-doesn't-end-with-dot"
     id = "ZT1"
 
     def validate(self, commit: Any) -> Optional[List[RuleViolation]]:
-        error = "Title does not end with a '.' character"
         if not commit.message.title.endswith("."):
-            return [RuleViolation(self.id, error, line_nr=1)]
+            return [RuleViolation(self.id, "Title must end with a '.'", line_nr=1)]
         return None
 
-
 class AreaFormatting(CommitRule):
+    """
+    Rule to enforce a structured format for commit message titles:
+    - The title must start with an area (lowercase, followed by ': ')
+    - Certain exclusions (e.g., 'WIP') are allowed in uppercase.
+    - The summary (after the colon) must start with an uppercase letter.
+    """
     name = "area-formatting"
     id = "ZT2"
-
-    options_spec = [
-        ListOption("exclusions", ["WIP"], "Exclusions to area lower-case rule")
-    ]
+    options_spec = [ListOption("exclusions", ["WIP"], "Allowed uppercase exclusions")]
 
     def validate(self, commit: Any) -> Optional[List[RuleViolation]]:
-        title_components = commit.message.title.split(": ")
-
+        title_parts = commit.message.title.split(": ")
         violations = []
-
-        # Return just this violation, since latter checks assume an area
-        error = (
-            "Title should start with at least one area, followed by a colon and space"
-        )
-        if len(title_components) < 2:
-            return [RuleViolation(self.id, error, line_nr=1)]
-
+        
+        # Ensure the title contains at least an area and a summary
+        if len(title_parts) < 2:
+            return [RuleViolation(self.id, "Title must start with an area, followed by ': '", line_nr=1)]
+        
         exclusions = self.options["exclusions"].value
-        exclusions_text = ", or ".join(exclusions)
-        if exclusions_text:
-            exclusions_text = f" (or {exclusions_text})"
-        error = (
-            f"Areas at start of title should be lower case{exclusions_text}, "
-            "followed by ': '"
-        )
-
-        def deny_capital_text(text: str) -> bool:
-            if text in exclusions:
-                return False
-            if not text.islower():
-                return True
-            return False
-
-        for area in title_components[:-1]:
-            if any(deny_capital_text(word) for word in area.split("/")) or " " in area:
-                violations += [RuleViolation(self.id, error, line_nr=1)]
-
-        error = "Summary of change, after area(s), should be capitalized"
-        if not title_components[-1][0].isupper():
-            violations += [RuleViolation(self.id, error, line_nr=1)]
-
-        return violations
+        area_part = title_parts[0]
+        summary_part = title_parts[1]
+        
+        # Check if the area part is correctly formatted
+        if area_part not in exclusions and not area_part.islower():
+            violations.append(RuleViolation(self.id, "Area must be lowercase unless excluded", line_nr=1))
+        
+        # Ensure the summary starts with an uppercase letter
+        if not summary_part[0].isupper():
+            violations.append(RuleViolation(self.id, "Summary must start with an uppercase letter", line_nr=1))
+        
+        return violations if violations else None
