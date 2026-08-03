@@ -322,6 +322,7 @@ class Controller:
                 maximum_footlinks=self.maximum_footlinks,
                 exit_confirmation_enabled=self.exit_confirmation,
                 transparency_enabled=self.transparency_enabled,
+                terminal_size=os.get_terminal_size(),
             ),
             "area:help",
         )

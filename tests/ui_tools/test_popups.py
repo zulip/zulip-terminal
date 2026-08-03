@@ -1,3 +1,4 @@
+import os
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from unittest.mock import patch
@@ -209,6 +210,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size=os.terminal_size((80, 24)),
         )
 
     @pytest.mark.parametrize(
@@ -260,6 +262,7 @@ class TestAboutView:
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
+            terminal_size=os.terminal_size((80, 24)),
         )
 
         assert len(about_view.feature_level_content) == (
@@ -297,6 +300,7 @@ Color depth: 256
 Notifications: disabled
 Exit confirmation: disabled
 Transparency: disabled
+Current terminal size: 80 x 24
 
 #### Detected Environment
 Platform: WSL

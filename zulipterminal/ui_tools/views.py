@@ -2,6 +2,7 @@
 UI views for larger elements such as Streams, Messages, Topics, Help, etc
 """
 
+import os
 import threading
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
@@ -1109,6 +1110,7 @@ class AboutView(PopUpView):
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
         transparency_enabled: bool,
+        terminal_size: os.terminal_size,
     ) -> None:
         self.feature_level_content = (
             [("Feature level", str(server_feature_level))]
@@ -1132,6 +1134,10 @@ class AboutView(PopUpView):
                         "enabled" if exit_confirmation_enabled else "disabled",
                     ),
                     ("Transparency", "enabled" if transparency_enabled else "disabled"),
+                    (
+                        "Current terminal size",
+                        f"{terminal_size.columns} x {terminal_size.lines}",
+                    ),
                 ],
             ),
             (
