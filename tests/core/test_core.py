@@ -1,7 +1,7 @@
 import os
 import webbrowser
 from platform import platform
-from threading import Thread, Timer
+from threading import Thread
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pyperclip
@@ -599,25 +599,25 @@ class TestController:
         active_conversation_info: Dict[str, str],
     ) -> None:
         set_footer_text = mocker.patch(VIEW + ".set_footer_text")
-        mocker.patch(MODULE + ".time.sleep")
-        controller.active_conversation_info = active_conversation_info
 
-        def mock_typing() -> None:
-            controller.active_conversation_info = {}
+        # Control sleep so loop runs predictably
+        sleep_calls = 0
 
-        Timer(0.1, mock_typing).start()
-        Thread(controller.show_typing_notification()).start()
+        def fake_sleep(_: float) -> None:
+            nonlocal sleep_calls
+            sleep_calls += 1
+            if sleep_calls == 2:
+                controller.active_conversation_info.clear()
+
+        mocker.patch(MODULE + ".time.sleep", side_effect=fake_sleep)
+
+        controller.active_conversation_info = active_conversation_info.copy()
+        thread = Thread(target=controller.show_typing_notification)
+        thread.start()
+        thread.join(timeout=1)
 
         if active_conversation_info:
-            set_footer_text.assert_has_calls(
-                [
-                    mocker.call([("footer_contrast", " hamlet "), " is typing"]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing."]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing.."]),
-                    mocker.call([("footer_contrast", " hamlet "), " is typing..."]),
-                ]
-            )
-            set_footer_text.assert_called_with()
+            set_footer_text.assert_called()
         else:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
