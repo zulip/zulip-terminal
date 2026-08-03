@@ -288,6 +288,7 @@ def test_sort_unread_topics(
             [["Some general stream", "Some general unread topic"]],
             {
                 "all_msg": 8,
+                "all_stream_msg": 0,
                 "streams": {99: 1},
                 "unread_topics": {(99, "Some private unread topic"): 1},
                 "all_mentions": 0,
@@ -298,17 +299,30 @@ def test_sort_unread_topics(
             [["Secret stream", "Some private unread topic"]],
             {
                 "all_msg": 8,
+                "all_stream_msg": 0,
                 "streams": {1000: 3},
                 "unread_topics": {(1000, "Some general unread topic"): 3},
                 "all_mentions": 0,
             },
         ),
         ({1}, [], {"all_mentions": 0}),
+        (
+            {},
+            [["Some general stream", "Some general unread topic"]],
+            {
+                "all_msg": 9,
+                "all_stream_msg": 1,
+                "streams": {99: 1},
+                "unread_topics": {(99, "Some private unread topic"): 1},
+                "all_mentions": 0,
+            },
+        ),
     ],
     ids=[
         "mute_private_stream_mute_general_stream_topic",
         "mute_general_stream_mute_private_stream_topic",
         "no_mute_some_other_stream_muted",
+        "mute_general_stream_topic",
     ],
 )
 def test_classify_unread_counts(

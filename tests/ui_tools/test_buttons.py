@@ -16,6 +16,7 @@ from zulipterminal.ui_tools.buttons import (
     PMButton,
     StarredButton,
     StreamButton,
+    StreamPanelButton,
     TopButton,
     TopicButton,
     UserButton,
@@ -196,6 +197,17 @@ class TestStarredButton:
     ) -> None:
         starred_button = StarredButton(controller=mocker.Mock(), count=count)
         assert starred_button.suffix_style == "starred_count"
+
+
+class TestStreamPanelButton:
+    def test_button_text_length(self, mocker: MockerFixture, count: int = 10) -> None:
+        stream_panel_button = StreamPanelButton(controller=mocker.Mock(), count=count)
+        assert len(stream_panel_button.label_text) == 20
+
+    def test_button_text_title(self, mocker: MockerFixture, count: int = 10) -> None:
+        stream_panel_button = StreamPanelButton(controller=mocker.Mock(), count=count)
+        title_text = stream_panel_button.label_text[:-3].strip()
+        assert title_text == "Stream messages"
 
 
 class TestStreamButton:

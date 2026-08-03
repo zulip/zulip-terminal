@@ -13,7 +13,9 @@ ALL_MESSAGES_MARKER = "≡"  # IDENTICAL TO, U+2261 (Mathematical operators)
 MENTIONED_MESSAGES_MARKER = "@"
 STARRED_MESSAGES_MARKER = "*"
 
+# Used in View buttons, and short form of DMs (not for streams)
 DIRECT_MESSAGE_MARKER = "§"  # SECTION SIGN, U+00A7 (Latin-1 supplement)
+STREAM_MESSAGE_MARKER = ">"
 
 STREAM_MARKER_PRIVATE = "P"
 STREAM_MARKER_PUBLIC = "#"

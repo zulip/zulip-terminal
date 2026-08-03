@@ -21,11 +21,16 @@ from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     CHECK_MARK,
     DIRECT_MESSAGE_MARKER,
+    STREAM_MESSAGE_MARKER,
     MENTIONED_MESSAGES_MARKER,
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
 )
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
+from zulipterminal.config.ui_mappings import (
+    EDIT_MODE_CAPTIONS,
+    STATE_ICON,
+    STREAM_ACCESS_TYPE,
+)
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
@@ -143,8 +148,10 @@ class HomeButton(TopButton):
         )
 
 
-class PMButton(TopButton):
-    def __init__(self, *, controller: Any, count: int) -> None:
+class DMPanelButton(TopButton):
+    def __init__(
+        self, *, controller: Any, count: int, show_function: Callable[[], Any]
+    ) -> None:
         button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
 
         super().__init__(
@@ -152,9 +159,36 @@ class PMButton(TopButton):
             label_markup=(None, button_text),
             prefix_markup=("title", DIRECT_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=show_function,
             count=count,
         )
+
+    def selectable(self) -> bool:
+        return False
+
+    def activate(self, key: Any) -> None:
+        self.show_function()
+
+
+class StreamPanelButton(TopButton):
+    def __init__(
+        self, *, controller: Any, count: int, show_function: Callable[[], Any]
+    ) -> None:
+        button_text = "Stream messages  [S]"
+        super().__init__(
+            controller=controller,
+            label_markup=(None, button_text),
+            prefix_markup=("title", STREAM_MESSAGE_MARKER),
+            suffix_markup=("unread_count", ""),
+            show_function=show_function,
+            count=count,
+        )
+
+    def selectable(self) -> bool:
+        return False
+
+    def activate(self, key: Any) -> None:
+        self.show_function()
 
 
 class MentionedButton(TopButton):
@@ -276,6 +310,38 @@ class StreamButton(TopButton):
         elif is_command_key("STREAM_INFO", key):
             self.model.controller.show_stream_info(self.stream_id)
         return super().keypress(size, key)
+
+
+class DMButton(TopButton):
+    def __init__(
+        self,
+        *,
+        dm_data: Dict[str, Any],
+        controller: Any,
+        view: Any,
+        state_marker: str,
+        color: Optional[str] = None,
+        count: int,
+    ) -> None:
+        self.model = controller.model
+        self.count = count
+        self.view = view
+        self.users: str = dm_data["users"]
+        self.user_emails: List[str] = dm_data["emails"]
+        self.dm_type: str = dm_data["type"]
+
+        narrow_function = partial(
+            controller.narrow_to_user,
+            recipient_emails=self.user_emails,
+        )
+        super().__init__(
+            controller=controller,
+            prefix_markup=(color, state_marker),
+            label_markup=(None, self.users),
+            suffix_markup=("unread_count", count),
+            show_function=narrow_function,
+            count=count,
+        )
 
 
 class UserButton(TopButton):
