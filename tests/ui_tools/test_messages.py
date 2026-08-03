@@ -1922,3 +1922,117 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    def test_todo_widget_strike_sends_submessage(self, mocker):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+
+        message = dict(
+            id=100,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":[{"task":"A"}]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+
+        msg_box.keypress((80, 24), "1")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": "0,canned"}
+        )
+
+    def test_todo_widget_rename_shows_popup_and_sends_submessage(self, mocker):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 42
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+        self.model.controller.maximum_popup_dimensions.return_value = (80, 24)
+
+        message = dict(
+            id=101,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"task_list_title":"Old","tasks":[]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+
+        msg_box.keypress((80, 24), "t")
+        popup = self.model.controller.show_pop_up.call_args[0][0]
+
+        popup._edit.set_edit_text("New")
+        popup.keypress((80, 24), "enter")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            101, {"type": "new_task_list_title", "title": "New"}
+        )
+
+    def test_todo_widget_add_shows_popup_and_sends_submessage(self, mocker):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+        self.model.controller.maximum_popup_dimensions.return_value = (80, 24)
+
+        message = dict(
+            id=102,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":[{"task":"A"}]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+
+        msg_box.keypress((80, 24), "a")
+        popup = self.model.controller.show_pop_up.call_args[0][0]
+
+        popup._edit.set_edit_text("Task: Desc")
+        popup.keypress((80, 24), "enter")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            102,
+            {
+                "type": "new_task",
+                "task": "Task",
+                "desc": "Desc",
+                "key": 1,
+                "completed": False,
+            },
+        )

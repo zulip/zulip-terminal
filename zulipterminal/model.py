@@ -1887,7 +1887,7 @@ class Model:
         message_id = event["message_id"]
         if message_id in self.index["messages"]:
             message = self.index["messages"][message_id]
-            message["submessages"].append(
+            message.setdefault("submessages", []).append(
                 {
                     "type": event["type"],
                     "msg_type": event["msg_type"],
@@ -1899,6 +1899,37 @@ class Model:
             )
             self.index["messages"][message_id] = message
             self._update_rendered_view(message_id)
+
+    def send_widget_submessage(
+        self, message_id: int, widget_content: Dict[str, Any]
+    ) -> bool:
+        content = json.dumps(widget_content, separators=(",", ":"), ensure_ascii=False)
+        request = {
+            "message_id": message_id,
+            "msg_type": "widget",
+            "content": content,
+        }
+
+        try:
+            # Zulip expects widget submessages on POST /api/v1/submessage.
+            if hasattr(self.client, "do_api_query"):
+                response = self.client.do_api_query(
+                    request, "/api/v1/submessage", method="POST"
+                )
+            else:
+                response = self.client.call_endpoint(
+                    "submessage", method="POST", request=request
+                )
+        except Exception as e:
+            self.controller.report_error([f" {e}"])
+            return False
+
+        if response.get("result") != "success":
+            msg = response.get("msg") or "Request failed."
+            self.controller.report_error([f" Submessage failed: {msg}"])
+            return False
+
+        return True
 
     def _handle_update_message_flags_event(self, event: Event) -> None:
         """

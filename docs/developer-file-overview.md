@@ -34,6 +34,7 @@ Zulip Terminal uses [Zulip's API](https://zulip.com/api/) to store and retrieve 
 |                        | buttons.py          | UI buttons for narrowing & showing unread counts, eg. All, Stream, Direct, Topic        |
 |                        | messages.py         | UI to render a Zulip message for display, and respond contextually to actions           |
 |                        | tables.py           | Helper functions which render tables in the UI                                          |
+|                        | todo_input.py       | Small input popup for interacting with TODO widgets.                                    |
 |                        | utils.py            | The `MessageBox` for every message displayed is created here                            |
 |                        | views.py            | UI views for larger elements such as Streams, Messages, Topics, Help, etc               |
 |                        |                     |                                                                                         |
