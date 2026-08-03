@@ -76,6 +76,11 @@
 |Show/hide user information|<kbd>i</kbd>|
 |Narrow to direct messages with user|<kbd>Enter</kbd>|
 
+## Topic list actions
+|Command|Key Combination|
+| :--- | :---: |
+|Show/hide topic information & (un)resolve topic|<kbd>i</kbd>|
+
 ## Begin composing a message
 |Command|Key Combination|
 | :--- | :---: |
