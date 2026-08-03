@@ -36,6 +36,7 @@ from zulipterminal.ui_tools.views import (
     EditHistoryView,
     EditModeView,
     EmojiPickerView,
+    EmptyNarrowPlaceholder,
     ExceptionView,
     FullRawMsgView,
     FullRenderedMsgView,
@@ -119,9 +120,11 @@ class Controller:
         # Register new ^C handler
         signal.signal(
             signal.SIGINT,
-            self.prompting_exit_handler
-            if self.exit_confirmation
-            else self.no_prompt_exit_handler,
+            (
+                self.prompting_exit_handler
+                if self.exit_confirmation
+                else self.no_prompt_exit_handler
+            ),
         )
 
     def raise_exception_in_main_thread(
@@ -628,7 +631,10 @@ class Controller:
         assert focus_position is not None
 
         self.view.message_view.log.clear()
-        if 0 <= focus_position < len(w_list):
+        if not w_list:
+            placeholder = urwid.AttrMap(EmptyNarrowPlaceholder(self.model), None)
+            self.view.message_view.log.extend([placeholder])
+        elif 0 <= focus_position < len(w_list):
             self.view.message_view.log.extend(w_list, focus_position)
         else:
             self.view.message_view.log.extend(w_list)

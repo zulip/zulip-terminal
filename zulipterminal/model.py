@@ -82,6 +82,7 @@ from zulipterminal.helper import (
 )
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
+from zulipterminal.ui_tools.views import EmptyNarrowPlaceholder
 
 
 class ServerConnectionFailure(Exception):
@@ -1408,7 +1409,7 @@ class Model:
             SubscriptionSettingChange(
                 stream_id=stream_id,
                 property="is_muted",
-                value=not self.is_muted_stream(stream_id)
+                value=not self.is_muted_stream(stream_id),
                 # True for muting and False for unmuting.
             )
         ]
@@ -1732,7 +1733,10 @@ class Model:
             repr(self.narrow), False
         ):
             msg_log = self.controller.view.message_view.log
-            if msg_log:
+            has_placeholder = msg_log and isinstance(
+                msg_log[-1].original_widget, EmptyNarrowPlaceholder
+            )
+            if msg_log and not has_placeholder:
                 last_message = msg_log[-1].original_widget.message
             else:
                 last_message = None
@@ -1745,6 +1749,8 @@ class Model:
                 msg_w = msg_w_list[0]
 
             if self.current_narrow_contains_message(message):
+                if has_placeholder:
+                    msg_log.remove(msg_log[0])
                 msg_log.append(msg_w)
 
             self.controller.update_screen()

@@ -12,6 +12,7 @@ from pytest_mock import MockerFixture
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
+from zulipterminal.ui_tools.views import EmptyNarrowPlaceholder
 from zulipterminal.version import ZT_VERSION
 
 
@@ -155,6 +156,27 @@ class TestController:
         widget = controller.view.message_view.log.extend.call_args_list[0][0][0][0]
         id_list = index_stream["stream_msg_ids_by_stream_id"][stream_id]
         assert {widget.original_widget.message["id"]} == id_list
+
+    def test_narrow_to_empty_stream_inserts_placeholder(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        stream_name: str = "EMPTY_STREAM",
+    ) -> None:
+        controller.view.message_view = mocker.patch("urwid.ListBox")
+        mocker.patch(MODEL + ".set_narrow", return_value=False)
+        mocker.patch(MODEL + ".get_message_ids_in_current_narrow", return_value=set())
+        mocker.patch(MODEL + ".get_messages")
+        mocker.patch(MODULE + ".create_msg_box_list", return_value=[])
+        mocker.patch(MODEL + ".get_focus_in_current_narrow", return_value=None)
+
+        controller._narrow_to(anchor=None, stream=stream_name)
+
+        controller.view.message_view.log.clear.assert_called_once_with()
+        extend_args = controller.view.message_view.log.extend.call_args_list[0][0][0]
+        assert len(extend_args) == 1
+        placeholder_w = extend_args[0]
+        assert isinstance(placeholder_w.original_widget, EmptyNarrowPlaceholder)
 
     @pytest.mark.parametrize(
         ["initial_narrow", "initial_stream_id", "anchor", "expected_final_focus"],
