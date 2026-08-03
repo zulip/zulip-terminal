@@ -20,7 +20,6 @@ SOURCE = [
     "zulipterminal",
     "tests",
     "tools",
-    "setup.py",
     "docs",
     "docker",
     "README.md",
