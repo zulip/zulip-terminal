@@ -29,6 +29,46 @@ def create_msg_box_list(
     focus_msg = None
     last_msg = last_message
     muted_msgs = 0  # No of messages that are muted.
+
+    # Add a dummy message if no new or old messages are found
+    if not message_list and not last_msg:
+        message_type = "stream" if model.stream_id is not None else "private"
+        dummy_message = {
+            "id": None,
+            "content": (
+                "No search hits" if model.is_search_narrow() else "No messages here"
+            ),
+            "is_me_message": False,
+            "flags": ["read"],
+            "reactions": [],
+            "type": message_type,
+            "stream_id": model.stream_id if message_type == "stream" else None,
+            "stream_name": model.stream_dict[model.stream_id]["name"]
+            if message_type == "stream"
+            else None,
+            "subject": next(
+                (subnarrow[1] for subnarrow in model.narrow if subnarrow[0] == "topic"),
+                "No topics in channel",
+            )
+            if message_type == "stream"
+            else None,
+            "display_recipient": (
+                model.stream_dict[model.stream_id]["name"]
+                if message_type == "stream"
+                else [
+                    {
+                        "email": model.user_id_email_dict[recipient_id],
+                        "full_name": model.user_dict[
+                            model.user_id_email_dict[recipient_id]
+                        ]["full_name"],
+                        "id": recipient_id,
+                    }
+                    for recipient_id in model.recipients
+                ]
+            ),
+        }
+        message_list.append(dummy_message)
+
     for msg in message_list:
         if is_unsubscribed_message(msg, model):
             continue
