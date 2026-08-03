@@ -138,7 +138,7 @@ If you want to show you agree with the current message, type <kbd>+</kbd> to add
 
 Let's try sending a direct message to the author of a message. Select the message you sent to the [#test here](https://chat.zulip.org/#narrow/stream/7-test-here) stream earlier and press <kbd>shift</kbd><kbd>r</kbd> to send a direct message to yourself. Type your message in the message editor that appears at the bottom of the middle column and then type <kbd>ctrl</kbd><kbd>d</kbd> to send. Press the <kbd>shift</kbd><kbd>p</kbd> hotkey as we did earlier in the tutorial to narrow to your direct messages and make sure everything worked properly.
 
-<img src="getting-started-imgs/send-pm.png" width="85%">
+<img src="getting-started-imgs/send-dm.png" width="85%">
 
 ### Send a Direct Message to Someone New
 
@@ -159,8 +159,8 @@ Try following the steps above to send a message to the Welcome Bot!
 
 > It's best to use <kbd>ctrl</kbd><kbd>f</kbd> to autocomplete the name and Zulip address of the person (or bot) you want to message; if you just type in their full name, Zulip Terminal does not know for sure who you are trying to send to - and there may be multiple people with that name!
 
-<img src="getting-started-imgs/send-pm-autocomplete1.png" width="85%">
-<img src="getting-started-imgs/send-pm-autocomplete2.png" width="85%">
+<img src="getting-started-imgs/send-dm-autocomplete1.png" width="85%">
+<img src="getting-started-imgs/send-dm-autocomplete2.png" width="85%">
 
 ### Create a New Topic
 

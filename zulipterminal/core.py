@@ -222,7 +222,7 @@ class Controller:
         width = clamp(max_cols, min_width, max_width)
         scaling = 1 - ((width - min_width) / (4 * (max_width - min_width)))
         max_popup_cols = int(scaling * max_cols)
-        # Scale Height
+        # Scale Height.
         max_popup_rows = 3 * max_rows // 4
 
         return max_popup_cols, max_popup_rows
@@ -659,7 +659,7 @@ class Controller:
     ) -> None:
         self._narrow_to(
             anchor=contextual_message_id,
-            pm_with=", ".join(recipient_emails),
+            dm_with=", ".join(recipient_emails),
         )
 
     def narrow_to_all_messages(
@@ -667,7 +667,7 @@ class Controller:
     ) -> None:
         self._narrow_to(anchor=contextual_message_id)
 
-    def narrow_to_all_pm(self, *, contextual_message_id: Optional[int] = None) -> None:
+    def narrow_to_all_dm(self, *, contextual_message_id: Optional[int] = None) -> None:
         self._narrow_to(anchor=contextual_message_id, pms=True)
 
     def narrow_to_all_starred(self) -> None:

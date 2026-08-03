@@ -58,7 +58,7 @@ def create_msg_box_list(
 
 # The SIM114 warnings are ignored here since combining the branches would be less clear
 def is_muted(msg: Message, model: Any) -> bool:
-    # PMs cannot be muted
+    # DMs cannot be muted
     if msg["type"] == "private":  # noqa: SIM114
         return False
     # In a topic narrow

@@ -87,17 +87,17 @@ class WriteBox(urwid.Pile):
         # Set to int for stream box only
         self.stream_id: Optional[int]
 
-        # Used in PM and stream boxes
-        # (empty list implies PM box empty, or not initialized)
+        # Used in DM and stream boxes
+        # (empty list implies DM box empty, or not initialized)
         # Prioritizes autocomplete in message body
         self.recipient_user_ids: List[int]
 
-        # Updates server on PM typing events
+        # Updates server on DM typing events
         # Is separate from recipient_user_ids because we
         # don't include the user's own id in this list
         self.typing_recipient_user_ids: List[int]
 
-        # Private message recipient text entry, None if stream-box
+        # Direct message recipient text entry, None if stream-box
         # or not initialized
         self.to_write_box: Optional[ReadlineEdit]
 
@@ -168,7 +168,7 @@ class WriteBox(urwid.Pile):
             self.typing_recipient_user_ids = list()
 
     def send_stop_typing_status(self) -> None:
-        # Send 'stop' updates only for PM narrows, when there are recipients
+        # Send 'stop' updates only for DM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
         if (
             self.compose_box_status == "open_with_private"

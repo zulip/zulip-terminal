@@ -143,16 +143,16 @@ class HomeButton(TopButton):
         )
 
 
-class PMButton(TopButton):
+class DMButton(TopButton):
     def __init__(self, *, controller: Any, count: int) -> None:
-        button_text = f"Direct messages  [{primary_display_key_for_command('ALL_PM')}]"
+        button_text = f"Direct messages  [{primary_display_key_for_command('ALL_DM')}]"
 
         super().__init__(
             controller=controller,
             label_markup=(None, button_text),
             prefix_markup=("title", DIRECT_MESSAGE_MARKER),
             suffix_markup=("unread_count", ""),
-            show_function=controller.narrow_to_all_pm,
+            show_function=controller.narrow_to_all_dm,
             count=count,
         )
 
