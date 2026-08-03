@@ -2,8 +2,10 @@
 Detection of supported platforms & platform-specific functions
 """
 
+import os
 import platform
 import subprocess
+from pathlib import Path
 from typing import Tuple
 
 from typing_extensions import Literal
@@ -87,6 +89,14 @@ def notify(title: str, text: str) -> str:
             # This likely means the notification command could not be found
             return command_list[0]
     return ""
+
+
+def xdg_config_home() -> Path:
+    """Return a Path corresponding to XDG_CONFIG_HOME."""
+    config_home = os.environ.get("XDG_CONFIG_HOME")
+    if config_home and Path(config_home).is_absolute():
+        return Path(config_home)
+    return Path.home() / ".config"
 
 
 def successful_GUI_return_code() -> int:  # noqa: N802 (allow upper case)
