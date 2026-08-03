@@ -588,11 +588,12 @@ class TestMessageLinkButton:
             "link",
             "handle_narrow_link_called",
             "process_media_called",
+            "open_in_browser_called",
         ],
         [
-            (SERVER_URL + "/#narrow/stream/1-Stream-1", True, False),
-            (SERVER_URL + "/user_uploads/some/path/image.png", False, True),
-            ("https://foo.com", False, False),
+            (SERVER_URL + "/#narrow/stream/1-Stream-1", True, False, False),
+            (SERVER_URL + "/user_uploads/some/path/image.png", False, True, False),
+            ("https://foo.com", False, False, True),
         ],
         ids=[
             "internal_narrow_link",
@@ -606,6 +607,7 @@ class TestMessageLinkButton:
         link: str,
         handle_narrow_link_called: bool,
         process_media_called: bool,
+        open_in_browser_called: bool,
     ) -> None:
         self.controller.model.server_url = SERVER_URL
         self.handle_narrow_link = mocker.patch(MSGLINKBUTTON + ".handle_narrow_link")
@@ -617,6 +619,7 @@ class TestMessageLinkButton:
 
         assert self.handle_narrow_link.called == handle_narrow_link_called
         assert self.process_media.called == process_media_called
+        assert self.controller.open_in_browser.called == open_in_browser_called
 
     @pytest.mark.parametrize(
         "stream_data, expected_response",
