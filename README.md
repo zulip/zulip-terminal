@@ -101,7 +101,10 @@ We also provide some sample Dockerfiles to build docker images in
 
 ### Installing into an isolated Python virtual environment
 
-With the python 3.6+ required for running, the following should work on most
+Python 3.8–3.11 is supported for running the project. Newer versions (such as Python 3.12+) may not work as expected due to dependency compatibility issues.
+
+We recommend installing in a dedicated Python virtual environment (see below) or using an automated option such as pipx.
+with meeting all conditions, the following should work on most
 systems:
 1. `python3 -m venv zt_venv`
    (creates a virtual environment named `zt_venv` in the current directory)
