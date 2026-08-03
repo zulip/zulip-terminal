@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+
+import argparse
+
+import zulip
+
+usage = """delete-stream <stream_id>
+
+Example: delete-stream 42
+"""
+
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("stream_id", type=int)
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+print(client.delete_stream(options.stream_id))

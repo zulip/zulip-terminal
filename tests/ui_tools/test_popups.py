@@ -170,9 +170,9 @@ class TestPopUpView:
         mocker.patch(
             MODULE + ".is_command_key",
             side_effect=(
-                lambda command, key: False
-                if command == self.command
-                else is_command_key(command, key)
+                lambda command, key: (
+                    False if command == self.command else is_command_key(command, key)
+                )
             ),
         )
 

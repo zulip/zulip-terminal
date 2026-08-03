@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+#
+# Zulip notification post-commit hook.
+#
+# The "post-commit" script is run after a transaction is completed and a new
+# revision is created.  It is passed arguments on the command line in this
+# form:
+#  <path> <revision>
+# For example:
+# /srv/svn/carols 1843
+
+import os
+import os.path
+import sys
+from typing import Any, Dict
+
+import pysvn
+
+sys.path.insert(0, os.path.dirname(__file__))
+import zulip_svn_config as config
+
+VERSION = "0.9"
+
+if config.ZULIP_API_PATH is not None:
+    sys.path.append(config.ZULIP_API_PATH)
+
+import zulip
+
+client = zulip.Client(
+    email=config.ZULIP_USER,
+    site=config.ZULIP_SITE,
+    api_key=config.ZULIP_API_KEY,
+    client="ZulipSVN/" + VERSION,
+)  # type: zulip.Client
+svn = pysvn.Client()  # type: pysvn.Client
+
+path, rev = sys.argv[1:]
+
+# since its a local path, prepend "file://"
+path = "file://" + path
+
+entry = svn.log(path, revision_end=pysvn.Revision(pysvn.opt_revision_kind.number, rev))[
+    0
+]  # type: Dict[str, Any]
+message = "**{}** committed revision r{} to `{}`.\n\n> {}".format(
+    entry["author"], rev, path.split("/")[-1], entry["revprops"]["svn:log"]
+)
+
+destination = config.commit_notice_destination(path, rev)
+
+if destination is not None:
+    message_data = {
+        "type": "stream",
+        "to": destination["stream"],
+        "subject": destination["subject"],
+        "content": message,
+    }  # type: Dict[str, Any]
+    client.send_message(message_data)

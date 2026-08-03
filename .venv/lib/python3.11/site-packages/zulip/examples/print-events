@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import argparse
+from typing import Any, Dict
+
+usage = """print-events [options]
+
+Prints out certain events received by the indicated bot or user matching the filter below.
+
+Example: print-events
+
+Specify your Zulip API credentials and server in a ~/.zuliprc file or using the options.
+"""
+
+import zulip
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+
+def print_event(event: Dict[str, Any]) -> None:
+    print(event)
+
+
+# This is a blocking call, and will continuously poll for new events
+# Note also the filter here is messages to the stream Denmark; if you
+# don't specify event_types it'll print all events.
+client.call_on_each_event(print_event, event_types=["message"], narrow=[["stream", "Denmark"]])

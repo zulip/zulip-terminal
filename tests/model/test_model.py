@@ -716,9 +716,11 @@ class TestModel:
             else model.user_id + 1
         )
         full_existing_reactions = [
-            dict(er, user={user_key: id})
-            if user_key is not None
-            else dict(user_id=id, emoji_code=er["emoji_code"])
+            (
+                dict(er, user={user_key: id})
+                if user_key is not None
+                else dict(user_id=id, emoji_code=er["emoji_code"])
+            )
             for er in existing_reactions
         ]
         message = dict(id=msg_id, reactions=full_existing_reactions)
@@ -1419,9 +1421,9 @@ class TestModel:
             initial_data["realm_edit_topic_policy"] = edit_topic_policy
         else:
             assert edit_topic_policy is None
-            initial_data[
-                "realm_allow_community_topic_editing"
-            ] = allow_community_topic_editing
+            initial_data["realm_allow_community_topic_editing"] = (
+                allow_community_topic_editing
+            )
         report_error = model.controller.report_error
 
         result = model.can_user_edit_topic()
@@ -4667,7 +4669,7 @@ class TestModel:
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
         model.unread_counts = {
-            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
+            "unread_topics": dict.fromkeys(unread_topics, 1)
         }
 
         current_message_id = 10  # Arbitrary value due to mock below
@@ -4694,14 +4696,7 @@ class TestModel:
         ]
 
         # date data unimportant (if present)
-        model._muted_topics = {
-            stream_topic: None
-            for stream_topic in [
-                ("Stream 2", "muted topic2"),
-                ("Stream 2", "topic2 muted"),
-                ("Stream 3", "topic3 muted"),
-            ]
-        }
+        model._muted_topics = dict.fromkeys([("Stream 2", "muted topic2"), ("Stream 2", "topic2 muted"), ("Stream 3", "topic3 muted")])
 
         unread_topic = model.next_unread_topic_from_message_id(current_message_id)
 
@@ -4729,7 +4724,7 @@ class TestModel:
     ):
         # NOTE Not important how many unreads per topic, so just use '1'
         model.unread_counts = {
-            "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
+            "unread_topics": dict.fromkeys(unread_topics, 1)
         }
         model.pinned_streams = [
             {"name": "Stream 1", "id": 1},
