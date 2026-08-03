@@ -35,6 +35,8 @@ expected_complete_themes = {
     "zt_dark",
     "gruvbox_dark",
     "gruvbox_light",
+    "oxocarbon_dark",
+    "oxocarbon_light",
     "zt_light",
     "zt_blue",
 }
