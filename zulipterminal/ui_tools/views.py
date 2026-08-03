@@ -123,8 +123,13 @@ class MessageView(urwid.ListBox):
     def main_view(self) -> List[Any]:
         msg_btn_list = create_msg_box_list(self.model)
         focus_msg = self.model.get_focus_in_current_narrow()
-        if focus_msg is None:
-            focus_msg = len(msg_btn_list) - 1
+        if (
+            not msg_btn_list
+            or focus_msg is None
+            or focus_msg < 0
+            or focus_msg >= len(msg_btn_list)
+        ):
+            focus_msg = max(0, len(msg_btn_list) - 1)
         self.focus_msg = focus_msg
         return msg_btn_list
 
