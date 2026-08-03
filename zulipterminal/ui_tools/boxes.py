@@ -569,12 +569,35 @@ class WriteBox(urwid.Pile):
         ]
         matching_ids = {user["user_id"] for user in matching_users}
         matching_recipient_ids = set(self.recipient_user_ids) & set(matching_ids)
-        # Display subscribed users/recipients first.
-        sorted_matching_users = sorted(
-            matching_users,
-            key=lambda user: user["user_id"] in matching_recipient_ids,
-            reverse=True,
-        )
+
+        if self.compose_box_status == "open_with_stream":
+            # get user ids in the topic narrow
+            topic_narrow_user_ids = self.model.get_user_ids_in_topic_narrow(
+                self.stream_id, self.title_write_box.edit_text
+            )
+            matching_narrow_user_ids = set(topic_narrow_user_ids) & set(matching_ids)
+
+            # user ids with recent DMs
+            recent_dm_user_ids = self.model.get_user_ids_in_recent_pms()
+            matching_dm_user_ids = set(recent_dm_user_ids) & set(matching_ids)
+
+            # sort priority level:  topic narrow > stream > recent DMs
+            sorted_matching_users = sorted(
+                matching_users,
+                key=lambda user: (
+                    user["user_id"] in matching_narrow_user_ids,
+                    user["user_id"] in matching_recipient_ids,
+                    user["user_id"] in matching_dm_user_ids,
+                ),
+                reverse=True,
+            )
+        else:
+            # Display subscribed users/recipients first.
+            sorted_matching_users = sorted(
+                matching_users,
+                key=lambda user: user["user_id"] in matching_recipient_ids,
+                reverse=True,
+            )
 
         user_names = [user["full_name"] for user in sorted_matching_users]
 
