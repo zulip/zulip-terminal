@@ -738,12 +738,8 @@ class WriteBox(urwid.Pile):
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
             or is_command_key("AUTOCOMPLETE_REVERSE", key)
+            or is_command_key("EXIT_COMPOSE", key)
         ):
-            # As is, this exits autocomplete even if the user chooses to resume compose.
-            # Including a check for "EXIT_COMPOSE" in the above logic would avoid
-            # resetting the footer until actually exiting compose, but autocomplete
-            # itself does not continue on resume with such a solution.
-            # TODO: Fully implement resuming of autocomplete upon resuming compose.
             self._set_default_footer_after_autocomplete()
 
         if is_command_key("SEND_MESSAGE", key):

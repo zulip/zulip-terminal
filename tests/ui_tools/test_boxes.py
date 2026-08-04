@@ -1615,6 +1615,27 @@ class TestWriteBox:
         # We may prefer called-once in future, but the key part is that we do reset
         assert self.view.set_footer_text.called
 
+    def test__keypress_typeahead_mode_exit_compose_popup_preserves_typeahead(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        write_box.msg_write_box = mocker.Mock(
+            edit_text="." * MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP
+        )
+        write_box.compose_box_status = "open_with_stream"
+        write_box.msg_edit_state = None
+        write_box.model.session_draft_message.return_value = None
+        write_box.is_in_typeahead_mode = True
+        size = widget_size(write_box)
+
+        write_box.keypress(size, primary_key_for_command("EXIT_COMPOSE"))
+
+        write_box.view.controller.exit_compose_confirmation_popup.assert_called_once_with()
+        assert write_box.is_in_typeahead_mode is True
+        assert not self.view.set_footer_text.called
+
     @pytest.mark.parametrize(
         [
             "initial_focus_name",
