@@ -1083,17 +1083,19 @@ class Model:
 
         if stream_id:
             assert self.is_user_subscribed_to_stream(stream_id)
+            stream = self.stream_dict[stream_id]
+            subscribers = stream.get("subscribers") or stream.get(
+                "partial_subscribers", []
+            )
 
-            return [
-                sub
-                for sub in self.stream_dict[stream_id]["subscribers"]
-                if sub != self.user_id
-            ]
+            return [sub for sub in subscribers if sub != self.user_id]
         else:
             return [
                 sub
                 for _, stream in self.stream_dict.items()
-                for sub in stream["subscribers"]
+                for sub in (
+                    stream.get("subscribers") or stream.get("partial_subscribers", [])
+                )
                 if stream["name"] == stream_name
                 if sub != self.user_id
             ]
@@ -1549,7 +1551,9 @@ class Model:
 
             for stream_id in stream_ids:
                 if self.is_user_subscribed_to_stream(stream_id):
-                    subscribers = self.stream_dict[stream_id]["subscribers"]
+                    subscribers = self.stream_dict[stream_id].get(
+                        "subscribers"
+                    ) or self.stream_dict[stream_id].get("partial_subscribers", [])
                     if event["op"] == "peer_add":
                         subscribers.extend(user_ids)
                     else:
@@ -2110,7 +2114,7 @@ class Model:
                 fetch_event_types=fetch_types,
                 client_gravatar=True,
                 apply_markdown=True,
-                include_subscribers=True,
+                include_subscribers="partial",
             )
         except zulip.ZulipError as e:
             return str(e)
