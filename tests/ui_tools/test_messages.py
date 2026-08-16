@@ -903,34 +903,39 @@ class TestMessageBox:
         assert isinstance(view_components[0][2], Divider)
 
     @pytest.mark.parametrize(
-        "msg_narrow, msg_type, assert_header_bar, assert_search_bar",
+        "msg_narrow, searching, msg_type, assert_header_bar, assert_search_bar",
         [
             (
                 [],
+                False,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [],
+                False,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [],
+                False,
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [["stream", "PTEST"]],
+                False,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 ("bar", ("s#bd6", f" {STREAM_MARKER_PUBLIC} PTEST ")),
             ),
             (
                 [["stream", "PTEST"], ["topic", "b"]],
+                False,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR}",
                 (
@@ -940,78 +945,91 @@ class TestMessageBox:
             ),
             (
                 [["is", "private"]],
+                False,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {DIRECT_MESSAGE_MARKER} All direct messages ",
             ),
             (
                 [["is", "private"]],
+                False,
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {DIRECT_MESSAGE_MARKER} All direct messages ",
             ),
             (
                 [["pm-with", "boo@zulip.com"]],
+                False,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {DIRECT_MESSAGE_MARKER} Direct message conversation ",
             ),
             (
                 [["pm-with", "boo@zulip.com, bar@zulip.com"]],
+                False,
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {DIRECT_MESSAGE_MARKER} Group direct message conversation ",
             ),
             (
                 [["is", "starred"]],
+                False,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 f" {STARRED_MESSAGES_MARKER} Starred messages ",
             ),
             (
                 [["is", "starred"]],
+                False,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {STARRED_MESSAGES_MARKER} Starred messages ",
             ),
             (
                 [["is", "starred"]],
+                False,
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {STARRED_MESSAGES_MARKER} Starred messages ",
             ),
             (
                 [["is", "starred"], ["search", "FOO"]],
+                True,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {STARRED_MESSAGES_MARKER} Starred messages ",
             ),
             (
                 [["search", "FOO"]],
+                True,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 f" {ALL_MESSAGES_MARKER} All messages ",
             ),
             (
                 [["is", "mentioned"]],
+                False,
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR} ",
                 f" {MENTIONED_MESSAGES_MARKER} Mentions ",
             ),
             (
                 [["is", "mentioned"]],
+                False,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {MENTIONED_MESSAGES_MARKER} Mentions ",
             ),
             (
                 [["is", "mentioned"]],
+                False,
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {MENTIONED_MESSAGES_MARKER} Mentions ",
             ),
             (
                 [["is", "mentioned"], ["search", "FOO"]],
+                True,
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
                 f" {MENTIONED_MESSAGES_MARKER} Mentions ",
@@ -1024,6 +1042,7 @@ class TestMessageBox:
         messages_successful_response,
         msg_type,
         msg_narrow,
+        searching,
         assert_header_bar,
         assert_search_bar,
     ):
@@ -1033,6 +1052,7 @@ class TestMessageBox:
             },
         }
         self.model.narrow = msg_narrow
+        self.model.is_search_narrow.return_value = searching
         messages = messages_successful_response["messages"]
         current_message = messages[msg_type]
         msg_box = MessageBox(current_message, self.model, messages[0])
@@ -1108,6 +1128,8 @@ class TestMessageBox:
         # The empty dict is responsible for INACTIVE status of test user.
         self.model.user_dict = {}  # called once in main_view explicitly
 
+        self.model.is_search_narrow.return_value = False
+
         stars = {
             msg: ({"flags": ["starred"]} if msg == starred_msg else {})
             for msg in ("this", "last")
@@ -1131,6 +1153,39 @@ class TestMessageBox:
         assert isinstance(view_components[1], Padding)
 
     @pytest.mark.parametrize(
+        "message",
+        [
+            {
+                "id": 4,
+                "type": "stream",
+                "display_recipient": "Verona",
+                "stream_id": 5,
+                "subject": "Test topic",
+                "flags": [],
+                "is_me_message": False,
+                "content": "<p>what are you planning to do this week</p>",
+                "reactions": [],
+                "sender_full_name": "alice",
+                "timestamp": 1532103879,
+            }
+        ],
+    )
+    def test_search_results_always_have_header(
+        self,
+        mocker,
+        message,
+    ):
+        self.model.is_search_narrow.return_value = True
+
+        msg_box = MessageBox(message, self.model, message)
+        view_components = msg_box.main_view()
+
+        assert len(view_components) == 3
+        assert isinstance(view_components[0], Columns)
+        assert isinstance(view_components[1], Columns)
+        assert isinstance(view_components[2], Padding)
+
+    @pytest.mark.parametrize(
         "to_vary_in_each_message",
         [
             {"sender_full_name": "bob"},
@@ -1152,6 +1207,7 @@ class TestMessageBox:
     ):
         message_fixture.update({"id": 4})
         varied_message = dict(message_fixture, **to_vary_in_each_message)
+        self.model.is_search_narrow.return_value = False
         msg_box = MessageBox(varied_message, self.model, varied_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 1
@@ -1163,6 +1219,7 @@ class TestMessageBox:
         messages = messages_successful_response["messages"]
         for message in messages:
             self.model.index["edited_messages"].add(message["id"])
+            self.model.is_search_narrow.return_value = False
             msg_box = MessageBox(message, self.model, message)
             view_components = msg_box.main_view()
 
@@ -1189,6 +1246,7 @@ class TestMessageBox:
     ):
         message = message_fixture
         last_msg = dict(message, **to_vary_in_last_message)
+        self.model.is_search_narrow.return_value = False
 
         msg_box = MessageBox(message, self.model, last_msg)
 
