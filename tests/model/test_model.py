@@ -520,6 +520,226 @@ class TestModel:
         assert current_ids == model.get_message_ids_in_current_narrow()
 
     @pytest.mark.parametrize(
+        "stream_id, topic, index, expected_user_ids",
+        [
+            (
+                1,
+                "general chat",
+                {
+                    "topic_msg_ids": {
+                        1: {
+                            "general chat": {101, 102, 103},
+                        }
+                    },
+                    "messages": {
+                        101: {"sender_id": 1},
+                        102: {"sender_id": 2},
+                        103: {"sender_id": 1},
+                    },
+                },
+                {1, 2},
+            ),
+            (
+                2,
+                "bug reports",
+                {
+                    "topic_msg_ids": {
+                        2: {
+                            "bug reports": {201, 202},
+                            "announcements": {203},
+                        }
+                    },
+                    "messages": {
+                        201: {"sender_id": 3},
+                        202: {"sender_id": 4},
+                        203: {"sender_id": 1},
+                    },
+                },
+                {3, 4},
+            ),
+            (
+                3,
+                "design",
+                {
+                    "topic_msg_ids": {
+                        1: {
+                            "general chat": {101},
+                        },
+                        3: {
+                            "design": {301, 302},
+                        },
+                    },
+                    "messages": {
+                        101: {"sender_id": 1},
+                        301: {"sender_id": 5},
+                        302: {"sender_id": 2},
+                    },
+                },
+                {5, 2},
+            ),
+        ],
+    )
+    def test_get_user_ids_in_topic_narrow(
+        self, mocker, model, index, stream_id, topic, expected_user_ids
+    ):
+        model.index = index
+        assert expected_user_ids == model.get_user_ids_in_topic_narrow(stream_id, topic)
+
+    @pytest.mark.parametrize(
+        "index, expected_user_ids",
+        [
+            (
+                {
+                    "private_msg_ids": {101, 102},
+                    "messages": {
+                        101: {
+                            "timestamp": 1527921326,
+                            "display_recipient": [
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 5,
+                                    "email": "iago@zulip.com",
+                                    "full_name": "Iago",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                        102: {
+                            "timestamp": 1527921400,
+                            "display_recipient": [
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 8,
+                                    "email": "prospero@zulip.com",
+                                    "full_name": "Prospero from The Tempest",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                        999: {  # stream message, should be ignored
+                            "timestamp": 1527921999,
+                            "display_recipient": "general",
+                        },
+                    },
+                },
+                [8, 5],
+            ),
+            (
+                {  # user sends message to self
+                    "private_msg_ids": {201},
+                    "messages": {
+                        201: {
+                            "timestamp": 1527921500,
+                            "display_recipient": [
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                        109: {  # stream message, should be ignored
+                            "timestamp": 1527921999,
+                            "display_recipient": "test here",
+                        },
+                    },
+                    109: {  # stream message, should be ignored
+                        "timestamp": 1527921089,
+                        "display_recipient": "zulip terminal",
+                    },
+                },
+                [],
+            ),
+            (
+                {
+                    "private_msg_ids": {301, 302, 303},
+                    "messages": {
+                        301: {
+                            "timestamp": 1527921600,
+                            "display_recipient": [
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 5,
+                                    "email": "iago@zulip.com",
+                                    "full_name": "Iago",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                        302: {
+                            "timestamp": 1527921700,
+                            "display_recipient": [
+                                {
+                                    "id": 5,
+                                    "email": "iago@zulip.com",
+                                    "full_name": "Iago",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 6,
+                                    "email": "prospero@zulip.com",
+                                    "full_name": "Prospero from The Tempest",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                        303: {
+                            "timestamp": 1527921800,
+                            "display_recipient": [
+                                {
+                                    "id": 4,
+                                    "email": "hamlet@zulip.com",
+                                    "full_name": "King Hamlet",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 6,
+                                    "email": "prospero@zulip.com",
+                                    "full_name": "Prospero from The Tempest",
+                                    "is_mirror_dummy": False,
+                                },
+                                {
+                                    "id": 7,
+                                    "email": "kenny@zulip.com",
+                                    "full_name": "Kenny Dehinde",
+                                    "is_mirror_dummy": False,
+                                },
+                            ],
+                        },
+                    },
+                },
+                [6, 7, 5],
+            ),
+        ],
+    )
+    def test_get_user_ids_in_recent_pms(self, mocker, model, index, expected_user_ids):
+        model.user_id = 4
+        model.index = index
+        assert expected_user_ids == model.get_user_ids_in_recent_pms()
+
+    @pytest.mark.parametrize(
         "response, expected_index, return_value",
         [
             (
