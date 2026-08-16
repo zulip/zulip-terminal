@@ -1893,7 +1893,7 @@ class Model:
         message_id = event["message_id"]
         if message_id in self.index["messages"]:
             message = self.index["messages"][message_id]
-            message["submessages"].append(
+            message.setdefault("submessages", []).append(
                 {
                     "type": event["type"],
                     "msg_type": event["msg_type"],
@@ -1905,6 +1905,21 @@ class Model:
             )
             self.index["messages"][message_id] = message
             self._update_rendered_view(message_id)
+
+    def send_widget_submessage(
+        self, message_id: int, widget_content: Dict[str, Any]
+    ) -> bool:
+        content = json.dumps(widget_content, separators=(",", ":"), ensure_ascii=False)
+        request = {
+            "message_id": message_id,
+            "msg_type": "widget",
+            "content": content,
+        }
+        response = self.client.call_endpoint(
+            "submessage", method="POST", request=request
+        )
+        display_error_if_present(response, self.controller)
+        return response["result"] == "success"
 
     def _handle_update_message_flags_event(self, event: Event) -> None:
         """

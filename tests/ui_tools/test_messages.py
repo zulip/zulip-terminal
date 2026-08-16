@@ -1922,3 +1922,195 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    def test_keypress_TODO_STRIKE(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+
+        message = dict(
+            id=100,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":[{"task":"A"}]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "1")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": "0,canned"}
+        )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_RENAME"))
+    def test_keypress_TODO_RENAME(self, mocker, key, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 42
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+        self.model.controller.maximum_popup_dimensions.return_value = (80, 24)
+
+        message = dict(
+            id=101,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"task_list_title":"Old","tasks":[]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+        popup = self.model.controller.show_pop_up.call_args[0][0]
+
+        popup._edit.set_edit_text("New")
+        popup.keypress((80, 24), "enter")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            101, {"type": "new_task_list_title", "title": "New"}
+        )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_ADD"))
+    def test_keypress_TODO_ADD(self, mocker, key, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+        self.model.controller.maximum_popup_dimensions.return_value = (80, 24)
+
+        message = dict(
+            id=102,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":[{"task":"A"}]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+        popup = self.model.controller.show_pop_up.call_args[0][0]
+
+        popup._edit.set_edit_text("Task: Desc")
+        popup.keypress((80, 24), "enter")
+
+        self.model.send_widget_submessage.assert_called_once_with(
+            102,
+            {
+                "type": "new_task",
+                "task": "Task",
+                "desc": "Desc",
+                "key": 1,
+                "completed": False,
+            },
+        )
+
+    def test_keypress_no_such_todo_item(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock()
+
+        message = dict(
+            id=103,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":[{"task":"A"}]}}'
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "5")
+
+        self.model.send_widget_submessage.assert_not_called()
+        self.model.controller.report_error.assert_called_once_with(
+            [" No such to-do item."]
+        )
+
+    def test_keypress_todo_more_than_9_items_warning(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.MagicMock(return_value=True)
+
+        message = dict(
+            id=104,
+            type="stream",
+            display_recipient="general",
+            stream_id=5,
+            subject="todo",
+            sender_id=42,
+            sender_email="foo@zulip.com",
+            sender_full_name="Foo",
+            content="<p>todo</p>",
+            submessages=[
+                {
+                    "msg_type": "widget",
+                    "sender_id": 42,
+                    "content": (
+                        '{"widget_type":"todo","extra_data":{"tasks":['
+                        '{"task":"A"},{"task":"B"},{"task":"C"},'
+                        '{"task":"D"},{"task":"E"},{"task":"F"},'
+                        '{"task":"G"},{"task":"H"},{"task":"I"},'
+                        '{"task":"J"}'
+                        "]}}"
+                    ),
+                }
+            ],
+        )
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "1")
+
+        self.model.controller.report_warning.assert_called_once_with(
+            [" This todo has 10 items, but only 1-9 can be selected."]
+        )
+        self.model.send_widget_submessage.assert_called_once()
