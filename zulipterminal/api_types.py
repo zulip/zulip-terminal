@@ -180,6 +180,113 @@ class SubscriptionSettingChange(TypedDict):
 
 ## TODO: Improve this typing to split private and stream message data
 
+###############################################################################
+# Submessage (widget) types
+# Used in messages for polls, todos, and other interactive widgets
+
+
+class Submessage(TypedDict):
+    type: Literal["submessage"]
+    msg_type: str
+    message_id: int
+    submessage_id: int
+    sender_id: int
+    content: str
+
+
+# Widget content types for deserialized JSON content
+
+
+class TodoTask(TypedDict):
+    task: str
+    desc: str
+
+
+class TodoWidgetData(TypedDict):
+    widget_type: Literal["todo"]
+    extra_data: "TodoExtraData"
+
+
+class TodoExtraData(TypedDict, total=False):
+    task_list_title: str
+    tasks: List[TodoTask]
+
+
+class NewTodoTask(TypedDict):
+    type: Literal["new_task"]
+    key: int
+    task: str
+    desc: str
+    completed: bool
+
+
+class TodoStrike(TypedDict):
+    type: Literal["strike"]
+    key: str
+
+
+class NewTodoTitle(TypedDict):
+    type: Literal["new_task_list_title"]
+    title: str
+
+
+class PollOption(TypedDict):
+    pass  # Option text is just a string in the "options" list
+
+
+class PollWidgetData(TypedDict):
+    widget_type: Literal["poll"]
+    extra_data: "PollExtraData"
+
+
+class PollExtraData(TypedDict):
+    question: str
+    options: List[str]
+
+
+class NewPollOption(TypedDict):
+    type: Literal["new_option"]
+    idx: int
+    option: str
+
+
+class PollQuestion(TypedDict):
+    type: Literal["question"]
+    question: str
+
+
+class PollVote(TypedDict):
+    type: Literal["vote"]
+    key: str
+    vote: Literal[1, -1]
+
+
+# Return types for widget processing functions
+
+
+class TodoTaskInfo(TypedDict):
+    task: str
+    desc: str
+    completed: bool
+
+
+class TodoWidgetResult(TypedDict):
+    title: str
+    tasks: Dict[str, TodoTaskInfo]
+
+
+class PollOptionInfo(TypedDict):
+    option: str
+    votes: List[int]
+
+
+class PollWidgetResult(TypedDict):
+    question: str
+    options: Dict[str, PollOptionInfo]
+
+
+###############################################################################
+
 
 class Message(TypedDict, total=False):
     id: int
@@ -195,7 +302,7 @@ class Message(TypedDict, total=False):
     subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
+    submessages: List[Submessage]
     flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str
