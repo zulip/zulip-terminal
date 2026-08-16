@@ -10,6 +10,7 @@ from zulipterminal.config.symbols import STATUS_ACTIVE
 from zulipterminal.helper import powerset
 from zulipterminal.ui_tools.views import (
     SIDE_PANELS_MOUSE_SCROLL_LINES,
+    EmptyNarrowPlaceholder,
     LeftColumnView,
     MessageView,
     MiddleColumnView,
@@ -27,6 +28,88 @@ SUBDIR = "zulipterminal.ui_tools"
 VIEWS = SUBDIR + ".views"
 MESSAGEVIEW = VIEWS + ".MessageView"
 MIDCOLVIEW = VIEWS + ".MiddleColumnView"
+
+
+class TestEmptyNarrowPlaceholder:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker):
+        self.model = mocker.MagicMock()
+
+    @pytest.fixture
+    def placeholder(self):
+        return EmptyNarrowPlaceholder(self.model)
+
+    def test_recipient_header_returns_empty_markup(self, placeholder):
+        header = placeholder.recipient_header()
+        assert header.markup == ""
+
+    @pytest.mark.parametrize(
+        "narrow, is_search_narrow, expected_text",
+        [
+            ([], False, "≡ All messages"),
+            ([["is", "private"]], False, "§ All direct messages"),
+            ([["is", "starred"]], False, "* Starred messages"),
+            ([["is", "mentioned"]], False, "@ Mentions"),
+        ],
+    )
+    def test_top_search_bar_non_stream_narrow(
+        self, mocker, placeholder, narrow, is_search_narrow, expected_text
+    ):
+        self.model.narrow = narrow
+        self.model.is_search_narrow.return_value = is_search_narrow
+
+        header = placeholder.top_search_bar()
+
+        assert expected_text in str(header.markup)
+
+    def test_top_search_bar_stream_narrow(self, mocker, placeholder):
+        stream_id = 205
+        self.model.narrow = [["stream", "PTEST"]]
+        self.model.is_search_narrow.return_value = False
+        self.model.stream_id = stream_id
+        self.model.stream_dict = {stream_id: {"color": "#ffffff", "name": "PTEST"}}
+        self.model.stream_access_type.return_value = "public"
+
+        header = placeholder.top_search_bar()
+
+        assert "PTEST" in str(header.markup)
+
+    def test_top_search_bar_stream_topic_narrow(self, mocker, placeholder):
+        stream_id = 205
+        self.model.narrow = [["stream", "PTEST"], ["topic", "Test"]]
+        self.model.is_search_narrow.return_value = False
+        self.model.stream_id = stream_id
+        self.model.stream_dict = {stream_id: {"color": "#ffffff", "name": "PTEST"}}
+        self.model.stream_access_type.return_value = "public"
+
+        header = placeholder.top_search_bar()
+
+        assert "PTEST" in str(header.markup)
+        assert "topic narrow" in str(header.markup)
+
+    def test_top_search_bar_dm_narrow(self, mocker, placeholder):
+        self.model.narrow = [["pm-with", "foo@example.com"]]
+        self.model.is_search_narrow.return_value = False
+
+        header = placeholder.top_search_bar()
+
+        assert "Direct message conversation" in str(header.markup)
+
+    def test_top_search_bar_group_dm_narrow(self, mocker, placeholder):
+        self.model.narrow = [["pm-with", "foo@example.com,bar@example.com"]]
+        self.model.is_search_narrow.return_value = False
+
+        header = placeholder.top_search_bar()
+
+        assert "Group direct message conversation" in str(header.markup)
+
+    def test_top_search_bar_search_narrow(self, mocker, placeholder):
+        self.model.narrow = [["is", "starred"], ["search", "foo"]]
+        self.model.is_search_narrow.return_value = True
+
+        header = placeholder.top_search_bar()
+
+        assert "Search Results" in str(header.markup)
 
 
 class TestModListWalker:
@@ -461,6 +544,85 @@ class TestMessageView:
         self.model.mark_message_ids_as_read.assert_called_once_with(
             [message_fixture["id"]]
         )
+
+    def test_read_message_with_placeholder_updates_search_box_only(
+        self, mocker, msg_box
+    ):
+        mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
+        mocker.patch(MESSAGEVIEW + ".set_focus")
+        mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
+        msg_view = MessageView(self.model, self.view)
+        msg_view.body = mocker.Mock()
+
+        placeholder = mocker.MagicMock(spec=EmptyNarrowPlaceholder)
+        msg_w = mocker.MagicMock()
+        msg_w.original_widget = placeholder
+        msg_view.body.get_focus.return_value = (msg_w, 0)
+
+        msg_view.read_message()
+
+        msg_view.update_search_box_narrow.assert_called_once_with(placeholder)
+        self.model.mark_message_ids_as_read.assert_not_called()
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
+    def test_keypress_GO_DOWN_exception_with_placeholder(
+        self, mocker, msg_view, key, widget_size
+    ):
+        size = widget_size(msg_view)
+        msg_view.new_loading = False
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        msg_view.log.next_position = Exception()
+        placeholder = mocker.MagicMock(spec=EmptyNarrowPlaceholder)
+        mocker.patch(
+            MESSAGEVIEW + ".focus",
+            mocker.MagicMock(original_widget=placeholder),
+        )
+        mocker.patch.object(msg_view, "load_new_messages")
+
+        msg_view.keypress(size, key)
+
+        msg_view.load_new_messages.assert_not_called()
+
+    @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
+    def test_keypress_GO_UP_exception_with_placeholder(
+        self, mocker, msg_view, key, widget_size
+    ):
+        size = widget_size(msg_view)
+        msg_view.old_loading = False
+        mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
+        msg_view.log.prev_position = Exception()
+        placeholder = mocker.MagicMock(spec=EmptyNarrowPlaceholder)
+        mocker.patch(
+            MESSAGEVIEW + ".focus",
+            mocker.MagicMock(original_widget=placeholder),
+        )
+        mocker.patch.object(msg_view, "load_old_messages")
+
+        msg_view.keypress(size, key)
+
+        msg_view.load_old_messages.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "key",
+        keys_for_command("THUMBS_UP")
+        + keys_for_command("TOGGLE_STAR_STATUS")
+        + keys_for_command("REACTION_AGREEMENT"),
+    )
+    def test_keypress_message_action_with_placeholder_no_op(
+        self, mocker, msg_view, key, widget_size
+    ):
+        size = widget_size(msg_view)
+        placeholder = mocker.MagicMock(spec=EmptyNarrowPlaceholder)
+        mocker.patch(
+            MESSAGEVIEW + ".focus",
+            mocker.MagicMock(original_widget=placeholder),
+        )
+        mocker.patch("urwid.ListBox.keypress", return_value=key)
+
+        msg_view.keypress(size, key)
+
+        self.model.toggle_message_reaction.assert_not_called()
+        self.model.toggle_message_star_status.assert_not_called()
 
 
 class TestStreamsViewDivider:

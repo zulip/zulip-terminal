@@ -24,6 +24,7 @@ from zulipterminal.model import (
     ServerConnectionFailure,
     UserSettings,
 )
+from zulipterminal.ui_tools.views import EmptyNarrowPlaceholder
 
 
 MODULE = "zulipterminal.model"
@@ -2019,6 +2020,30 @@ class TestModel:
         expected_last_msg = log[0].original_widget.message
         create_msg_box_list.assert_called_once_with(
             model, [message_fixture["id"]], last_message=expected_last_msg
+        )
+
+    def test__handle_message_event_replaces_placeholder(
+        self, mocker, model, message_fixture
+    ):
+        model._have_last_message[repr([])] = True
+        mocker.patch(MODEL + "._update_topic_index")
+        mocker.patch(MODULE + ".index_messages", return_value={})
+        placeholder_widget = mocker.MagicMock(spec=EmptyNarrowPlaceholder)
+        placeholder_w = mocker.Mock()
+        placeholder_w.original_widget = placeholder_widget
+        log = [placeholder_w]
+        self.controller.view.message_view = mocker.Mock(log=log)
+        create_msg_box_list = mocker.patch(
+            MODULE + ".create_msg_box_list", return_value=["msg_w"]
+        )
+        model.notify_user = mocker.Mock()
+        event = {"type": "message", "message": message_fixture}
+
+        model._handle_message_event(event)
+
+        assert self.controller.view.message_view.log == ["msg_w"]
+        create_msg_box_list.assert_called_once_with(
+            model, [message_fixture["id"]], last_message=None
         )
 
     def test__handle_message_event_with_flags(self, mocker, model, message_fixture):
