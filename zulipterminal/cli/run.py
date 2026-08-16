@@ -15,8 +15,10 @@ from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
 from urwid import display_common, set_encoding
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import ServerSettings
+from zulipterminal.config.keys import KEY_BINDINGS, READLINE_SUFFIX
 from zulipterminal.config.themes import (
     ThemeError,
     aliased_themes,
@@ -413,6 +415,34 @@ def list_themes() -> str:
     )
 
 
+class ReadlineShortcutError(Exception):
+    pass
+
+
+def check_readline_shortcuts_availability() -> None:
+    readline_edit = ReadlineEdit()
+    commands_to_exclude = ["PREV_LINE" + READLINE_SUFFIX, "NEXT_LINE" + READLINE_SUFFIX]
+    filtered_commands = [
+        command
+        for command in KEY_BINDINGS
+        if command.endswith(READLINE_SUFFIX) and command not in commands_to_exclude
+    ]
+
+    missing_keys = []
+    for command in filtered_commands:
+        for key in KEY_BINDINGS[command]["keys"]:
+            if key not in readline_edit.keymap:
+                key_missing_error = (
+                    f'Key "{key}" for command "{KEY_BINDINGS[command]["help_text"]}" '
+                    f"is not found."
+                )
+                missing_keys.append(key_missing_error)
+
+    if missing_keys:
+        error_message = "\n".join(missing_keys)
+        raise ReadlineShortcutError(error_message)
+
+
 def main(options: Optional[List[str]] = None) -> None:
     """
     Launch Zulip Terminal.
@@ -612,6 +642,17 @@ def main(options: Optional[List[str]] = None) -> None:
             color_depth=color_depth,
             transparent_background=transparency_enabled,
         )
+
+        try:
+            check_readline_shortcuts_availability()
+        except ReadlineShortcutError as e:
+            print(
+                "\nThe following readline shortcuts "
+                + "are missing in urwid_readline's keymap.\n"
+                + str(e)
+                + "\n",
+                file=sys.stderr,
+            )
 
         Controller(
             config_file=zuliprc_path,

@@ -7,6 +7,9 @@ Regular expression constants
 
 
 # (*) Stream and topic regexes
+from zulipterminal.config.keys import GENERAL_TERMINAL_SUFFIX, READLINE_SUFFIX
+
+
 REGEX_STREAM_NAME = r"([^*>]+)"
 REGEX_TOPIC_NAME = r"([^*]*)"
 
@@ -46,3 +49,9 @@ REGEX_COLOR_VALID_FORMATS = (
 
 # Example: 6-test-stream
 REGEX_INTERNAL_LINK_STREAM_ID = r"^[0-9]+-"
+
+
+# Example: UNDO_LAST_ACTION_READLINE
+REGEX_READLINE_COMMANDS = rf"([A-Z_]+{READLINE_SUFFIX})"
+# Example: REDRAW_GENERAL_TERMINAL
+REGEX_TERMINAL_COMMANDS = rf"^.*([A-Z_]+{GENERAL_TERMINAL_SUFFIX})"

@@ -18,6 +18,10 @@ from urwid.command_map import (
 )
 
 
+READLINE_SUFFIX = "_READLINE"
+GENERAL_TERMINAL_SUFFIX = "_GENERAL_TERMINAL"
+
+
 class KeyBinding(TypedDict):
     keys: List[str]
     help_text: str
@@ -331,12 +335,12 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'excluded_from_random_tips': True,
         'key_category': 'stream_info',
     },
-    'REDRAW': {
+    'REDRAW' + GENERAL_TERMINAL_SUFFIX: {
         'keys': ['ctrl l'],
         'help_text': 'Redraw screen',
         'key_category': 'general',
     },
-    'QUIT': {
+    'QUIT' + GENERAL_TERMINAL_SUFFIX: {
         'keys': ['ctrl c'],
         'help_text': 'Quit',
         'key_category': 'general',
@@ -354,82 +358,82 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Narrow to direct messages with user',
         'key_category': 'user_list',
     },
-    'BEGINNING_OF_LINE': {
+    'BEGINNING_OF_LINE' + READLINE_SUFFIX: {
         'keys': ['ctrl a', 'home'],
         'help_text': 'Start of line',
         'key_category': 'editor_navigation',
     },
-    'END_OF_LINE': {
+    'END_OF_LINE' + READLINE_SUFFIX: {
         'keys': ['ctrl e', 'end'],
         'help_text': 'End of line',
         'key_category': 'editor_navigation',
     },
-    'ONE_WORD_BACKWARD': {
+    'ONE_WORD_BACKWARD' + READLINE_SUFFIX: {
         'keys': ['meta b', 'shift left'],
         'help_text': 'Start of current or previous word',
         'key_category': 'editor_navigation',
     },
-    'ONE_WORD_FORWARD': {
+    'ONE_WORD_FORWARD' + READLINE_SUFFIX: {
         'keys': ['meta f', 'shift right'],
         'help_text': 'Start of next word',
         'key_category': 'editor_navigation',
     },
-    'PREV_LINE': {
+    'PREV_LINE' + READLINE_SUFFIX: {
         'keys': ['up', 'ctrl p'],
         'help_text': 'Previous line',
         'key_category': 'editor_navigation',
     },
-    'NEXT_LINE': {
+    'NEXT_LINE' + READLINE_SUFFIX: {
         'keys': ['down', 'ctrl n'],
         'help_text': 'Next line',
         'key_category': 'editor_navigation',
     },
-    'UNDO_LAST_ACTION': {
+    'UNDO_LAST_ACTION' + READLINE_SUFFIX: {
         'keys': ['ctrl _'],
         'help_text': 'Undo last action',
         'key_category': 'editor_text_manipulation',
     },
-    'CLEAR_MESSAGE': {
+    'CLEAR_MESSAGE' + READLINE_SUFFIX: {
         'keys': ['ctrl l'],
         'help_text': 'Clear text box',
         'key_category': 'editor_text_manipulation',
     },
-    'CUT_TO_END_OF_LINE': {
+    'CUT_TO_END_OF_LINE' + READLINE_SUFFIX: {
         'keys': ['ctrl k'],
         'help_text': 'Cut forwards to the end of the line',
         'key_category': 'editor_text_manipulation',
     },
-    'CUT_TO_START_OF_LINE': {
+    'CUT_TO_START_OF_LINE' + READLINE_SUFFIX: {
         'keys': ['ctrl u'],
         'help_text': 'Cut backwards to the start of the line',
         'key_category': 'editor_text_manipulation',
     },
-    'CUT_TO_END_OF_WORD': {
+    'CUT_TO_END_OF_WORD' + READLINE_SUFFIX: {
         'keys': ['meta d'],
         'help_text': 'Cut forwards to the end of the current word',
         'key_category': 'editor_text_manipulation',
     },
-    'CUT_TO_START_OF_WORD': {
+    'CUT_TO_START_OF_WORD' + READLINE_SUFFIX: {
         'keys': ['ctrl w', 'meta backspace'],
         'help_text': 'Cut backwards to the start of the current word',
         'key_category': 'editor_text_manipulation',
     },
-    'CUT_WHOLE_LINE': {
+    'CUT_WHOLE_LINE' + READLINE_SUFFIX: {
         'keys': ['meta x'],
         'help_text': 'Cut the current line',
         'key_category': 'editor_text_manipulation',
     },
-    'PASTE_LAST_CUT': {
+    'PASTE_LAST_CUT' + READLINE_SUFFIX: {
         'keys': ['ctrl y'],
         'help_text': 'Paste last cut section',
         'key_category': 'editor_text_manipulation',
     },
-    'DELETE_LAST_CHARACTER': {
+    'DELETE_LAST_CHARACTER' + READLINE_SUFFIX: {
         'keys': ['ctrl h'],
         'help_text': 'Delete previous character',
         'key_category': 'editor_text_manipulation',
     },
-    'TRANSPOSE_CHARACTERS': {
+    'TRANSPOSE_CHARACTERS' + READLINE_SUFFIX: {
         'keys': ['ctrl t'],
         'help_text': 'Swap with previous character',
         'key_category': 'editor_text_manipulation',
