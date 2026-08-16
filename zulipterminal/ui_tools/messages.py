@@ -86,13 +86,12 @@ class MessageBox(urwid.Pile):
             self.stream_name = self.message["display_recipient"]
             self.stream_id = self.message["stream_id"]
             self.topic_name = self.message["subject"]
-        elif self.message["type"] == "private":
-            self.email = self.message["sender_email"]
-            self.user_id = self.message["sender_id"]
         else:
-            raise RuntimeError("Invalid message type")
+            # Get sender details only for non-empty narrows
+            if self.message.get("id") is not None:
+                self.email = self.message["sender_email"]
+                self.user_id = self.message["sender_id"]
 
-        if self.message["type"] == "private":
             if self._is_private_message_to_self():
                 recipient = self.message["display_recipient"][0]
                 self.recipients_names = recipient["full_name"]
@@ -120,6 +119,8 @@ class MessageBox(urwid.Pile):
         super().__init__(self.main_view())
 
     def need_recipient_header(self) -> bool:
+        if self.model.controller.is_in_empty_narrow:
+            return False
         # Prevent redundant information in recipient bar
         if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
             return False
@@ -203,8 +204,23 @@ class MessageBox(urwid.Pile):
         header.markup = title_markup
         return header
 
+    def empty_narrow_header(self) -> Any:
+        title_markup = ("header", [("general_narrow", "No selected message")])
+        title = urwid.Text(title_markup)
+        header = urwid.Columns(
+            [
+                ("pack", title),
+                (1, urwid.Text(("general_bar", " "))),
+                urwid.AttrWrap(urwid.Divider(MESSAGE_HEADER_DIVIDER), "general_bar"),
+            ]
+        )
+        header.markup = title_markup
+        return header
+
     def recipient_header(self) -> Any:
-        if self.message["type"] == "stream":
+        if self.model.controller.is_in_empty_narrow:
+            return self.empty_narrow_header()
+        elif self.message["type"] == "stream":
             return self.stream_header()
         else:
             return self.private_header()
@@ -672,7 +688,8 @@ class MessageBox(urwid.Pile):
             "recipients": recipient_header is not None,
             "author": message["this"]["author"] != message["last"]["author"],
             "24h": (
-                message["last"]["datetime"] is not None
+                message["this"]["datetime"] is not None
+                and message["last"]["datetime"] is not None
                 and ((message["this"]["datetime"] - message["last"]["datetime"]).days)
             ),
             "timestamp": (
@@ -965,7 +982,8 @@ class MessageBox(urwid.Pile):
         return super().mouse_event(size, event, button, col, row, focus)
 
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
-        if is_command_key("REPLY_MESSAGE", key):
+        is_in_empty_narrow = self.model.controller.is_in_empty_narrow
+        if is_command_key("REPLY_MESSAGE", key) and not is_in_empty_narrow:
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
                     recipient_user_ids=self.recipient_ids,
@@ -984,7 +1002,7 @@ class MessageBox(urwid.Pile):
                 )
             else:
                 self.model.controller.view.write_box.stream_box_view(0)
-        elif is_command_key("STREAM_NARROW", key):
+        elif is_command_key("STREAM_NARROW", key) and not is_in_empty_narrow:
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
@@ -995,7 +1013,7 @@ class MessageBox(urwid.Pile):
                     stream_name=self.stream_name,
                     contextual_message_id=self.message["id"],
                 )
-        elif is_command_key("TOGGLE_NARROW", key):
+        elif is_command_key("TOGGLE_NARROW", key) and not is_in_empty_narrow:
             self.model.unset_search_narrow()
             if self.message["type"] == "private":
                 if len(self.model.narrow) == 1 and self.model.narrow[0][0] == "pm-with":
@@ -1019,7 +1037,7 @@ class MessageBox(urwid.Pile):
                         topic_name=self.topic_name,
                         contextual_message_id=self.message["id"],
                     )
-        elif is_command_key("TOPIC_NARROW", key):
+        elif is_command_key("TOPIC_NARROW", key) and not is_in_empty_narrow:
             if self.message["type"] == "private":
                 self.model.controller.narrow_to_user(
                     recipient_emails=self.recipient_emails,
@@ -1035,12 +1053,12 @@ class MessageBox(urwid.Pile):
             self.model.controller.narrow_to_all_messages(
                 contextual_message_id=self.message["id"]
             )
-        elif is_command_key("REPLY_AUTHOR", key):
+        elif is_command_key("REPLY_AUTHOR", key) and not is_in_empty_narrow:
             # All subscribers from recipient_ids are not needed here.
             self.model.controller.view.write_box.private_box_view(
                 recipient_user_ids=[self.message["sender_id"]],
             )
-        elif is_command_key("MENTION_REPLY", key):
+        elif is_command_key("MENTION_REPLY", key) and not is_in_empty_narrow:
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
             mention = f"@**{self.message['sender_full_name']}** "
             self.model.controller.view.write_box.msg_write_box.set_edit_text(mention)
@@ -1048,7 +1066,7 @@ class MessageBox(urwid.Pile):
                 len(mention)
             )
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("QUOTE_REPLY", key):
+        elif is_command_key("QUOTE_REPLY", key) and not is_in_empty_narrow:
             self.keypress(size, primary_key_for_command("REPLY_MESSAGE"))
 
             # To correctly quote a message that contains quote/code-blocks,
@@ -1076,7 +1094,7 @@ class MessageBox(urwid.Pile):
             self.model.controller.view.write_box.msg_write_box.set_edit_text(quote)
             self.model.controller.view.write_box.msg_write_box.set_edit_pos(len(quote))
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("EDIT_MESSAGE", key):
+        elif is_command_key("EDIT_MESSAGE", key) and not is_in_empty_narrow:
             # User can't edit messages of others that already have a subject
             # For private messages, subject = "" (empty string)
             # This also handles the realm_message_content_edit_limit_seconds == 0 case
@@ -1180,12 +1198,12 @@ class MessageBox(urwid.Pile):
                 write_box.header_write_box.focus_col = write_box.FOCUS_HEADER_BOX_TOPIC
 
             self.model.controller.view.middle_column.set_focus("footer")
-        elif is_command_key("MSG_INFO", key):
+        elif is_command_key("MSG_INFO", key) and not is_in_empty_narrow:
             self.model.controller.show_msg_info(
                 self.message, self.topic_links, self.message_links, self.time_mentions
             )
-        elif is_command_key("ADD_REACTION", key):
+        elif is_command_key("ADD_REACTION", key) and not is_in_empty_narrow:
             self.model.controller.show_emoji_picker(self.message)
-        elif is_command_key("MSG_SENDER_INFO", key):
+        elif is_command_key("MSG_SENDER_INFO", key) and not is_in_empty_narrow:
             self.model.controller.show_msg_sender_info(self.message["sender_id"])
         return key
