@@ -12,6 +12,7 @@ from zulip import Client, ZulipError
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
 from zulipterminal.helper import initial_index, powerset
 from zulipterminal.model import (
+    DIRECT_MESSAGE_TYPE_FEATURE_LEVEL,
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
     MAX_TOPIC_NAME_LENGTH,
@@ -908,17 +909,34 @@ class TestModel:
             ({"result": "some_failure"}, False),
         ],
     )
+    # AFTER
     @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
+    @pytest.mark.parametrize(
+        "feature_level, expected_type",
+        [
+            (DIRECT_MESSAGE_TYPE_FEATURE_LEVEL, "direct"),
+            (DIRECT_MESSAGE_TYPE_FEATURE_LEVEL - 1, "private"),
+        ],
+        ids=["feature_level:direct_type", "feature_level:private_type"],
+    )
     def test_send_private_message(
-        self, mocker, model, recipients, response, return_value, content="hi!"
+        self,
+        mocker,
+        model,
+        recipients,
+        response,
+        return_value,
+        feature_level,
+        expected_type,
+        content="hi!",
     ):
+        model.server_feature_level = feature_level
         self.client.send_message = mocker.Mock(return_value=response)
-
         result = model.send_private_message(recipients, content)
-
-        req = dict(type="private", to=recipients, content=content, read_by_sender=True)
+        req = dict(
+            type=expected_type, to=recipients, content=content, read_by_sender=True
+        )
         self.client.send_message.assert_called_once_with(req)
-
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
         if result == "success":
