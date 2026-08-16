@@ -106,7 +106,7 @@ setup(
     tests_require=testing_deps,
     install_requires=[
         "urwid~=2.1.2",
-        "zulip>=0.8.2,<0.9.0",  # Next release, 0.9.0, requires Python 3.9
+        "zulip @ git+https://github.com/zulip/python-zulip-api.git@f1ca74c5cef483a097155f51e8f3f7a5422327f4#subdirectory=zulip",
         "urwid_readline>=0.15.1",
         "beautifulsoup4>=4.13.4",
         "lxml==4.9.4",
