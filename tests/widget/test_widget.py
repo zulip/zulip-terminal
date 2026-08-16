@@ -1,14 +1,93 @@
-from typing import Dict, List, Union
+import json
+from typing import Dict, List, Optional, Union
 
 import pytest
 from pytest import param as case
 
+from zulipterminal.api_types import PollOption, Submessage
 from zulipterminal.widget import (
-    Submessage,
     find_widget_type,
     process_poll_widget,
     process_todo_widget,
 )
+
+
+# Factories for constructing submessage test data
+
+
+def submessage_factory(
+    *, id: int, message_id: int, sender_id: int, content: str
+) -> Submessage:
+    """Construct a Submessage dict for use in widget tests."""
+    return {
+        "id": id,
+        "message_id": message_id,
+        "sender_id": sender_id,
+        "msg_type": "widget",
+        "content": content,
+    }
+
+
+# Todo widget JSON content helpers
+
+
+def todo_widget_content(
+    *, task_list_title: str = "", tasks: Optional[List[Dict[str, str]]] = None
+) -> str:
+    """Return JSON for initializing a todo widget."""
+    return json.dumps(
+        {
+            "widget_type": "todo",
+            "extra_data": {"task_list_title": task_list_title, "tasks": tasks or []},
+        }
+    )
+
+
+def todo_new_task_content(key: int, task: str, desc: str = "") -> str:
+    """Return JSON for adding a new task."""
+    return json.dumps(
+        {"type": "new_task", "key": key, "task": task, "desc": desc, "completed": False}
+    )
+
+
+def todo_strike_content(key: str) -> str:
+    """Return JSON for toggling task completion."""
+    return json.dumps({"type": "strike", "key": key})
+
+
+def todo_new_title_content(title: str) -> str:
+    """Return JSON for updating the todo list title."""
+    return json.dumps({"type": "new_task_list_title", "title": title})
+
+
+# Poll widget JSON content helpers
+
+
+def poll_widget_content(
+    *, question: str = "", options: Optional[List[str]] = None
+) -> str:
+    """Return JSON for initializing a poll widget."""
+    return json.dumps(
+        {
+            "widget_type": "poll",
+            "extra_data": {"question": question, "options": options or []},
+        }
+    )
+
+
+def poll_vote_content(key: str, vote: int = 1) -> str:
+    """Return JSON for casting or removing a vote."""
+    return json.dumps({"type": "vote", "key": key, "vote": vote})
+
+
+def poll_new_option_content(idx: int, option: str) -> str:
+    """Return JSON for adding a new poll option."""
+    return json.dumps({"type": "new_option", "idx": idx, "option": option})
+
+
+def poll_new_question_content(question: str) -> str:
+    """Return JSON for updating the poll question."""
+    return json.dumps({"type": "question", "question": question})
 
 
 @pytest.mark.parametrize(
@@ -657,7 +736,7 @@ def test_process_todo_widget(
 def test_process_poll_widget(
     submessages: List[Submessage],
     expected_poll_question: str,
-    expected_options: Dict[str, Dict[str, Union[str, List[str]]]],
+    expected_options: Dict[str, PollOption],
 ) -> None:
     poll_question, options = process_poll_widget(submessages)
 

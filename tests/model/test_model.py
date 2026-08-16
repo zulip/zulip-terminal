@@ -3178,10 +3178,9 @@ class TestModel:
                         ),
                     },
                     {
-                        "type": "submessage",
+                        "id": 1,
                         "msg_type": "widget",
                         "message_id": 1958326,
-                        "submessage_id": 1,
                         "sender_id": 27294,
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
@@ -3243,10 +3242,9 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
+                        "id": 12185,
                         "msg_type": "widget",
                         "message_id": 1958326,
-                        "submessage_id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee",'
@@ -3278,16 +3276,14 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
+                        "id": 12185,
                         "msg_type": "widget",
                         "message_id": 1958326,
-                        "submessage_id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee"'
                             ',"desc":"","completed":false}'
                         ),
-                        "id": 0,
                     },
                 ],
                 {
@@ -3323,22 +3319,19 @@ class TestModel:
                         "content": '{"type":"strike","key":"0,canned"}',
                     },
                     {
-                        "type": "submessage",
+                        "id": 12185,
                         "msg_type": "widget",
                         "message_id": 1958326,
-                        "submessage_id": 12185,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task","key":2,"task":"Make a coffee"'
                             ',"desc":"","completed":false}'
                         ),
-                        "id": 0,
                     },
                     {
-                        "type": "submessage",
+                        "id": 12186,
                         "msg_type": "widget",
                         "message_id": 1958326,
-                        "submessage_id": 12186,
                         "sender_id": 27294,
                         "content": (
                             '{"type":"new_task_list_title",'
