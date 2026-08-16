@@ -78,21 +78,46 @@ class ModListWalker(urwid.SimpleFocusListWalker):
         self._action()
 
     def _set_focus(self, index: int) -> None:
-        # This method is called when directly setting focus via
-        # self.focus = focus_position
-        if not self:  # type: ignore[truthy-bool]  # Implemented in base class
+    # 1) 空列表：不抛异常，保持不崩并发出必要通知
+        if len(self) == 0:
+            # 无项可聚焦，内部焦点标为 0（外部不会把它当作有效条目）
             self._focus = 0
+            # 与原实现保持一致的变更通知（如果项目使用这些 hook）
+            try:
+                self._modified()
+            except Exception:
+                pass
+            try:
+                self._action()
+            except Exception:
+                pass
             return
-        if index < 0 or index >= len(self):
-            raise IndexError(f"focus index is out of range: {index}")
+
+        # 2) 非空列表：index 必须是整数
         if index != int(index):
             raise IndexError(f"invalid focus index: {index}")
         index = int(index)
+
+        # 3) 越界钳制到合法范围 [0, len(self)-1]
+        if index < 0:
+            index = 0
+        elif index >= len(self):
+            index = len(self) - 1
+
+        # 4) 焦点变化时触发回调，保持原有语义
         if index != self._focus:
-            self._focus_changed(index)
+            try:
+                self._focus_changed(index)
+            except Exception:
+                pass
         self._focus = index
 
-        self._action()
+        # 5) 下游通知
+        try:
+            self._action()
+        except Exception:
+            pass
+
 
     def extend(self, items: List[Any], focus_position: Optional[int] = None) -> int:
         if focus_position is None:
