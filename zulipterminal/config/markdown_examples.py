@@ -119,4 +119,9 @@ MARKDOWN_ELEMENTS: List[MarkdownElements] = [
             "</table>"
         ),
     },
+    {  # HORIZONTAL RULE
+        "name": "Horizontal Rule",
+        "raw_text": "---",
+        "html_element": "<hr>",
+    },
 ]

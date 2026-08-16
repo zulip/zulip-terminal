@@ -32,6 +32,9 @@ QUOTED_TEXT_MARKER = "░"  # LIGHT SHADE, U+2591 (Block elements)
 # Extends from end of recipient details (above messages where recipients differ above)
 MESSAGE_HEADER_DIVIDER = "━"  # BOX DRAWINGS HEAVY HORIZONTAL, U+2501 (Box drawing)
 
+# Message body horizontal rule (<hr>)
+MESSAGE_RULE_LINE = "─"  # BOX DRAWINGS LIGHT HORIZONTAL, U+2500 (Box drawing)
+
 # NOTE: CHECK_MARK is not used for resolved topics (that is an API detail)
 CHECK_MARK = "✓"  # CHECK MARK, U+2713 (Dingbats)
 
