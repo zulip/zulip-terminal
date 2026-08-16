@@ -617,7 +617,11 @@ class MiddleColumnView(urwid.Frame):
                 )
                 if stream_topic is None:
                     return key
-            elif narrow[0][0] == "stream" and narrow[1][0] == "topic":
+            elif (
+                len(narrow) == 2
+                and narrow[0][0] == "stream"
+                and narrow[1][0] == "topic"
+            ):
                 stream_topic = self.model.next_unread_topic_from_message_id(None)
             else:
                 return key
