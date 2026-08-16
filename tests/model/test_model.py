@@ -89,7 +89,7 @@ class TestModel:
         assert model.user_full_name == user_profile["full_name"]
         assert model.user_email == user_profile["email"]
         assert model.server_name == initial_data["realm_name"]
-        # FIXME Add test here for model.server_url
+        assert model.server_url == ":///"
         model._update_users_data_from_initial_data.assert_called_once_with()
         assert model.users == []
         self.classify_unread_counts.assert_called_once_with(model)
@@ -117,6 +117,28 @@ class TestModel:
         assert model.active_emoji_data["joker"]["type"] == "realm_emoji"
         # zulip_extra_emoji replaces all other emoji types for 'zulip' emoji.
         assert model.active_emoji_data["zulip"]["type"] == "zulip_extra_emoji"
+
+    @pytest.mark.parametrize(
+        "base_url, expected_server_url",
+        [
+            ("chat.zulip.zulip", ":///"),
+            ("https://chat.zulip.org", "https://chat.zulip.org/"),
+            ("http://localhost:9991", "http://localhost:9991/"),
+        ],
+    )
+    def test_server_url_generation(
+        self, mocker, initial_data, user_profile, base_url, expected_server_url
+    ):
+        self.client.base_url = base_url
+        mocker.patch(MODEL + ".get_messages", return_value="")
+        self.client.register.return_value = initial_data
+        self.client.get_profile.return_value = user_profile
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
+        mocker.patch(MODULE + ".classify_unread_counts")
+
+        model = Model(self.controller)
+
+        assert model.server_url == expected_server_url
 
     @pytest.mark.parametrize(
         "sptn, expected_sptn_value",
