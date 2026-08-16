@@ -20,6 +20,10 @@ If you know:
   (see https://zulip.com/api/changelog)
 
 
+### Impact on user experience
+<!-- How does the absence of this feature affect users? -->
+
+
 ### Other details
 
 

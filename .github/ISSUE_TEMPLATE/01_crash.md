@@ -23,6 +23,9 @@ How can you reproduce the bug?
 
 ```
 
+### Frequency of occurrence
+<!-- Does this happen every time, or only occasionally? -->
+
 ### How are you running the application?
 Please include as many of the following as possible:
 - **Zulip-terminal version:**
