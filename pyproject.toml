@@ -1,3 +1,101 @@
+[build-system]
+# setuptools added pyproject.toml support in v61.0.0
+requires = ["setuptools >= 61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zulip-term"
+description = "Zulip's official terminal client"
+authors = [
+    {name="Zulip Open Source Project", email="zulip-devel@googlegroups.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Communications :: Chat",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+keywords = []
+requires-python = ">=3.7, <3.12"
+dynamic = ["version", "readme"]
+dependencies = [
+    "urwid~=2.1.2",
+    "zulip>=0.8.2,<0.9.0",  # Next release, 0.9.0, requires Python 3.9
+    "urwid_readline>=0.15.1",
+    "beautifulsoup4>=4.13.4",
+    "lxml==4.9.4",
+    "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
+    "typing_extensions~=4.5.0",
+    "python-dateutil>=2.8.2",
+    "pytz>=2025",  # Can use native support from Python 3.9 onwards
+    "tzlocal>=5.0,<5.1",  # 5.1 will drop support for Python 3.7
+    "pyperclip>=1.9.0",
+]
+
+[project.optional-dependencies]
+dev = ["zulip-term[testing,linting,typing,dev-helper,gitlint]"]
+testing = ["zulip-term[testing-minimal, testing-plugins]"]
+testing-minimal = [
+    "pytest>=7.4.0,<8.0.0",  # 8.0.0 drops support for Python 3.7
+    "pytest-mock>=3.10.0,<3.12.0",  # 3.12.0 drops support for Python 3.7
+]
+testing-plugins = [
+    "pytest-cov>=4.0.0,<5.0.0",  # 5.0.0 drops support for Python 3.7 (6.0.0 drops 3.8)
+]
+linting = [
+    "isort~=5.11.0,<5.12.0",  # 5.12.0 drops support for Python 3.7, 6.0.0 drops 3.8
+    "black==23.3.0",  # Later versions drop support for Python 3.7
+    "ruff==0.0.267",
+    "codespell[toml]==2.2.5,<2.2.6",  # 2.2.6 drops support for Python 3.7
+    "typos>=1.32.0",
+]
+gitlint = [
+    "gitlint~=0.18.0",
+]
+typing = [
+    "lxml-stubs",
+    "mypy~=1.8.0",  # >=1.9.0 requires Python 3.8+, >=1.15.0 requires 3.9+
+    "types-beautifulsoup4",
+    "types-pygments",
+    "types-python-dateutil",
+    "types-tzlocal",
+    "types-pytz",
+    "types-requests",
+    "types-setuptools",
+]
+dev-helper = [
+    "pudb==2022.1.1",
+    "snakeviz>=2.1.1",
+]
+
+[project.scripts]
+zulip-term = "zulipterminal.cli.run:main"
+zulip-term-check-symbols = "zulipterminal.scripts.render_symbols:main"
+
+[project.urls]
+Changelog = "https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md"
+FAQs = "https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md"
+Issues = "https://github.com/zulip/zulip-terminal/issues"
+"Hot Keys" = "https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md"
+# NOTE: This Was home-page, ie. url
+Repository = "https://github.com/zulip/zulip-terminal"
+
+[tool.setuptools.packages.find]
+include=["zulipterminal"]
+
+[tool.setuptools.dynamic]
+version = {attr = "zulipterminal.version.ZT_VERSION"}
+# FIXME ? This doesn't support losing the top title line, like with setup.py
+readme = {file = ["README.md"], content-type = "text/markdown"}
+
 [tool.black]
 # Default line-length, but use explicit value here since used for isort & ruff
 line-length = 88
@@ -191,8 +289,6 @@ select = [
     "YTT", # Year TwentyTwenty (flake8-2020), sys.version checks
 ]
 [tool.ruff.per-file-ignores]
-# ANN: We don't consider this worth typing
-"setup.py" = ["ANN"]
 # ANN: These test files are not yet typed
 "tests/model/test_model.py" = ["ANN"]
 "tests/ui/test_ui_tools.py" = ["ANN"]

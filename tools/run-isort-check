@@ -5,7 +5,7 @@ import sys
 
 
 cmds = ["isort"]
-files = ["zulipterminal", "tests", "tools", "setup.py"]
+files = ["zulipterminal", "tests", "tools"]
 
 result = subprocess.call(cmds + ["--check-only", "--diff"] + files)
 

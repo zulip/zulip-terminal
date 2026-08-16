@@ -9,7 +9,7 @@ ZT_VENV?=zt_venv
 VENV_ACTIVATE=. $(ZT_VENV)/bin/activate
 PYTHON=${ZT_VENV}/bin/$(BASEPYTHON)
 
-SOURCES = zulipterminal tests setup.py
+SOURCES = zulipterminal tests
 
 # Default target at top
 install-devel: venv
@@ -42,8 +42,8 @@ force-fix: venv
 # Short name for file dependency
 venv: $(ZT_VENV)/bin/activate
 
-# If setup.py is updated or activate script doesn't exist, update virtual env
-$(ZT_VENV)/bin/activate: setup.py
+# If pyproject.toml is updated or activate script doesn't exist, update virtual env
+$(ZT_VENV)/bin/activate: pyproject.toml
 	@echo "=== Installing development environment ==="
 	test -d $(ZT_VENV) || $(BASEPYTHON) -m venv $(ZT_VENV)
 	$(PYTHON) -m pip install wheel && $(PYTHON) -m pip install -U pip && $(PYTHON) -m pip install -e .[dev] && touch $(ZT_VENV)/bin/activate

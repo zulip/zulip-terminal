@@ -1,0 +1,11 @@
+prune tools
+prune tests
+prune .github
+exclude .git*
+exclude makefile
+exclude Pipfile
+exclude .codecov.yml
+exclude .mailmap
+# May bring these back, but aiming to reproduce previous minimal sdist first
+prune docs
+prune docker
