@@ -9,6 +9,7 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
+from zulipterminal.api_types import Subscription
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
@@ -131,6 +132,7 @@ class TestController:
         mocker: MockerFixture,
         controller: Controller,
         index_stream: Index,
+        general_stream: Subscription,
         stream_id: int = 205,
         stream_name: str = "PTEST",
     ) -> None:
@@ -138,11 +140,14 @@ class TestController:
         controller.model.index = index_stream
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
-            stream_id: {
+            stream_id: general_stream,
+        }
+        controller.model.stream_dict[stream_id].update(
+            {
                 "color": "#ffffff",
                 "name": stream_name,
             }
-        }
+        )
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -178,6 +183,7 @@ class TestController:
         initial_stream_id: Optional[int],
         anchor: Optional[int],
         expected_final_focus: int,
+        general_stream: Subscription,
         stream_name: str = "PTEST",
         topic_name: str = "Test",
         stream_id: int = 205,
@@ -191,11 +197,14 @@ class TestController:
         controller.model.stream_id = initial_stream_id
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.stream_dict = {
-            stream_id: {
+            stream_id: general_stream,
+        }
+        controller.model.stream_dict[stream_id].update(
+            {
                 "color": "#ffffff",
                 "name": stream_name,
             }
-        }
+        )
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -260,6 +269,7 @@ class TestController:
         controller: Controller,
         index_all_messages: Index,
         anchor: Optional[int],
+        general_stream: Subscription,
         expected_final_focus_msg_id: int,
     ) -> None:
         controller.model.narrow = [["stream", "PTEST"]]
@@ -268,10 +278,13 @@ class TestController:
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
         controller.model.stream_dict = {
-            205: {
+            205: general_stream,
+        }
+        controller.model.stream_dict[205].update(
+            {
                 "color": "#ffffff",
             }
-        }
+        )
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
 
@@ -307,7 +320,11 @@ class TestController:
         assert msg_ids == id_list
 
     def test_narrow_to_all_starred(
-        self, mocker: MockerFixture, controller: Controller, index_all_starred: Index
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        index_all_starred: Index,
+        general_stream: Subscription,
     ) -> None:
         controller.model.narrow = []
         controller.model.index = index_all_starred
@@ -317,10 +334,13 @@ class TestController:
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
         controller.model.user_email = "some@email"
         controller.model.stream_dict = {
-            205: {
+            205: general_stream,
+        }
+        controller.model.stream_dict[205].update(
+            {
                 "color": "#ffffff",
             }
-        }
+        )
         controller.view.message_view = mocker.patch("urwid.ListBox")
 
         controller.narrow_to_all_starred()  # FIXME: Add id narrowing test
@@ -334,7 +354,11 @@ class TestController:
         assert msg_ids == id_list
 
     def test_narrow_to_all_mentions(
-        self, mocker: MockerFixture, controller: Controller, index_all_mentions: Index
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        index_all_mentions: Index,
+        general_stream: Subscription,
     ) -> None:
         controller.model.narrow = []
         controller.model.index = index_all_mentions
@@ -344,10 +368,13 @@ class TestController:
         controller.model.user_email = "some@email"
         controller.model.user_id = 1
         controller.model.stream_dict = {
-            205: {
+            205: general_stream,
+        }
+        controller.model.stream_dict[205].update(
+            {
                 "color": "#ffffff",
             }
-        }
+        )
         controller.view.message_view = mocker.patch("urwid.ListBox")
 
         controller.narrow_to_all_mentions()  # FIXME: Add id narrowing test
