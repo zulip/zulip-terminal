@@ -119,9 +119,11 @@ class Controller:
         # Register new ^C handler
         signal.signal(
             signal.SIGINT,
-            self.prompting_exit_handler
-            if self.exit_confirmation
-            else self.no_prompt_exit_handler,
+            (
+                self.prompting_exit_handler
+                if self.exit_confirmation
+                else self.no_prompt_exit_handler
+            ),
         )
 
     def raise_exception_in_main_thread(

@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+
+import argparse
+import multiprocessing as mp
+import os
+import sys
+from typing import Any, Callable, Dict
+
+import interrealm_bridge_config
+
+import zulip
+
+
+def create_pipe_event(
+    to_client: zulip.Client, from_bot: Dict[str, Any], to_bot: Dict[str, Any], stream_wide: bool
+) -> Callable[[Dict[str, Any]], None]:
+    def _pipe_message(msg: Dict[str, Any]) -> None:
+        isa_stream = msg["type"] == "stream"
+        not_from_bot = msg["sender_email"] not in (from_bot["email"], to_bot["email"])
+        in_the_specified_stream = msg["display_recipient"] == from_bot["stream"]
+
+        if stream_wide:
+            # If tunnel granularity is at stream-wide, all subjects are
+            # mirrored as-is without translation.
+            at_the_specified_subject = True
+            subject = msg["subject"]
+        else:
+            at_the_specified_subject = msg["subject"] == from_bot["subject"]
+            subject = to_bot["subject"]
+
+        if isa_stream and not_from_bot and in_the_specified_stream and at_the_specified_subject:
+            if "/user_uploads/" in msg["content"]:
+                # Fix the upload URL of the image to be the source of where it
+                # comes from
+                msg["content"] = msg["content"].replace(
+                    "/user_uploads/", from_bot["site"] + "/user_uploads/"
+                )
+            if msg["content"].startswith(("```", "- ", "* ", "> ", "1. ")):
+                # If a message starts with special prefixes, make sure to prepend a newline for
+                # formatting purpose
+                msg["content"] = "\n" + msg["content"]
+            msg_data = {
+                "type": "stream",
+                "to": to_bot["stream"],
+                "subject": subject,
+                "content": "**{}**: {}".format(msg["sender_full_name"], msg["content"]),
+                "has_attachment": msg.get("has_attachment", False),
+                "has_image": msg.get("has_image", False),
+                "has_link": msg.get("has_link", False),
+            }
+            print(msg_data)
+            print(to_client.send_message(msg_data))
+
+    def _pipe_event(event: Dict[str, Any]) -> None:
+        # See zerver/lib/events.py for a comprehensive event list
+        if event["type"] == "message":
+            msg = event["message"]
+            _pipe_message(msg)
+
+    return _pipe_event
+
+
+if __name__ == "__main__":
+    usage = """run-interrealm-bridge [--stream]
+
+    Relay each message received at a specified topic in a specified stream from
+    the first realm to a specified topic in a specified stream in the second realm.
+
+    If the --stream flag is added, then the mirroring
+    granularity becomes stream-wide. Instead of one topic,
+    all topics within the stream are mirrored as-is without
+    translation.
+    """
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+    parser = argparse.ArgumentParser(usage=usage)
+    parser.add_argument("--stream", action="store_true", help="", default=False)
+    args = parser.parse_args()
+
+    options = interrealm_bridge_config.config
+
+    bot1 = options["bot_1"]
+    bot2 = options["bot_2"]
+    client1 = zulip.Client(email=bot1["email"], api_key=bot1["api_key"], site=bot1["site"])
+    client2 = zulip.Client(email=bot2["email"], api_key=bot2["api_key"], site=bot2["site"])
+    # A bidirectional tunnel
+    pipe_event1 = create_pipe_event(client2, bot1, bot2, args.stream)
+    p1 = mp.Process(target=client1.call_on_each_event, args=(pipe_event1, ["message"]))
+    pipe_event2 = create_pipe_event(client1, bot2, bot1, args.stream)
+    p2 = mp.Process(target=client2.call_on_each_event, args=(pipe_event2, ["message"]))
+    p1.start()
+    p2.start()
+    print("Listening...")
+    p1.join()
+    p2.join()

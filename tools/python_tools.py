@@ -5,14 +5,14 @@ import glob
 
 tools_exclusions = {
     f"tools/{name}"
-    for name in {
+    for name in (
         "fetch-pull-request",
         "fetch-rebase-pull-request",
         "push-to-pull-request",
         "release",
         "__pycache__",
         "check-branch",
-    }
+    )
 }
 
 lintable_tools_files = set(glob.glob("tools/*")).difference(tools_exclusions)

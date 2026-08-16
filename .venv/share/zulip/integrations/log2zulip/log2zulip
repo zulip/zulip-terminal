@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+
+import argparse
+import errno
+import os
+import platform
+import re
+import subprocess
+import sys
+import tempfile
+import traceback
+
+# Use the Zulip virtualenv if available
+sys.path.append("/home/zulip/deployments/current")
+try:
+    from scripts.lib.setup_path import setup_path
+
+    setup_path()
+except ImportError:
+    try:
+        import scripts.lib.setup_path_on_import
+
+        scripts.lib.setup_path_on_import  # Suppress unused import warning
+    except ImportError:
+        pass
+
+import json
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../"))
+from typing import List
+
+import zulip
+
+temp_dir = "/var/tmp/" if os.name == "posix" else tempfile.gettempdir()
+
+
+def mkdir_p(path: str) -> None:
+    # Python doesn't have an analog to `mkdir -p` < Python 3.2.
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+def send_log_zulip(file_name: str, count: int, lines: List[str], extra: str = "") -> None:
+    content = "{} new errors{}:\n```\n{}\n```".format(count, extra, "\n".join(lines))
+    zulip_client.send_message(
+        {
+            "type": "stream",
+            "to": "logs",
+            "subject": f"{file_name} on {platform.node()}",
+            "content": content,
+        }
+    )
+
+
+def process_lines(raw_lines: List[str], file_name: str) -> None:
+    lines = []
+    for line in raw_lines:
+        # Add any filtering or modification code here
+        if re.match(r".*upstream timed out.*while reading upstream.*", line):
+            continue
+        lines.append(line)
+
+    if len(lines) == 0:
+        return
+    elif len(lines) > 10:
+        send_log_zulip(file_name, len(lines), lines[0:3], extra=", examples include")
+    else:
+        send_log_zulip(file_name, len(lines), lines)
+
+
+def process_logs() -> None:
+    data_file_path = os.path.join(temp_dir, "log2zulip.state")
+    mkdir_p(os.path.dirname(data_file_path))
+    if not os.path.exists(data_file_path):
+        open(data_file_path, "w").write("{}")
+    last_data = json.loads(open(data_file_path).read())
+    new_data = {}
+    for log_file in log_files:
+        file_data = last_data.get(log_file, {})
+        if not os.path.exists(log_file):
+            # If the file doesn't exist, log an error and then move on to the next file
+            print(f"Log file does not exist or could not stat log file: {log_file}")
+            continue
+        length = int(subprocess.check_output(["wc", "-l", log_file]).split()[0])
+        if file_data.get("last") is None:
+            file_data["last"] = 1
+        if length + 1 < file_data["last"]:
+            # The log file was rotated, restart from empty.  Note that
+            # because we don't actually store the log file content, if
+            # a log file ends up at the same line length as before
+            # immediately after rotation, this tool won't notice.
+            file_data["last"] = 1
+        output = subprocess.check_output(["tail", "-n+{}".format(file_data["last"]), log_file])
+        new_lines = output.decode("utf-8", errors="replace").split("\n")[:-1]
+        if len(new_lines) > 0:
+            process_lines(new_lines, log_file)
+            file_data["last"] += len(new_lines)
+        new_data[log_file] = file_data
+    open(data_file_path, "w").write(json.dumps(new_data))
+
+
+if __name__ == "__main__":
+    parser = zulip.add_default_arguments(argparse.ArgumentParser())  # type: argparse.ArgumentParser
+    parser.add_argument("--control-path", default="/etc/log2zulip.conf")
+    args = parser.parse_args()
+
+    lock_path = os.path.join(temp_dir, "log2zulip.lock")
+    if os.path.exists(lock_path):
+        # This locking code is here to protect against log2zulip,
+        # running in a cron job, ending up with multiple copies
+        # running at the same time.
+        print("Log2zulip lock held; not doing anything")
+        sys.exit(0)
+
+    # TODO: Convert this locking code to use a standard context manager.
+    try:
+        open(lock_path, "w").write("1")
+        zulip_client = zulip.init_from_options(args)
+        try:
+            log_files = json.loads(open(args.control_path).read())
+        except (json.JSONDecodeError, OSError):
+            print(f"Could not load control data from {args.control_path}")
+            traceback.print_exc()
+            sys.exit(1)
+        process_logs()
+    finally:
+        try:
+            os.remove(lock_path)
+        except OSError:
+            pass

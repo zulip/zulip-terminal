@@ -446,6 +446,8 @@ def msg_template_factory(
     subject: str = "",
     stream_id: Optional[int] = None,
     recipients: Union[str, List[Dict[str, Any]]] = "PTEST",
+    last_edit_timestamp: Optional[int] = None,
+    last_moved_timestamp: Optional[int] = None,
 ) -> Message:
     """
     Generate message template for all types of messages(stream/PM/group)
@@ -470,6 +472,13 @@ def msg_template_factory(
         content=f"{msg_type} content here.",
         display_recipient=recipients,
     )
+    # Pass through optional timestamps (tests expect these keys to be present
+    # when simulating edited/moved messages). Use non-zero ints so truthy checks
+    # in the code work (0 is falsy).
+    if last_edit_timestamp is not None:
+        message["last_edit_timestamp"] = last_edit_timestamp
+    if last_moved_timestamp is not None:
+        message["last_moved_timestamp"] = last_moved_timestamp
 
     if msg_type == "stream":
         assert isinstance(stream_id, int)
@@ -1076,7 +1085,7 @@ def empty_index(
             topics=defaultdict(list),
             search=set(),
             messages=defaultdict(
-                lambda: {},
+                dict,
                 {
                     stream_msg_template["id"]: stream_msg_template,
                     pm_template["id"]: pm_template,

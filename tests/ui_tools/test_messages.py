@@ -1181,6 +1181,40 @@ class TestMessageBox:
             "author_field_not_present",
         ],
     )
+    def test_main_view_generates_MOVED_label(
+        self, mocker, messages_successful_response
+    ):
+        messages = messages_successful_response["messages"]
+        for message in messages:
+            # Ensure legacy edited index does not trigger EDITED
+            # Use get(...) to avoid KeyError if the fixture doesn't create the key.
+            self.model.index.get("edited_messages", set()).discard(message["id"])
+            # Set server-provided moved timestamp only
+            message["last_moved_timestamp"] = 1650000000
+
+            msg_box = MessageBox(message, self.model, message)
+            view_components = msg_box.main_view()
+
+            label = view_components[0].original_widget.contents[0]
+            assert label[0].text == "MOVED"
+            assert label[1][1] == 7
+
+    def test_main_view_EDITED_takes_priority_over_MOVED(
+        self, mocker, messages_successful_response
+    ):
+        messages = messages_successful_response["messages"]
+        for message in messages:
+            # Set both last_edit_timestamp and last_moved_timestamp; EDITED should win.
+            message["last_edit_timestamp"] = 1650000001
+            message["last_moved_timestamp"] = 1650000000
+
+            msg_box = MessageBox(message, self.model, message)
+            view_components = msg_box.main_view()
+
+            label = view_components[0].original_widget.contents[0]
+            assert label[0].text == "EDITED"
+            assert label[1][1] == 7
+
     def test_update_message_author_status(
         self,
         message_fixture,

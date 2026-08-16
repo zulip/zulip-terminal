@@ -824,7 +824,7 @@ class LeftColumnView(urwid.Pile):
             for stream in self.view.pinned_streams
         ]
 
-        if len(streams_btn_list):
+        if streams_btn_list:
             streams_btn_list += [StreamsViewDivider()]
 
         streams_btn_list += [

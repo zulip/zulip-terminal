@@ -1,0 +1,347 @@
+#!/usr/bin/env python3
+
+# Zulip mirror of Codebase HQ activity
+# The "zulip_codebase_mirror" script is run continuously, possibly on a work
+# computer or preferably on a server.
+#
+# When restarted, it will attempt to pick up where it left off.
+#
+# python-dateutil is a dependency for this script.
+
+import logging
+import os
+import sys
+import time
+from datetime import datetime, timedelta
+
+import pytz
+import requests
+
+try:
+    import dateutil.parser
+except ImportError as e:
+    print(e, file=sys.stderr)
+    print("Please install the python-dateutil package.", file=sys.stderr)
+    exit(1)
+
+sys.path.insert(0, os.path.dirname(__file__))
+import zulip_codebase_config as config
+
+VERSION = "0.9"
+
+if config.ZULIP_API_PATH is not None:
+    sys.path.append(config.ZULIP_API_PATH)
+from typing import Any, Dict, List, Optional
+
+import zulip
+
+client = zulip.Client(
+    email=config.ZULIP_USER,
+    site=config.ZULIP_SITE,
+    api_key=config.ZULIP_API_KEY,
+    client="ZulipCodebase/" + VERSION,
+)
+user_agent = "Codebase To Zulip Mirroring script (zulip-devel@googlegroups.com)"
+
+# find some form of JSON loader/dumper, with a preference order for speed.
+json_implementations = ["ujson", "cjson", "simplejson", "json"]
+
+while len(json_implementations):
+    try:
+        json = __import__(json_implementations.pop(0))
+        break
+    except ImportError:
+        continue
+
+
+def make_api_call(path: str) -> Optional[List[Dict[str, Any]]]:
+    response = requests.get(
+        f"https://api3.codebasehq.com/{path}",
+        auth=(config.CODEBASE_API_USERNAME, config.CODEBASE_API_KEY),
+        params={"raw": "True"},
+        headers={
+            "User-Agent": user_agent,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+    )
+    if response.status_code == 200:
+        return json.loads(response.text)
+
+    if response.status_code >= 500:
+        logging.error(str(response.status_code))
+        return None
+    if response.status_code == 403:
+        logging.error("Bad authorization from Codebase. Please check your credentials")
+        sys.exit(-1)
+    else:
+        logging.warn(
+            f"Found non-success response status code: {response.status_code} {response.text}"
+        )
+        return None
+
+
+def make_url(path: str) -> str:
+    return f"{config.CODEBASE_ROOT_URL}/{path}"
+
+
+def handle_event(event: Dict[str, Any]) -> None:
+    event = event["event"]
+    event_type = event["type"]
+    actor_name = event["actor_name"]
+
+    raw_props = event.get("raw_properties", {})
+
+    project_link = raw_props.get("project_permalink")
+
+    subject = None
+    content = None
+    if event_type == "repository_creation":
+        stream = config.ZULIP_COMMITS_STREAM_NAME
+
+        project_name = raw_props.get("name")
+        project_repo_type = raw_props.get("scm_type")
+
+        url = make_url(f"projects/{project_link}")
+        scm = f"of type {project_repo_type}" if project_repo_type else ""
+
+        subject = f"Repository {project_name} Created"
+        content = f"{actor_name} created a new repository {scm} [{project_name}]({url})"
+    elif event_type == "push":
+        stream = config.ZULIP_COMMITS_STREAM_NAME
+
+        num_commits = raw_props.get("commits_count")
+        branch = raw_props.get("ref_name")
+        project = raw_props.get("project_name")
+        repo_link = raw_props.get("repository_permalink")
+        deleted_ref = raw_props.get("deleted_ref")
+        new_ref = raw_props.get("new_ref")
+
+        subject = f"Push to {branch} on {project}"
+
+        if deleted_ref:
+            content = f"{actor_name} deleted branch {branch} from {project}"
+        else:
+            if new_ref:
+                branch = f"new branch {branch}"
+            content = "{} pushed {} commit(s) to {} in project {}:\n\n".format(
+                actor_name,
+                num_commits,
+                branch,
+                project,
+            )
+            for commit in raw_props.get("commits"):
+                ref = commit.get("ref")
+                url = make_url(f"projects/{project_link}/repositories/{repo_link}/commit/{ref}")
+                message = commit.get("message")
+                content += f"* [{ref}]({url}): {message}\n"
+    elif event_type == "ticketing_ticket":
+        stream = config.ZULIP_TICKETS_STREAM_NAME
+
+        num = raw_props.get("number")
+        name = raw_props.get("subject")
+        assignee = raw_props.get("assignee")
+        priority = raw_props.get("priority")
+        url = make_url(f"projects/{project_link}/tickets/{num}")
+
+        if assignee is None:
+            assignee = "no one"
+        subject = f"#{num}: {name}"
+        content = (
+            """%s created a new ticket [#%s](%s) priority **%s** assigned to %s:\n\n~~~ quote\n %s"""
+            % (actor_name, num, url, priority, assignee, name)
+        )
+    elif event_type == "ticketing_note":
+        stream = config.ZULIP_TICKETS_STREAM_NAME
+
+        num = raw_props.get("number")
+        name = raw_props.get("subject")
+        body = raw_props.get("content")
+        changes = raw_props.get("changes")
+
+        url = make_url(f"projects/{project_link}/tickets/{num}")
+        subject = f"#{num}: {name}"
+
+        content = ""
+        if body is not None and len(body) > 0:
+            content = "{} added a comment to ticket [#{}]({}):\n\n~~~ quote\n{}\n\n".format(
+                actor_name,
+                num,
+                url,
+                body,
+            )
+
+        if "status_id" in changes:
+            status_change = changes.get("status_id")
+            content += "Status changed from **{}** to **{}**\n\n".format(
+                status_change[0],
+                status_change[1],
+            )
+    elif event_type == "ticketing_milestone":
+        stream = config.ZULIP_TICKETS_STREAM_NAME
+
+        name = raw_props.get("name")
+        identifier = raw_props.get("identifier")
+        url = make_url(f"projects/{project_link}/milestone/{identifier}")
+
+        subject = name
+        content = f"{actor_name} created a new milestone [{name}]({url})"
+    elif event_type == "comment":
+        stream = config.ZULIP_COMMITS_STREAM_NAME
+
+        comment = raw_props.get("content")
+        commit = raw_props.get("commit_ref")
+
+        # If there's a commit id, it's a comment to a commit
+        if commit:
+            repo_link = raw_props.get("repository_permalink")
+
+            url = make_url(f"projects/{project_link}/repositories/{repo_link}/commit/{commit}")
+
+            subject = f"{actor_name} commented on {commit}"
+            content = "{} commented on [{}]({}):\n\n~~~ quote\n{}".format(
+                actor_name,
+                commit,
+                url,
+                comment,
+            )
+        else:
+            # Otherwise, this is a Discussion item, and handle it
+            subj = raw_props.get("subject")
+            category = raw_props.get("category")
+            comment_content = raw_props.get("content")
+
+            subject = f"Discussion: {subj}"
+
+            if category:
+                format_str = "%s started a new discussion in %s:\n\n~~~ quote\n%s\n~~~"
+                content = format_str % (actor_name, category, comment_content)
+            else:
+                content = f"{actor_name} posted:\n\n~~~ quote\n{comment_content}\n~~~"
+
+    elif event_type == "deployment":
+        stream = config.ZULIP_COMMITS_STREAM_NAME
+
+        start_ref = raw_props.get("start_ref")
+        end_ref = raw_props.get("end_ref")
+        environment = raw_props.get("environment")
+        servers = raw_props.get("servers")
+        repo_link = raw_props.get("repository_permalink")
+
+        start_ref_url = make_url(
+            f"projects/{project_link}/repositories/{repo_link}/commit/{start_ref}"
+        )
+        end_ref_url = make_url(f"projects/{project_link}/repositories/{repo_link}/commit/{end_ref}")
+        between_url = make_url(
+            "projects/%s/repositories/%s/compare/%s...%s"
+            % (project_link, repo_link, start_ref, end_ref)
+        )
+
+        subject = f"Deployment to {environment}"
+
+        content = "{} deployed [{}]({}) [through]({}) [{}]({}) to the **{}** environment.".format(
+            actor_name,
+            start_ref,
+            start_ref_url,
+            between_url,
+            end_ref,
+            end_ref_url,
+            environment,
+        )
+        if servers is not None:
+            content += "\n\nServers deployed to: %s" % (
+                ", ".join(f"`{server}`" for server in servers)
+            )
+
+    elif event_type == "named_tree":
+        # Docs say named_tree type used for new/deleting branches and tags,
+        # but experimental testing showed that they were all sent as 'push' events
+        pass
+    elif event_type == "wiki_page":
+        logging.warn("Wiki page notifications not yet implemented")
+    elif event_type == "sprint_creation":
+        logging.warn("Sprint notifications not yet implemented")
+    elif event_type == "sprint_ended":
+        logging.warn("Sprint notifications not yet implemented")
+    else:
+        logging.info(f"Unknown event type {event_type}, ignoring!")
+
+    if subject and content:
+        if len(subject) > 60:
+            subject = subject[:57].rstrip() + "..."
+
+        res = client.send_message(
+            {"type": "stream", "to": stream, "subject": subject, "content": content}
+        )
+        if res["result"] == "success":
+            logging.info("Successfully sent Zulip with id: {}".format(res["id"]))
+        else:
+            logging.warn("Failed to send Zulip: {} {}".format(res["result"], res["msg"]))
+
+
+# the main run loop for this mirror script
+def run_mirror() -> None:
+    # we should have the right (write) permissions on the resume file, as seen
+    # in check_permissions, but it may still be empty or corrupted
+    def default_since() -> datetime:
+        return datetime.now(tz=pytz.utc) - timedelta(hours=config.CODEBASE_INITIAL_HISTORY_HOURS)
+
+    try:
+        with open(config.RESUME_FILE) as f:
+            timestamp = f.read()
+        if timestamp == "":
+            since = default_since()
+        else:
+            since = datetime.fromtimestamp(float(timestamp), tz=pytz.utc)
+    except (ValueError, OSError) as e:
+        logging.warn(f"Could not open resume file: {str(e)}")
+        since = default_since()
+
+    try:
+        sleepInterval = 1
+        while True:
+            events = make_api_call("activity")
+            if events is not None:
+                sleepInterval = 1
+                for event in events[::-1]:
+                    timestamp = event.get("event", {}).get("timestamp", "")
+                    event_date = dateutil.parser.parse(timestamp)
+                    if event_date > since:
+                        handle_event(event)
+                        since = event_date
+            else:
+                # back off a bit
+                if sleepInterval < 22:
+                    sleepInterval += 4
+            time.sleep(sleepInterval)
+
+    except KeyboardInterrupt:
+        open(config.RESUME_FILE, "w").write(since.strftime("%s"))
+        logging.info("Shutting down Codebase mirror")
+
+
+# void function that checks the permissions of the files this script needs.
+def check_permissions() -> None:
+    # check that the log file can be written
+    if config.LOG_FILE:
+        try:
+            open(config.LOG_FILE, "w")
+        except OSError as e:
+            sys.stderr.write("Could not open up log for writing:")
+            sys.stderr.write(str(e))
+    # check that the resume file can be written (this creates if it doesn't exist)
+    try:
+        open(config.RESUME_FILE, "a+")
+    except OSError as e:
+        sys.stderr.write(f"Could not open up the file {config.RESUME_FILE} for reading and writing")
+        sys.stderr.write(str(e))
+
+
+if __name__ == "__main__":
+    assert isinstance(config.RESUME_FILE, str), "RESUME_FILE path not given; refusing to continue"
+    check_permissions()
+    if config.LOG_FILE:
+        logging.basicConfig(filename=config.LOG_FILE, level=logging.WARNING)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+    run_mirror()
