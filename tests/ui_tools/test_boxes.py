@@ -331,35 +331,35 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         ["raw_recipients", "tidied_recipients"],
         [
-            ("Human 1 person1@example.com", "Human 1 <person1@example.com>"),
+            ("• Human 1 person1@example.com", "• Human 1 <person1@example.com>"),
             (
-                "Human 2 person2@example.com random text",
-                "Human 2 <person2@example.com>",
+                "• Human 2 person2@example.com random text",
+                "• Human 2 <person2@example.com>",
             ),
             (
-                "Human Myself FOOBOO@gmail.com random, Human 1 <person1@example.com>",
-                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+                "● Human Myself FOOBOO@gmail.com random, • Human 1 <person1@example.com>",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 <person1@example.com>",
             ),
             (
-                "Human Myself <FOOBOO@gmail.com>, Human 1 person1@example.com random",
-                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 person1@example.com random",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 <person1@example.com>",
             ),
             (
-                "Human Myself FOOBOO@gmail.com random,"
-                "Human 1 person1@example.com random",
-                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>",
+                "● Human Myself FOOBOO@gmail.com random,"
+                "• Human 1 person1@example.com random",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 <person1@example.com>",
             ),
             (
-                "Human Myself FOOBOO@gmail.com random, Human 1 person1@example.com "
-                "random, Human 2 person2@example.com random",
-                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>, "
-                "Human 2 <person2@example.com>",
+                "● Human Myself FOOBOO@gmail.com random, • Human 1 person1@example.com "
+                "random, • Human 2 person2@example.com random",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 <person1@example.com>, "
+                "• Human 2 <person2@example.com>",
             ),
             (
-                "Human Myself FOOBOO@gmail.com, Human 1 person1@example.com random, "
-                "Human 2 person2@example.com",
-                "Human Myself <FOOBOO@gmail.com>, Human 1 <person1@example.com>, "
-                "Human 2 <person2@example.com>",
+                "● Human Myself FOOBOO@gmail.com, • Human 1 person1@example.com random, "
+                "• Human 2 person2@example.com",
+                "● Human Myself <FOOBOO@gmail.com>, • Human 1 <person1@example.com>, "
+                "• Human 2 <person2@example.com>",
             ),
         ],
         ids=[
@@ -404,7 +404,7 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         ["raw_recipients", "invalid_recipients"],
         [
-            ("Human 1 <person2@example.com>", "Human 1 <person2@example.com>"),
+            ("• Human 1 <person2@example.com>", "• Human 1 <person2@example.com>"),
             ("person1@example.com", "person1@example.com"),
             ("Human 1", "Human 1"),
         ],
@@ -460,13 +460,13 @@ class TestWriteBox:
         "header, expected_recipient_emails, expected_recipient_user_ids",
         [
             case(
-                "Human 1 <person1@example.com>",
+                "• Human 1 <person1@example.com>",
                 ["person1@example.com"],
                 [11],
                 id="single_recipient",
             ),
             case(
-                "Human 1 <person1@example.com>, Human 2 <person2@example.com>",
+                "• Human 1 <person1@example.com>, • Human 2 <person2@example.com>",
                 ["person1@example.com", "person2@example.com"],
                 [11, 12],
                 id="multiple_recipients",
@@ -1082,14 +1082,14 @@ class TestWriteBox:
                     "Human Duplicate",
                 ],
                 [
-                    "Human Myself <FOOBOO@gmail.com>",
-                    "Human 1 <person1@example.com>",
-                    "Human 2 <person2@example.com>",
+                    "● Human Myself <FOOBOO@gmail.com>",
+                    "• Human 1 <person1@example.com>",
+                    "• Human 2 <person2@example.com>",
                     "Human Duplicate <personduplicate1@example.com>",
                     "Human Duplicate <personduplicate2@example.com>",
                 ],
             ),
-            ("My", ["Human Myself"], ["Human Myself <FOOBOO@gmail.com>"]),
+            ("My", ["Human Myself"], ["● Human Myself <FOOBOO@gmail.com>"]),
         ],
         ids=[
             "no_search_text",
@@ -1116,9 +1116,9 @@ class TestWriteBox:
     @pytest.mark.parametrize(
         "text, expected_text",
         [
-            ("Hu", "Human Myself <FOOBOO@gmail.com>"),
-            ("Human M", "Human Myself <FOOBOO@gmail.com>"),
-            ("Human Myself <FOOBOO", "Human Myself <FOOBOO@gmail.com>"),
+            ("Hu", "● Human Myself <FOOBOO@gmail.com>"),
+            ("Human M", "● Human Myself <FOOBOO@gmail.com>"),
+            ("● Human Myself <FOOBOO", "● Human Myself <FOOBOO@gmail.com>"),
         ],
     )
     def test__to_box_autocomplete_with_spaces(
@@ -1155,11 +1155,11 @@ class TestWriteBox:
                 ],
                 [
                     "Welcome Bot <welcome-bot@zulip.com>, "
-                    "Human Myself <FOOBOO@gmail.com>",
+                    "● Human Myself <FOOBOO@gmail.com>",
                     "Welcome Bot <welcome-bot@zulip.com>, "
-                    "Human 1 <person1@example.com>",
+                    "• Human 1 <person1@example.com>",
                     "Welcome Bot <welcome-bot@zulip.com>, "
-                    "Human 2 <person2@example.com>",
+                    "• Human 2 <person2@example.com>",
                     "Welcome Bot <welcome-bot@zulip.com>, "
                     "Human Duplicate <personduplicate1@example.com>",
                     "Welcome Bot <welcome-bot@zulip.com>, "
@@ -1172,7 +1172,7 @@ class TestWriteBox:
                 ["Human 2"],
                 [
                     "Welcome Bot <welcome-bot@zulip.com>, Notification Bot "
-                    "<notification-bot@zulip.com>, Human 2 <person2@example.com>"
+                    "<notification-bot@zulip.com>, • Human 2 <person2@example.com>"
                 ],
             ),
             (
@@ -1186,11 +1186,11 @@ class TestWriteBox:
                 ],
                 [
                     "Email Gateway <emailgateway@zulip.com>, "
-                    "Human Myself <FOOBOO@gmail.com>",
+                    "● Human Myself <FOOBOO@gmail.com>",
                     "Email Gateway <emailgateway@zulip.com>, "
-                    "Human 1 <person1@example.com>",
+                    "• Human 1 <person1@example.com>",
                     "Email Gateway <emailgateway@zulip.com>, "
-                    "Human 2 <person2@example.com>",
+                    "• Human 2 <person2@example.com>",
                     "Email Gateway <emailgateway@zulip.com>, "
                     "Human Duplicate <personduplicate1@example.com>",
                     "Email Gateway <emailgateway@zulip.com>, "
@@ -1198,12 +1198,12 @@ class TestWriteBox:
                 ],
             ),
             (
-                "Human 1 <person1@example.com>, Notification Bot "
+                "• Human 1 <person1@example.com>, Notification Bot "
                 "<notification-bot@zulip.com>,person2",
                 ["Human 2"],
                 [
-                    "Human 1 <person1@example.com>, Notification Bot "
-                    "<notification-bot@zulip.com>, Human 2 <person2@example.com>"
+                    "• Human 1 <person1@example.com>, Notification Bot "
+                    "<notification-bot@zulip.com>, • Human 2 <person2@example.com>"
                 ],
             ),
         ],
