@@ -51,7 +51,6 @@ class _MessageEditState(NamedTuple):
     message_id: int
     old_topic: str
 
-
 class MessageBox(urwid.Pile):
     # type of last_message is Optional[Message], but needs refactoring
     def __init__(self, message: Message, model: "Model", last_message: Any) -> None:
@@ -1189,3 +1188,34 @@ class MessageBox(urwid.Pile):
         elif is_command_key("MSG_SENDER_INFO", key):
             self.model.controller.show_msg_sender_info(self.message["sender_id"])
         return key
+
+class PlaceholderMessageBox(urwid.WidgetWrap):
+    def __init__(self, text: str) -> None:
+        self.message = {"id": -1}  # So it doesn’t explode when accessed
+        text_widget = urwid.Text(text)
+        self.original_widget = self  # Trickery: mimic MessageBox
+
+        super().__init__(text_widget)
+
+    def recipient_header(self) -> Any:
+        return urwid.Text("")  # Blank for empty narrow
+
+    def top_search_bar(self) -> Any:
+        return urwid.Text("")  # Stub for compatibility
+
+    def update_message_author_status(self) -> None:
+        pass  # Stub for compatibility
+
+    def keypress(self, size: Tuple[int, int], key: str) -> None:
+        if is_command_key("GO_DOWN", key):
+            return None
+        if is_command_key("GO_UP", key):
+            return None
+
+        elif is_command_key("GO_LEFT", key):
+            self.view.show_left_panel(visible=True)
+            return None
+
+        elif is_command_key("GO_RIGHT", key):
+            self.view.show_right_panel(visible=True)
+            return None
