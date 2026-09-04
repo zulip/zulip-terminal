@@ -605,8 +605,14 @@ class TestController:
         def mock_typing() -> None:
             controller.active_conversation_info = {}
 
+        # Join before asserting: the notification loop runs in its own thread,
+        # and asserting while it is still starting up raced it under CI load,
+        # failing the footer-text assertions intermittently.
+        notification_thread = Thread(target=controller.show_typing_notification)
+        notification_thread.start()
         Timer(0.1, mock_typing).start()
-        Thread(controller.show_typing_notification()).start()
+        notification_thread.join(timeout=10)
+        assert not notification_thread.is_alive()
 
         if active_conversation_info:
             set_footer_text.assert_has_calls(
