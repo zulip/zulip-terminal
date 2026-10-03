@@ -299,6 +299,58 @@ class TestView:
 
         super_keypress.assert_called_once_with(size, navigation_key)
 
+    @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
+    @pytest.mark.parametrize("focused_column", [0, 1, 2])
+    def test_keypress_SEARCH_MESSAGES_saves_column(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        widget_size: Callable[[Widget], urwid_Box],
+        key: str,
+        focused_column: int,
+    ) -> None:
+        view.body = mocker.Mock()
+        view.body.focus_position = focused_column
+        view.middle_column = mocker.Mock()
+        view.controller.autohide = False
+        view.controller.is_in_editor_mode = lambda: False
+        size = widget_size(view)
+
+        view.keypress(size, key)
+
+        assert view.column_before_search == focused_column
+        assert view.body.focus_col == 1
+
+    @pytest.mark.parametrize(
+        "column, shown_panel",
+        [(0, "left"), (1, None), (2, "right")],
+        ids=["left_panel", "middle", "right_panel"],
+    )
+    def test_restore_column_after_search(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        column: int,
+        shown_panel: Optional[str],
+    ) -> None:
+        view.body = mocker.Mock()
+        show_left = mocker.patch.object(view, "show_left_panel")
+        show_right = mocker.patch.object(view, "show_right_panel")
+        view.column_before_search = column
+
+        view.restore_column_after_search()
+
+        assert view.body.focus_position == column
+        if shown_panel == "left":
+            show_left.assert_called_once_with(visible=True)
+            show_right.assert_not_called()
+        elif shown_panel == "right":
+            show_right.assert_called_once_with(visible=True)
+            show_left.assert_not_called()
+        else:
+            show_left.assert_not_called()
+            show_right.assert_not_called()
+
     @pytest.mark.parametrize("key", keys_for_command("ALL_MENTIONS"))
     def test_keypress_ALL_MENTIONS(
         self,
