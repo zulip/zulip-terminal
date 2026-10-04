@@ -48,6 +48,9 @@ class View(urwid.WidgetWrap):
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
         self.search_box = MessageSearchBox(self.controller)
+        # Column that had focus when message search started; the middle column
+        # (1) means nothing needs restoring when search is cancelled.
+        self.column_before_search = 1
         self.stream_topic_map: Dict[int, str] = {}
 
         self.message_view: Any = None
@@ -231,6 +234,18 @@ class View(urwid.WidgetWrap):
             # unread msg" issue and setting focus_column=1 when initializing.
             self.body.focus_position = 1
 
+    def restore_column_after_search(self) -> None:
+        """
+        Return focus to the column (eg. a side panel) which had it before
+        message search started, showing that panel again in autohide mode.
+        """
+        column = self.column_before_search
+        if column == 0:
+            self.show_left_panel(visible=True)
+        elif column == 2:
+            self.show_right_panel(visible=True)
+        self.body.focus_position = column
+
     def show_right_panel(self, *, visible: bool) -> None:
         if not self.controller.autohide:
             return
@@ -264,6 +279,8 @@ class View(urwid.WidgetWrap):
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
+            if is_command_key("SEARCH_MESSAGES", key):
+                self.column_before_search = self.body.focus_position
             self.show_left_panel(visible=False)
             self.show_right_panel(visible=False)
             self.body.focus_col = 1
