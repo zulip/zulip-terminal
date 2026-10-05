@@ -45,7 +45,7 @@ PRESENCE_PING_INTERVAL_SECS: Final = 60
 ###############################################################################
 # Core message types (used in Composition and Message below)
 
-DirectMessageString = Literal["private"]
+DirectMessageString = Literal["private", "direct"]
 StreamMessageString = Literal["stream"]
 
 MessageType = Union[DirectMessageString, StreamMessageString]
