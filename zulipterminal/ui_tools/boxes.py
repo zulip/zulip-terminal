@@ -664,7 +664,8 @@ class WriteBox(urwid.Pile):
         matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
         return matched_stream_typeaheads, matched_streams
 
-    def autocomplete_stream_and_topic(
+    # NOTE: only used in next function right now
+    def _autocomplete_stream_and_topic(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         match = re.search(REGEX_STREAM_AND_TOPIC_FENCED_HALF, text)
@@ -714,7 +715,7 @@ class WriteBox(urwid.Pile):
             # Amending the text to have new prefix (with `**` fence)
             text = text[: match_unfenced.start()] + prefix_with_topic
         if match or match_fenced or match_unfenced:
-            autocomplete_map.update({prefix: self.autocomplete_stream_and_topic})
+            autocomplete_map.update({prefix: self._autocomplete_stream_and_topic})
 
         return text
 
