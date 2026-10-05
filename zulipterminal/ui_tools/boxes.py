@@ -479,11 +479,11 @@ class WriteBox(urwid.Pile):
 
     def _generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         autocomplete_map = {
-            "@_": self.autocomplete_users,
-            "@_**": self.autocomplete_users,
+            "@_": self._autocomplete_users,
+            "@_**": self._autocomplete_users,
             "@": self._autocomplete_mentions,
             "@*": self.autocomplete_groups,
-            "@**": self.autocomplete_users,
+            "@**": self._autocomplete_users,
             "#": self.autocomplete_streams,
             "#**": self.autocomplete_streams,
             ":": self.autocomplete_emojis,
@@ -553,7 +553,7 @@ class WriteBox(urwid.Pile):
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
 
-        user_typeahead, user_names = self.autocomplete_users(text, prefix_string)
+        user_typeahead, user_names = self._autocomplete_users(text, prefix_string)
         group_typeahead, groups = self.autocomplete_groups(text, prefix_string)
 
         combined_typeahead = user_typeahead + group_typeahead
@@ -561,7 +561,8 @@ class WriteBox(urwid.Pile):
 
         return combined_typeahead, combined_names
 
-    def autocomplete_users(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_users(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         users_list = self.view.users
