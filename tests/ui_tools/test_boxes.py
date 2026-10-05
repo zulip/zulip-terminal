@@ -1824,7 +1824,7 @@ class TestWriteBox:
         user_id_email_dict: Dict[int, str],
     ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
-        mocker.patch(WRITEBOX + ".set_editor_mode")
+        mocker.patch(WRITEBOX + "._set_editor_mode")
         write_box.model.user_id_email_dict = user_id_email_dict
         if msg_type == "stream":
             write_box.stream_box_view(1000)
