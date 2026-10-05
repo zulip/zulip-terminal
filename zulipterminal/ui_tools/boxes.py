@@ -482,7 +482,7 @@ class WriteBox(urwid.Pile):
             "@_": self._autocomplete_users,
             "@_**": self._autocomplete_users,
             "@": self._autocomplete_mentions,
-            "@*": self.autocomplete_groups,
+            "@*": self._autocomplete_groups,
             "@**": self._autocomplete_users,
             "#": self.autocomplete_streams,
             "#**": self.autocomplete_streams,
@@ -554,7 +554,7 @@ class WriteBox(urwid.Pile):
         # and group mentions.
 
         user_typeahead, user_names = self._autocomplete_users(text, prefix_string)
-        group_typeahead, groups = self.autocomplete_groups(text, prefix_string)
+        group_typeahead, groups = self._autocomplete_groups(text, prefix_string)
 
         combined_typeahead = user_typeahead + group_typeahead
         combined_names = user_names + groups
@@ -604,7 +604,8 @@ class WriteBox(urwid.Pile):
 
         return user_typeahead, user_names
 
-    def autocomplete_groups(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_groups(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         prefix_length = len(prefix_string)
