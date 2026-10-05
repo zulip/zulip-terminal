@@ -150,7 +150,7 @@ class WriteBox(urwid.Pile):
         else:
             self.contents.clear()
 
-    def set_editor_mode(self) -> None:
+    def _set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
     def _set_regular_and_typing_recipient_user_ids(
@@ -187,7 +187,7 @@ class WriteBox(urwid.Pile):
         *,
         recipient_user_ids: Optional[List[int]] = None,
     ) -> None:
-        self.set_editor_mode()
+        self._set_editor_mode()
 
         self.compose_box_status = "open_with_private"
 
@@ -328,7 +328,7 @@ class WriteBox(urwid.Pile):
     def _setup_common_stream_compose(
         self, stream_id: int, caption: str, title: str
     ) -> None:
-        self.set_editor_mode()
+        self._set_editor_mode()
         self.compose_box_status = "open_with_stream"
         self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
