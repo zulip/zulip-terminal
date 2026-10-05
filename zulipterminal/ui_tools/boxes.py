@@ -481,7 +481,7 @@ class WriteBox(urwid.Pile):
         autocomplete_map = {
             "@_": self.autocomplete_users,
             "@_**": self.autocomplete_users,
-            "@": self.autocomplete_mentions,
+            "@": self._autocomplete_mentions,
             "@*": self.autocomplete_groups,
             "@**": self.autocomplete_users,
             "#": self.autocomplete_streams,
@@ -546,7 +546,8 @@ class WriteBox(urwid.Pile):
         self.view.set_typeahead_footer(reduced_suggestions, state, is_truncated)
         return typeahead
 
-    def autocomplete_mentions(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_mentions(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         # Handles user mentions (@ mentions and silent mentions)
