@@ -167,7 +167,7 @@ class WriteBox(urwid.Pile):
             self.recipient_user_ids = list()
             self.typing_recipient_user_ids = list()
 
-    def send_stop_typing_status(self) -> None:
+    def _send_stop_typing_status(self) -> None:
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
         if (
@@ -270,7 +270,7 @@ class WriteBox(urwid.Pile):
                     self.last_key_update + stop_period_delta - datetime.now()
                 )
                 sleep(idle_check_time.total_seconds())
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
 
         urwid.connect_signal(self.msg_write_box, "change", on_type_send_status)
 
@@ -747,7 +747,7 @@ class WriteBox(urwid.Pile):
             self._set_default_footer_after_autocomplete()
 
         if is_command_key("SEND_MESSAGE", key):
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
             if self.compose_box_status == "open_with_stream":
                 if re.fullmatch(r"\s*", self.title_write_box.edit_text):
                     topic = "(no topic)"
@@ -828,7 +828,7 @@ class WriteBox(urwid.Pile):
                     )
         elif is_command_key("EXIT_COMPOSE", key):
             saved_draft = self.model.session_draft_message()
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
 
             compose_not_in_edit_mode = self.msg_edit_state is None
             compose_box_content = self.msg_write_box.edit_text
