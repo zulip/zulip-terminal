@@ -14,7 +14,7 @@ from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
 import urwid
-from typing_extensions import Final, Literal
+from typing_extensions import Final, Literal, assert_never
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
@@ -170,17 +170,22 @@ class WriteBox(urwid.Pile):
     def _send_stop_typing_status(self) -> None:
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
-        if (
-            self.compose_box_status == "open_with_private"
-            and self.typing_recipient_user_ids
-            and self.sent_start_typing_status
+        if self.compose_box_status == "open_with_private":
+            if self.typing_recipient_user_ids and self.sent_start_typing_status:
+                self.model.send_typing_status_by_user_ids(
+                    self.typing_recipient_user_ids, status="stop"
+                )
+                self.send_next_typing_update = datetime.now()
+                self.idle_status_tracking = False
+                self.sent_start_typing_status = False
+        elif (
+            self.compose_box_status == "open_with_stream"
+            or self.compose_box_status == "closed"
         ):
-            self.model.send_typing_status_by_user_ids(
-                self.typing_recipient_user_ids, status="stop"
-            )
-            self.send_next_typing_update = datetime.now()
-            self.idle_status_tracking = False
-            self.sent_start_typing_status = False
+            # FIXME: Implement stream typing status, if server supports it
+            pass
+        else:
+            assert_never(self.compose_box_status)
 
     def private_box_view(
         self,
@@ -783,7 +788,7 @@ class WriteBox(urwid.Pile):
                         topic=topic,
                         content=self.msg_write_box.edit_text,
                     )
-            else:
+            elif self.compose_box_status == "open_with_private":
                 if self.msg_edit_state is not None:
                     success = self.model.update_private_message(
                         content=self.msg_write_box.edit_text,
@@ -806,6 +811,11 @@ class WriteBox(urwid.Pile):
                             ["Cannot send message without specifying recipients."]
                         )
                         success = None
+            elif self.compose_box_status == "closed":
+                raise RuntimeError("Sending message when compose box closed")
+            else:
+                assert_never(self.compose_box_status)
+
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
@@ -832,6 +842,12 @@ class WriteBox(urwid.Pile):
                     self.view.controller.report_error(
                         "Cannot narrow to message without specifying recipients."
                     )
+            elif self.compose_box_status == "closed":
+                raise RuntimeError(
+                    "Narrowing to message recipient when compose box closed"
+                )
+            else:
+                assert_never(self.compose_box_status)
         elif is_command_key("EXIT_COMPOSE", key):
             saved_draft = self.model.session_draft_message()
             self._send_stop_typing_status()
@@ -918,6 +934,11 @@ class WriteBox(urwid.Pile):
                         subject=self.title_write_box.edit_text,
                         read_by_sender=True,
                     )
+                elif self.compose_box_status == "closed":
+                    raise RuntimeError("Save as draft when compose box closed")
+                else:
+                    assert_never(self.compose_box_status)
+
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:
                     self.model.save_draft(this_draft)
@@ -972,7 +993,7 @@ class WriteBox(urwid.Pile):
                         return key
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-                else:
+                elif self.compose_box_status == "open_with_private":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )
@@ -982,6 +1003,12 @@ class WriteBox(urwid.Pile):
                     # that all the recipients are valid, to avoid including any
                     # invalid ones.
                     self._update_recipients(self.to_write_box)
+                elif self.compose_box_status == "closed":
+                    raise RuntimeError(
+                        "Cycling compose box focus when compose box closed"
+                    )
+                else:
+                    assert_never(self.compose_box_status)
 
             if not self.msg_body_edit_enabled:
                 return key
@@ -989,13 +1016,18 @@ class WriteBox(urwid.Pile):
                 self.focus_position = self.FOCUS_CONTAINER_MESSAGE
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
+
             if self.compose_box_status == "open_with_stream":
                 if self.msg_edit_state is not None:
                     header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
                 else:
                     header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-            else:
+            elif self.compose_box_status == "open_with_private":
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+            elif self.compose_box_status == "closed":
+                raise RuntimeError("Cycling compose box focus when compose box closed")
+            else:
+                assert_never(self.compose_box_status)
 
         key = super().keypress(size, key)
         return key
