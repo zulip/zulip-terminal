@@ -220,7 +220,7 @@ class TestWriteBox:
             write_box.model.send_typing_status_by_user_ids.assert_called_with(
                 typing_recipient_user_ids, status="start"
             )
-            write_box.send_stop_typing_status()
+            write_box._send_stop_typing_status()
             write_box.model.send_typing_status_by_user_ids.assert_called_with(
                 typing_recipient_user_ids, status="stop"
             )
