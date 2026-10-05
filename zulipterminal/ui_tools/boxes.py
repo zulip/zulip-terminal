@@ -486,7 +486,7 @@ class WriteBox(urwid.Pile):
             "@**": self._autocomplete_users,
             "#": self._autocomplete_streams,
             "#**": self._autocomplete_streams,
-            ":": self.autocomplete_emojis,
+            ":": self._autocomplete_emojis,
         }
 
         # Look in a reverse order to find the last autocomplete prefix used in
@@ -664,6 +664,16 @@ class WriteBox(urwid.Pile):
         matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
         return matched_stream_typeaheads, matched_streams
 
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_emojis(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
+        emoji_list = self.model.all_emoji_names
+        emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
+        emoji_typeahead = format_string(emojis, ":{}:")
+
+        return emoji_typeahead, emojis
+
     # NOTE: only used in next function right now
     def _autocomplete_stream_and_topic(
         self, text: str, prefix_string: str
@@ -718,15 +728,6 @@ class WriteBox(urwid.Pile):
             autocomplete_map.update({prefix: self._autocomplete_stream_and_topic})
 
         return text
-
-    def autocomplete_emojis(
-        self, text: str, prefix_string: str
-    ) -> Tuple[List[str], List[str]]:
-        emoji_list = self.model.all_emoji_names
-        emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
-        emoji_typeahead = format_string(emojis, ":{}:")
-
-        return emoji_typeahead, emojis
 
     def exit_compose_box(self) -> None:
         self._set_default_footer_after_autocomplete()
