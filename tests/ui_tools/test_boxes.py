@@ -484,7 +484,7 @@ class TestWriteBox:
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
-        write_box.update_recipients(write_box.to_write_box)
+        write_box._update_recipients(write_box.to_write_box)
 
         assert write_box.recipient_emails == expected_recipient_emails
         assert write_box.recipient_user_ids == expected_recipient_user_ids
