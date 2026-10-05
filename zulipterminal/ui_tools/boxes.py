@@ -221,7 +221,7 @@ class WriteBox(urwid.Pile):
             multiline=True, max_char=self.model.max_message_length
         )
         self.msg_write_box.enable_autocomplete(
-            func=self.generic_autocomplete,
+            func=self._generic_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
@@ -338,7 +338,7 @@ class WriteBox(urwid.Pile):
             multiline=True, max_char=self.model.max_message_length
         )
         self.msg_write_box.enable_autocomplete(
-            func=self.generic_autocomplete,
+            func=self._generic_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
@@ -477,7 +477,7 @@ class WriteBox(urwid.Pile):
         # matched_streams[0] and matched_streams[1] contains the same data.
         return self._process_typeaheads(matched_streams[0], state, matched_streams[1])
 
-    def generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
+    def _generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         autocomplete_map = {
             "@_": self.autocomplete_users,
             "@_**": self.autocomplete_users,
