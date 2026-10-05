@@ -484,8 +484,8 @@ class WriteBox(urwid.Pile):
             "@": self._autocomplete_mentions,
             "@*": self._autocomplete_groups,
             "@**": self._autocomplete_users,
-            "#": self.autocomplete_streams,
-            "#**": self.autocomplete_streams,
+            "#": self._autocomplete_streams,
+            "#**": self._autocomplete_streams,
             ":": self.autocomplete_emojis,
         }
 
@@ -619,7 +619,8 @@ class WriteBox(urwid.Pile):
         group_typeahead = format_string(groups, prefix_string + extra_prefix + "{}*")
         return group_typeahead, groups
 
-    def autocomplete_streams(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_streams(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
