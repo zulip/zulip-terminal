@@ -14,7 +14,7 @@ from time import sleep
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
 import urwid
-from typing_extensions import Final, Literal
+from typing_extensions import Final, Literal, assert_never
 from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import Composition, PrivateComposition, StreamComposition
@@ -150,7 +150,7 @@ class WriteBox(urwid.Pile):
         else:
             self.contents.clear()
 
-    def set_editor_mode(self) -> None:
+    def _set_editor_mode(self) -> None:
         self.view.controller.enter_editor_mode_with(self)
 
     def _set_regular_and_typing_recipient_user_ids(
@@ -167,27 +167,32 @@ class WriteBox(urwid.Pile):
             self.recipient_user_ids = list()
             self.typing_recipient_user_ids = list()
 
-    def send_stop_typing_status(self) -> None:
+    def _send_stop_typing_status(self) -> None:
         # Send 'stop' updates only for PM narrows, when there are recipients
         # to send to and a prior 'start' status has already been sent.
-        if (
-            self.compose_box_status == "open_with_private"
-            and self.typing_recipient_user_ids
-            and self.sent_start_typing_status
+        if self.compose_box_status == "open_with_private":
+            if self.typing_recipient_user_ids and self.sent_start_typing_status:
+                self.model.send_typing_status_by_user_ids(
+                    self.typing_recipient_user_ids, status="stop"
+                )
+                self.send_next_typing_update = datetime.now()
+                self.idle_status_tracking = False
+                self.sent_start_typing_status = False
+        elif (
+            self.compose_box_status == "open_with_stream"
+            or self.compose_box_status == "closed"
         ):
-            self.model.send_typing_status_by_user_ids(
-                self.typing_recipient_user_ids, status="stop"
-            )
-            self.send_next_typing_update = datetime.now()
-            self.idle_status_tracking = False
-            self.sent_start_typing_status = False
+            # FIXME: Implement stream typing status, if server supports it
+            pass
+        else:
+            assert_never(self.compose_box_status)
 
     def private_box_view(
         self,
         *,
         recipient_user_ids: Optional[List[int]] = None,
     ) -> None:
-        self.set_editor_mode()
+        self._set_editor_mode()
 
         self.compose_box_status = "open_with_private"
 
@@ -221,7 +226,7 @@ class WriteBox(urwid.Pile):
             multiline=True, max_char=self.model.max_message_length
         )
         self.msg_write_box.enable_autocomplete(
-            func=self.generic_autocomplete,
+            func=self._generic_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
@@ -270,11 +275,11 @@ class WriteBox(urwid.Pile):
                     self.last_key_update + stop_period_delta - datetime.now()
                 )
                 sleep(idle_check_time.total_seconds())
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
 
         urwid.connect_signal(self.msg_write_box, "change", on_type_send_status)
 
-    def update_recipients(self, write_box: ReadlineEdit) -> None:
+    def _update_recipients(self, write_box: ReadlineEdit) -> None:
         self.recipient_emails = re.findall(REGEX_RECIPIENT_EMAIL, write_box.edit_text)
         self._set_regular_and_typing_recipient_user_ids(
             [self.model.user_dict[email]["user_id"] for email in self.recipient_emails]
@@ -328,7 +333,7 @@ class WriteBox(urwid.Pile):
     def _setup_common_stream_compose(
         self, stream_id: int, caption: str, title: str
     ) -> None:
-        self.set_editor_mode()
+        self._set_editor_mode()
         self.compose_box_status = "open_with_stream"
         self.stream_id = stream_id
         self.recipient_user_ids = self.model.get_other_subscribers_in_stream(
@@ -338,7 +343,7 @@ class WriteBox(urwid.Pile):
             multiline=True, max_char=self.model.max_message_length
         )
         self.msg_write_box.enable_autocomplete(
-            func=self.generic_autocomplete,
+            func=self._generic_autocomplete,
             key=primary_key_for_command("AUTOCOMPLETE"),
             key_reverse=primary_key_for_command("AUTOCOMPLETE_REVERSE"),
         )
@@ -477,16 +482,16 @@ class WriteBox(urwid.Pile):
         # matched_streams[0] and matched_streams[1] contains the same data.
         return self._process_typeaheads(matched_streams[0], state, matched_streams[1])
 
-    def generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
+    def _generic_autocomplete(self, text: str, state: Optional[int]) -> Optional[str]:
         autocomplete_map = {
-            "@_": self.autocomplete_users,
-            "@_**": self.autocomplete_users,
-            "@": self.autocomplete_mentions,
-            "@*": self.autocomplete_groups,
-            "@**": self.autocomplete_users,
-            "#": self.autocomplete_streams,
-            "#**": self.autocomplete_streams,
-            ":": self.autocomplete_emojis,
+            "@_": self._autocomplete_users,
+            "@_**": self._autocomplete_users,
+            "@": self._autocomplete_mentions,
+            "@*": self._autocomplete_groups,
+            "@**": self._autocomplete_users,
+            "#": self._autocomplete_streams,
+            "#**": self._autocomplete_streams,
+            ":": self._autocomplete_emojis,
         }
 
         # Look in a reverse order to find the last autocomplete prefix used in
@@ -546,21 +551,23 @@ class WriteBox(urwid.Pile):
         self.view.set_typeahead_footer(reduced_suggestions, state, is_truncated)
         return typeahead
 
-    def autocomplete_mentions(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_mentions(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         # Handles user mentions (@ mentions and silent mentions)
         # and group mentions.
 
-        user_typeahead, user_names = self.autocomplete_users(text, prefix_string)
-        group_typeahead, groups = self.autocomplete_groups(text, prefix_string)
+        user_typeahead, user_names = self._autocomplete_users(text, prefix_string)
+        group_typeahead, groups = self._autocomplete_groups(text, prefix_string)
 
         combined_typeahead = user_typeahead + group_typeahead
         combined_names = user_names + groups
 
         return combined_typeahead, combined_names
 
-    def autocomplete_users(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_users(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         users_list = self.view.users
@@ -602,7 +609,8 @@ class WriteBox(urwid.Pile):
 
         return user_typeahead, user_names
 
-    def autocomplete_groups(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_groups(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         prefix_length = len(prefix_string)
@@ -616,7 +624,8 @@ class WriteBox(urwid.Pile):
         group_typeahead = format_string(groups, prefix_string + extra_prefix + "{}*")
         return group_typeahead, groups
 
-    def autocomplete_streams(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_streams(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         streams_list = self.view.pinned_streams + self.view.unpinned_streams
@@ -660,7 +669,18 @@ class WriteBox(urwid.Pile):
         matched_stream_typeaheads = format_string(matched_streams, "#**{}**")
         return matched_stream_typeaheads, matched_streams
 
-    def autocomplete_stream_and_topic(
+    # FIXME: Add test, or not necessary?
+    def _autocomplete_emojis(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
+        emoji_list = self.model.all_emoji_names
+        emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
+        emoji_typeahead = format_string(emojis, ":{}:")
+
+        return emoji_typeahead, emojis
+
+    # NOTE: only used in next function right now
+    def _autocomplete_stream_and_topic(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
         match = re.search(REGEX_STREAM_AND_TOPIC_FENCED_HALF, text)
@@ -710,18 +730,9 @@ class WriteBox(urwid.Pile):
             # Amending the text to have new prefix (with `**` fence)
             text = text[: match_unfenced.start()] + prefix_with_topic
         if match or match_fenced or match_unfenced:
-            autocomplete_map.update({prefix: self.autocomplete_stream_and_topic})
+            autocomplete_map.update({prefix: self._autocomplete_stream_and_topic})
 
         return text
-
-    def autocomplete_emojis(
-        self, text: str, prefix_string: str
-    ) -> Tuple[List[str], List[str]]:
-        emoji_list = self.model.all_emoji_names
-        emojis = [emoji for emoji in emoji_list if match_emoji(emoji, text[1:])]
-        emoji_typeahead = format_string(emojis, ":{}:")
-
-        return emoji_typeahead, emojis
 
     def exit_compose_box(self) -> None:
         self._set_default_footer_after_autocomplete()
@@ -747,7 +758,7 @@ class WriteBox(urwid.Pile):
             self._set_default_footer_after_autocomplete()
 
         if is_command_key("SEND_MESSAGE", key):
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
             if self.compose_box_status == "open_with_stream":
                 if re.fullmatch(r"\s*", self.title_write_box.edit_text):
                     topic = "(no topic)"
@@ -777,7 +788,7 @@ class WriteBox(urwid.Pile):
                         topic=topic,
                         content=self.msg_write_box.edit_text,
                     )
-            else:
+            elif self.compose_box_status == "open_with_private":
                 if self.msg_edit_state is not None:
                     success = self.model.update_private_message(
                         content=self.msg_write_box.edit_text,
@@ -789,7 +800,7 @@ class WriteBox(urwid.Pile):
                     )
                     if not all_valid:
                         return key
-                    self.update_recipients(self.to_write_box)
+                    self._update_recipients(self.to_write_box)
                     if self.recipient_user_ids:
                         success = self.model.send_private_message(
                             recipients=self.recipient_user_ids,
@@ -800,6 +811,11 @@ class WriteBox(urwid.Pile):
                             ["Cannot send message without specifying recipients."]
                         )
                         success = None
+            elif self.compose_box_status == "closed":
+                raise RuntimeError("Sending message when compose box closed")
+            else:
+                assert_never(self.compose_box_status)
+
             if success:
                 self.msg_write_box.edit_text = ""
                 if self.msg_edit_state is not None:
@@ -826,9 +842,15 @@ class WriteBox(urwid.Pile):
                     self.view.controller.report_error(
                         "Cannot narrow to message without specifying recipients."
                     )
+            elif self.compose_box_status == "closed":
+                raise RuntimeError(
+                    "Narrowing to message recipient when compose box closed"
+                )
+            else:
+                assert_never(self.compose_box_status)
         elif is_command_key("EXIT_COMPOSE", key):
             saved_draft = self.model.session_draft_message()
-            self.send_stop_typing_status()
+            self._send_stop_typing_status()
 
             compose_not_in_edit_mode = self.msg_edit_state is None
             compose_box_content = self.msg_write_box.edit_text
@@ -897,7 +919,7 @@ class WriteBox(urwid.Pile):
                     )
                     if not all_valid:
                         return key
-                    self.update_recipients(self.to_write_box)
+                    self._update_recipients(self.to_write_box)
                     this_draft: Composition = PrivateComposition(
                         type="private",
                         to=self.recipient_user_ids,
@@ -912,6 +934,11 @@ class WriteBox(urwid.Pile):
                         subject=self.title_write_box.edit_text,
                         read_by_sender=True,
                     )
+                elif self.compose_box_status == "closed":
+                    raise RuntimeError("Save as draft when compose box closed")
+                else:
+                    assert_never(self.compose_box_status)
+
                 saved_draft = self.model.session_draft_message()
                 if not saved_draft:
                     self.model.save_draft(this_draft)
@@ -966,7 +993,7 @@ class WriteBox(urwid.Pile):
                         return key
                     else:
                         header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-                else:
+                elif self.compose_box_status == "open_with_private":
                     all_valid = self._tidy_valid_recipients_and_notify_invalid_ones(
                         self.to_write_box
                     )
@@ -975,7 +1002,13 @@ class WriteBox(urwid.Pile):
                     # We extract recipients' user_ids and emails only once we know
                     # that all the recipients are valid, to avoid including any
                     # invalid ones.
-                    self.update_recipients(self.to_write_box)
+                    self._update_recipients(self.to_write_box)
+                elif self.compose_box_status == "closed":
+                    raise RuntimeError(
+                        "Cycling compose box focus when compose box closed"
+                    )
+                else:
+                    assert_never(self.compose_box_status)
 
             if not self.msg_body_edit_enabled:
                 return key
@@ -983,13 +1016,18 @@ class WriteBox(urwid.Pile):
                 self.focus_position = self.FOCUS_CONTAINER_MESSAGE
             else:
                 self.focus_position = self.FOCUS_CONTAINER_HEADER
+
             if self.compose_box_status == "open_with_stream":
                 if self.msg_edit_state is not None:
                     header.focus_col = self.FOCUS_HEADER_BOX_TOPIC
                 else:
                     header.focus_col = self.FOCUS_HEADER_BOX_STREAM
-            else:
+            elif self.compose_box_status == "open_with_private":
                 header.focus_col = self.FOCUS_HEADER_BOX_RECIPIENT
+            elif self.compose_box_status == "closed":
+                raise RuntimeError("Cycling compose box focus when compose box closed")
+            else:
+                assert_never(self.compose_box_status)
 
         key = super().keypress(size, key)
         return key

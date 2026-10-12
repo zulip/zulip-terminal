@@ -164,7 +164,7 @@ class TestWriteBox:
             ("(#**Stream 1**>", 0, True, "(#**Stream 1>Topic 1**"),
         ],
     )
-    def test_generic_autocomplete_stream_and_topic(
+    def test__generic_autocomplete__stream_and_topic(
         self,
         write_box: WriteBox,
         text: str,
@@ -178,7 +178,7 @@ class TestWriteBox:
         write_box.model.is_valid_stream.return_value = is_valid_stream
         write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = set()
-        typeahead_string = write_box.generic_autocomplete(text, state)
+        typeahead_string = write_box._generic_autocomplete(text, state)
 
         assert typeahead_string == required_typeahead
 
@@ -220,7 +220,7 @@ class TestWriteBox:
             write_box.model.send_typing_status_by_user_ids.assert_called_with(
                 typing_recipient_user_ids, status="start"
             )
-            write_box.send_stop_typing_status()
+            write_box._send_stop_typing_status()
             write_box.model.send_typing_status_by_user_ids.assert_called_with(
                 typing_recipient_user_ids, status="stop"
             )
@@ -484,7 +484,7 @@ class TestWriteBox:
         assert write_box.to_write_box is not None
         write_box.to_write_box.edit_text = header
 
-        write_box.update_recipients(write_box.to_write_box)
+        write_box._update_recipients(write_box.to_write_box)
 
         assert write_box.recipient_emails == expected_recipient_emails
         assert write_box.recipient_user_ids == expected_recipient_user_ids
@@ -496,10 +496,10 @@ class TestWriteBox:
             ("Plain Text", 1),
         ],
     )
-    def test_generic_autocomplete_no_prefix(
+    def test__generic_autocomplete__no_prefix(
         self, write_box: WriteBox, text: str, state: Optional[int]
     ) -> None:
-        return_val = write_box.generic_autocomplete(text, state)
+        return_val = write_box._generic_autocomplete(text, state)
         assert return_val == text
         write_box.view.set_typeahead_footer.assert_not_called()
 
@@ -634,7 +634,7 @@ class TestWriteBox:
             (":NoMatch", None, []),
         ],
     )
-    def test_generic_autocomplete_set_footer(
+    def test__generic_autocomplete__set_footer(
         self,
         mocker: MockerFixture,
         write_box: WriteBox,
@@ -648,7 +648,7 @@ class TestWriteBox:
         )
         write_box.model.stream_dict = stream_dict
         write_box.model.muted_streams = set()
-        write_box.generic_autocomplete(text, state)
+        write_box._generic_autocomplete(text, state)
 
         write_box.view.set_typeahead_footer.assert_called_once_with(
             footer_text, state, False
@@ -756,14 +756,14 @@ class TestWriteBox:
             ("@@_**H", 0, "@@_**Human Myself**"),  # Optional stars
         ],
     )
-    def test_generic_autocomplete_mentions(
+    def test__generic_autocomplete__mentions(
         self,
         write_box: WriteBox,
         text: str,
         required_typeahead: Optional[str],
         state: Optional[int],
     ) -> None:
-        typeahead_string = write_box.generic_autocomplete(text, state)
+        typeahead_string = write_box._generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
@@ -779,7 +779,7 @@ class TestWriteBox:
             ("@", -1, "@*Group 4*", [11, 12]),
         ],
     )
-    def test_generic_autocomplete_mentions_subscribers(
+    def test__generic_autocomplete__mentions_subscribers(
         self,
         write_box: WriteBox,
         text: str,
@@ -788,7 +788,7 @@ class TestWriteBox:
         recipients: List[int],
     ) -> None:
         write_box.recipient_user_ids = recipients
-        typeahead_string = write_box.generic_autocomplete(text, state)
+        typeahead_string = write_box._generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
@@ -801,7 +801,7 @@ class TestWriteBox:
         + [("@**" + "Human"[:index], "@") for index in range(len("Human") + 1)]
         + [("@_" + "Human"[:index], "@_") for index in range(len("Human") + 1)],
     )
-    def test_generic_autocomplete_user_mentions(
+    def test__generic_autocomplete__user_mentions(
         self,
         write_box: WriteBox,
         mocker: MockerFixture,
@@ -811,7 +811,7 @@ class TestWriteBox:
     ) -> None:
         _process_typeaheads = mocker.patch(WRITEBOX + "._process_typeaheads")
 
-        write_box.generic_autocomplete(text, state)
+        write_box._generic_autocomplete(text, state)
 
         matching_users = [
             "Human Myself",
@@ -1002,7 +1002,7 @@ class TestWriteBox:
             ),
         ],
     )
-    def test_generic_autocomplete_streams(
+    def test__generic_autocomplete__streams(
         self,
         write_box: WriteBox,
         text: str,
@@ -1028,7 +1028,7 @@ class TestWriteBox:
         states = state_and_required_typeahead.keys()
         required_typeaheads = list(state_and_required_typeahead.values())
         typeahead_strings = [
-            write_box.generic_autocomplete(text, state) for state in states
+            write_box._generic_autocomplete(text, state) for state in states
         ]
         assert typeahead_strings == required_typeaheads
 
@@ -1059,14 +1059,14 @@ class TestWriteBox:
             ("#:smi", 0, "#:smile:"),
         ],
     )
-    def test_generic_autocomplete_emojis(
+    def test__generic_autocomplete__emojis(
         self,
         write_box: WriteBox,
         text: str,
         state: Optional[int],
         required_typeahead: Optional[str],
     ) -> None:
-        typeahead_string = write_box.generic_autocomplete(text, state)
+        typeahead_string = write_box._generic_autocomplete(text, state)
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
@@ -1824,7 +1824,7 @@ class TestWriteBox:
         user_id_email_dict: Dict[int, str],
     ) -> None:
         mocker.patch(WRITEBOX + "._set_stream_write_box_style")
-        mocker.patch(WRITEBOX + ".set_editor_mode")
+        mocker.patch(WRITEBOX + "._set_editor_mode")
         write_box.model.user_id_email_dict = user_id_email_dict
         if msg_type == "stream":
             write_box.stream_box_view(1000)
