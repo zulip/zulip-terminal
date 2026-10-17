@@ -13,6 +13,7 @@
   - [When are messages marked as having been read?](#when-are-messages-marked-as-having-been-read)
   - [How do I access multiple servers?](#how-do-i-access-multiple-servers)
   - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
+  - [How do I format text while composing?](#how-do-i-format-text-while-composing)
   - [Can I compose messages in another editor?](#can-i-compose-messages-in-another-editor)
 - Something is not working!
   - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
@@ -374,6 +375,17 @@ through autocomplete depend upon the context automatically.
 **NOTE:** If a direct message recipient's name contains comma(s) (`,`), they
 are currently treated as comma-separated recipients.
 
+## How do I format text while composing?
+
+When composing in Zulip Terminal, use `Meta l` to insert a Markdown link
+template (`[](url)`) or `Meta c` to insert a pair of backticks for an inline
+code span. The cursor is placed between the link brackets or backticks. Unlike
+the web app, the compose box does not support selecting text to wrap. `Ctrl l`
+is already used to clear the compose box (and redraws the screen elsewhere).
+`Ctrl`/`Cmd`+`Shift` shortcuts may be intercepted or indistinguishable in a
+terminal. To paste, use your terminal emulator's paste command; handling of
+tabs and newlines may vary.
+
 ## Can I compose messages in another editor?
 
 In the `main` branch of zulip-terminal, you can now use an external editor of
@@ -496,4 +508,3 @@ cause of the error, which should be output in such cases:
 Come meet us on the
 [#zulip-terminal](https://chat.zulip.org/#narrow/stream/206-zulip-terminal)
 stream on *chat.zulip.org*.
-

@@ -734,6 +734,16 @@ class WriteBox(urwid.Pile):
         self.is_in_typeahead_mode = False
         self.view.set_footer_text()
 
+    def _insert_markdown_template(self, template: str) -> None:
+        message_box = self.msg_write_box
+        cursor_position = message_box.edit_pos
+        message_box.set_edit_text(
+            message_box.edit_text[:cursor_position]
+            + template
+            + message_box.edit_text[cursor_position:]
+        )
+        message_box.set_edit_pos(cursor_position + 1)
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if self.is_in_typeahead_mode and not (
             is_command_key("AUTOCOMPLETE", key)
@@ -746,7 +756,23 @@ class WriteBox(urwid.Pile):
             # TODO: Fully implement resuming of autocomplete upon resuming compose.
             self._set_default_footer_after_autocomplete()
 
-        if is_command_key("SEND_MESSAGE", key):
+        if (
+            self.msg_body_edit_enabled
+            and self.contents
+            and self.focus_position == self.FOCUS_CONTAINER_MESSAGE
+            and is_command_key("INSERT_LINK_TEMPLATE", key)
+        ):
+            self._insert_markdown_template("[](url)")
+            return key
+        elif (
+            self.msg_body_edit_enabled
+            and self.contents
+            and self.focus_position == self.FOCUS_CONTAINER_MESSAGE
+            and is_command_key("INSERT_CODE_SPAN", key)
+        ):
+            self._insert_markdown_template("``")
+            return key
+        elif is_command_key("SEND_MESSAGE", key):
             self.send_stop_typing_status()
             if self.compose_box_status == "open_with_stream":
                 if re.fullmatch(r"\s*", self.title_write_box.edit_text):

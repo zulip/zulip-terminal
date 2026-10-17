@@ -93,6 +93,8 @@
 |Cycle through recipient and content boxes|<kbd>Tab</kbd>|
 |Send a message|<kbd>Ctrl</kbd> + <kbd>d</kbd> / <kbd>Meta</kbd> + <kbd>Enter</kbd>|
 |Save current message as a draft|<kbd>Meta</kbd> + <kbd>s</kbd>|
+|Insert Markdown link template|<kbd>Meta</kbd> + <kbd>l</kbd>|
+|Insert inline code span|<kbd>Meta</kbd> + <kbd>c</kbd>|
 |Autocomplete @mentions, #stream_names, :emoji: and topics|<kbd>Ctrl</kbd> + <kbd>f</kbd>|
 |Cycle through autocomplete suggestions in reverse|<kbd>Ctrl</kbd> + <kbd>r</kbd>|
 |Exit message compose box|<kbd>Esc</kbd>|

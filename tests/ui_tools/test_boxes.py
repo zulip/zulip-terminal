@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
-from urwid import Widget
+from urwid import Text, Widget
 
 from zulipterminal.api_types import (
     TYPING_STARTED_EXPIRY_PERIOD,
@@ -95,6 +95,36 @@ class TestWriteBox:
         assert isinstance(write_box.last_key_update, datetime.datetime)
         assert write_box.idle_status_tracking is False
         assert write_box.sent_start_typing_status is False
+
+    @pytest.mark.parametrize(
+        "command, template",
+        [
+            ("INSERT_LINK_TEMPLATE", "[](url)"),
+            ("INSERT_CODE_SPAN", "``"),
+        ],
+    )
+    def test_keypress_inserts_markdown_template(
+        self,
+        mocker: MockerFixture,
+        write_box: WriteBox,
+        command: str,
+        template: str,
+    ) -> None:
+        message_box = mocker.Mock(edit_text="beforeafter", edit_pos=6)
+        write_box.msg_write_box = message_box
+        write_box.contents.extend(
+            [
+                (Text(""), write_box.options("weight", 1)),
+                (Text(""), write_box.options("weight", 1)),
+            ]
+        )
+        write_box.focus_position = write_box.FOCUS_CONTAINER_MESSAGE
+
+        result = write_box.keypress((1,), primary_key_for_command(command))
+
+        message_box.set_edit_text.assert_called_once_with("before" + template + "after")
+        message_box.set_edit_pos.assert_called_once_with(7)
+        assert result == primary_key_for_command(command)
 
     def test_not_calling_typing_method_without_recipients(
         self, mocker: MockerFixture, write_box: WriteBox
