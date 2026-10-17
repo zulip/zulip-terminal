@@ -157,6 +157,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Save current message as a draft',
         'key_category': 'compose_box',
     },
+    'INSERT_LINK_TEMPLATE': {
+        'keys': ['meta l'],
+        'help_text': 'Insert Markdown link template',
+        'key_category': 'compose_box',
+    },
+    'INSERT_CODE_SPAN': {
+        'keys': ['meta c'],
+        'help_text': 'Insert inline code span',
+        'key_category': 'compose_box',
+    },
     'AUTOCOMPLETE': {
         'keys': ['ctrl f'],
         'help_text': ('Autocomplete @mentions, #stream_names, :emoji:'
