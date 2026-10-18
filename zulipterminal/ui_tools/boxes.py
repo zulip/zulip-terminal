@@ -66,6 +66,26 @@ class _MessageEditState(NamedTuple):
 DELIMS_MESSAGE_COMPOSE = "\t\n;"
 
 
+class _WildcardMention(NamedTuple):
+    name: str
+    min_feature_level: int
+    allowed_in_direct_messages: bool
+
+
+# Wildcard mentions, as offered by the web app:
+# - stream-only wildcards are not offered in direct messages
+# - "topic" requires Zulip 8.0 (ZFL 224), "channel" Zulip 9.0 (ZFL 247)
+WILDCARD_MENTIONS: Final = (
+    _WildcardMention("all", 0, True),
+    _WildcardMention("everyone", 0, True),
+    _WildcardMention("stream", 0, False),
+    _WildcardMention("channel", 247, False),
+    _WildcardMention("topic", 224, False),
+)
+# The web app only suggests the shortest matching wildcards
+MAX_WILDCARD_MENTION_SUGGESTIONS: Final = 2
+
+
 class WriteBox(urwid.Pile):
     def __init__(self, view: Any) -> None:
         super().__init__(self.main_view(True))
@@ -549,16 +569,46 @@ class WriteBox(urwid.Pile):
     def autocomplete_mentions(
         self, text: str, prefix_string: str
     ) -> Tuple[List[str], List[str]]:
-        # Handles user mentions (@ mentions and silent mentions)
-        # and group mentions.
+        # Handles user mentions (@ mentions and silent mentions),
+        # wildcard mentions and group mentions.
 
+        wildcard_typeahead, wildcards = self.autocomplete_wildcard_mentions(
+            text, prefix_string
+        )
         user_typeahead, user_names = self.autocomplete_users(text, prefix_string)
         group_typeahead, groups = self.autocomplete_groups(text, prefix_string)
 
-        combined_typeahead = user_typeahead + group_typeahead
-        combined_names = user_names + groups
+        combined_typeahead = wildcard_typeahead + user_typeahead + group_typeahead
+        combined_names = wildcards + user_names + groups
 
         return combined_typeahead, combined_names
+
+    def autocomplete_wildcard_mentions(
+        self, text: str, prefix_string: str
+    ) -> Tuple[List[str], List[str]]:
+        if self.compose_box_status == "open_with_stream":
+            in_stream = True
+        elif self.compose_box_status == "open_with_private":
+            in_stream = False
+        else:
+            return [], []
+
+        search_text = text[len(prefix_string) :].lower()
+        feature_level = self.model.server_feature_level
+
+        matching_wildcards = [
+            wildcard.name
+            for wildcard in WILDCARD_MENTIONS
+            if feature_level >= wildcard.min_feature_level
+            and (in_stream or wildcard.allowed_in_direct_messages)
+            and wildcard.name.startswith(search_text)
+        ]
+        wildcards = sorted(matching_wildcards, key=len)[
+            :MAX_WILDCARD_MENTION_SUGGESTIONS
+        ]
+
+        wildcard_typeahead = format_string(wildcards, prefix_string + "**{}**")
+        return wildcard_typeahead, wildcards
 
     def autocomplete_users(
         self, text: str, prefix_string: str

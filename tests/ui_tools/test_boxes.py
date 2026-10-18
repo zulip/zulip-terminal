@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional
 import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
+from typing_extensions import Literal
 from urwid import Widget
 
 from zulipterminal.api_types import (
@@ -789,6 +790,110 @@ class TestWriteBox:
     ) -> None:
         write_box.recipient_user_ids = recipients
         typeahead_string = write_box.generic_autocomplete(text, state)
+        assert typeahead_string == required_typeahead
+
+    @pytest.mark.parametrize(
+        "text, compose_box_status, feature_level, expected_wildcards",
+        [
+            case("@al", "open_with_stream", 247, ["all"], id="stream-all"),
+            case(
+                "@AL",
+                "open_with_stream",
+                247,
+                ["all"],
+                id="stream-case_insensitive",
+            ),
+            case(
+                "@every",
+                "open_with_stream",
+                0,
+                ["everyone"],
+                id="stream-everyone",
+            ),
+            case("@str", "open_with_stream", 0, ["stream"], id="stream-stream"),
+            case(
+                "@top",
+                "open_with_stream",
+                224,
+                ["topic"],
+                id="stream-topic_ZFL224",
+            ),
+            case("@top", "open_with_stream", 223, [], id="stream-topic_ZFL223"),
+            case(
+                "@chan",
+                "open_with_stream",
+                247,
+                ["channel"],
+                id="stream-channel_ZFL247",
+            ),
+            case("@chan", "open_with_stream", 246, [], id="stream-channel_ZFL246"),
+            case(
+                "@",
+                "open_with_stream",
+                247,
+                ["all", "topic"],
+                id="stream-empty_ZFL247",
+            ),
+            case(
+                "@",
+                "open_with_stream",
+                223,
+                ["all", "stream"],
+                id="stream-empty_ZFL223",
+            ),
+            case(
+                "@",
+                "open_with_private",
+                247,
+                ["all", "everyone"],
+                id="dm-empty",
+            ),
+            case("@al", "open_with_private", 247, ["all"], id="dm-all"),
+            case("@top", "open_with_private", 247, [], id="dm-no_topic"),
+            case("@chan", "open_with_private", 247, [], id="dm-no_channel"),
+            case("@str", "open_with_private", 247, [], id="dm-no_stream"),
+            case("@nomatch", "open_with_stream", 247, [], id="stream-no_match"),
+            case("@al", "closed", 247, [], id="compose_closed"),
+        ],
+    )
+    def test_autocomplete_wildcard_mentions(
+        self,
+        write_box: WriteBox,
+        text: str,
+        compose_box_status: Literal["open_with_private", "open_with_stream", "closed"],
+        feature_level: int,
+        expected_wildcards: List[str],
+    ) -> None:
+        write_box.compose_box_status = compose_box_status
+        write_box.model.server_feature_level = feature_level
+
+        typeaheads, wildcards = write_box.autocomplete_wildcard_mentions(text, "@")
+
+        assert wildcards == expected_wildcards
+        assert typeaheads == [f"@**{name}**" for name in expected_wildcards]
+
+    @pytest.mark.parametrize(
+        "text, state, required_typeahead",
+        [
+            case("@al", 0, "@**all**", id="wildcard_only_match"),
+            case("@", 0, "@**all**", id="empty-first_is_wildcard"),
+            case("@", 1, "@**topic**", id="empty-second_is_wildcard"),
+            case("@", 2, "@**Human Myself**", id="empty-then_users"),
+            case("@_al", 0, None, id="silent_mention-no_wildcards"),
+        ],
+    )
+    def test_generic_autocomplete_wildcard_mentions_in_stream(
+        self,
+        write_box: WriteBox,
+        text: str,
+        state: Optional[int],
+        required_typeahead: Optional[str],
+    ) -> None:
+        write_box.compose_box_status = "open_with_stream"
+        write_box.model.server_feature_level = 247
+
+        typeahead_string = write_box.generic_autocomplete(text, state)
+
         assert typeahead_string == required_typeahead
 
     @pytest.mark.parametrize(
