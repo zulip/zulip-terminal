@@ -297,7 +297,8 @@ option in turn, including:
 - helping to specify users for new direct messages (eg. after <kbd>x</kbd>)
 - helping to specify streams and existing topics for new stream messages (eg.
   after <kbd>c</kbd>)
-- mentioning a user or user-group (in message content)
+- mentioning a user, user-group, or everyone via wildcard mentions such as
+  `@**all**` or `@**topic**` (in message content)
 - linking to a stream or existing topic (in message content)
 - emojis (in message content)
 
