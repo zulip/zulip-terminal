@@ -1034,6 +1034,7 @@ class MessageSearchBox(urwid.Pile):
             self.text_box.set_edit_text("")
             self.controller.exit_editor_mode()
             self.controller.view.middle_column.set_focus("body")
+            self.controller.view.restore_column_after_search()
             return key
 
         elif is_command_key("EXECUTE_SEARCH", key):
