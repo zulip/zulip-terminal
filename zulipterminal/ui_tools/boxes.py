@@ -1003,6 +1003,13 @@ class MessageSearchBox(urwid.Pile):
     def __init__(self, controller: Any) -> None:
         self.controller = controller
         super().__init__(self.main_view())
+        self._recipient_bar_item = self.contents[1]
+
+    def set_recipient_bar_visible(self, visible: bool) -> None:
+        if visible and len(self.contents) == 1:
+            self.contents.append(self._recipient_bar_item)
+        elif not visible and len(self.contents) == 2:
+            self.contents.pop()
 
     def main_view(self) -> Any:
         search_text = (

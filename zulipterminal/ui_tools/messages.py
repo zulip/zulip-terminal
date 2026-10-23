@@ -209,6 +209,12 @@ class MessageBox(urwid.Pile):
         else:
             return self.private_header()
 
+    def has_fixed_recipients(self) -> bool:
+        narrow = [part for part in self.model.narrow if part[0] != "search"]
+        return (len(narrow) == 1 and narrow[0][0] == "pm-with") or (
+            len(narrow) == 2 and narrow[0][0] == "stream" and narrow[1][0] == "topic"
+        )
+
     def top_search_bar(self) -> Any:
         curr_narrow = self.model.narrow
         is_search_narrow = self.model.is_search_narrow()
@@ -218,7 +224,10 @@ class MessageBox(urwid.Pile):
             ]
         else:
             self.model.controller.view.search_box.text_box.set_edit_text("")
-        if curr_narrow == []:
+        text_to_fill: Any
+        if self.has_fixed_recipients():
+            text_to_fill = self.recipient_header().markup
+        elif curr_narrow == []:
             text_to_fill = f" {ALL_MESSAGES_MARKER} All messages "
         elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
             text_to_fill = f" {DIRECT_MESSAGE_MARKER} All direct messages "
@@ -233,16 +242,10 @@ class MessageBox(urwid.Pile):
             bar_color = f"s{bar_color}"
             stream_access_type = self.model.stream_access_type(self.stream_id)
             stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
-            if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
-                text_to_fill = (
-                    "bar",  # type: ignore[assignment]
-                    (bar_color, f" {stream_icon} {self.stream_name}: topic narrow "),
-                )
-            else:
-                text_to_fill = (
-                    "bar",  # type: ignore[assignment]
-                    (bar_color, f" {stream_icon} {self.stream_name} "),
-                )
+            text_to_fill = (
+                "bar",
+                (bar_color, f" {stream_icon} {self.stream_name} "),
+            )
         elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
             text_to_fill = (
                 f" {DIRECT_MESSAGE_MARKER} Group direct message conversation "
