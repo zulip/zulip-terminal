@@ -417,11 +417,14 @@ class TestMessageView:
             ["topic", msg_box.topic_name],
         ]
         channel = [["stream", msg_box.stream_name]]
+        group_dm = [["pm-with", "boo@zulip.com, bar@zulip.com"]]
 
         for narrow, visible in [
             (topic, False),
             (channel, True),
             (topic, False),
+            (channel, True),
+            (group_dm, False),
             (channel, True),
         ]:
             model.narrow = narrow
