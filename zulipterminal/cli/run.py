@@ -23,6 +23,7 @@ from zulipterminal.config.themes import (
     all_themes,
     complete_and_incomplete_themes,
     generate_theme,
+    redundant_pygments_overrides,
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
@@ -567,6 +568,13 @@ def main(options: Optional[List[str]] = None) -> None:
             else:
                 incomplete_theme_text += "      (all themes are incomplete)"
             print(in_color("yellow", incomplete_theme_text))
+        redundant_overrides = redundant_pygments_overrides(theme_to_use.value)
+        if redundant_overrides:
+            redundant_overrides_text = (
+                "   WARNING: Theme has redundant pygments overrides!\n"
+                f"      (these could be removed: {', '.join(redundant_overrides)})"
+            )
+            print(in_color("yellow", redundant_overrides_text))
         print_setting("autohide setting", zterm["autohide"])
         print_setting("exit confirmation setting", zterm["exit_confirmation"])
         if zterm["footlinks"].source == ConfigSource.ZULIPRC:

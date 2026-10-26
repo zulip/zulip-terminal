@@ -1,6 +1,6 @@
 import re
 from enum import Enum
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 from pygments.styles.material import MaterialStyle
@@ -24,6 +24,7 @@ from zulipterminal.config.themes import (
     generate_theme,
     generate_urwid_compatible_pygments_styles,
     parse_themefile,
+    redundant_pygments_overrides,
     valid_16_color_codes,
     validate_colors,
 )
@@ -357,6 +358,61 @@ def test_generate_pygments_styles(
     # Check for overrides(k,sd) and inheriting styles (kr)
     for style in expected_styles:
         assert style in pygments_styles
+
+
+# Check built-in themes have no redundant overrides, for quality-control purposes
+@pytest.mark.parametrize("theme_name", THEMES)
+def test_builtin_theme_has_no_redundant_pygments_overrides(theme_name: str) -> None:
+    assert redundant_pygments_overrides(theme_name) == []
+
+
+@pytest.mark.parametrize(
+    "overrides, expected_redundant_overrides",
+    [
+        case(None, [], id="overrides_none"),
+        case({}, [], id="overrides_empty"),
+        case(
+            {
+                "k": "#8B008B, bold",  # Same as style, other than whitespace
+                "nc": "#008b45,bold",  # Same as translated style
+                "s": "#CD5555",  # Same as style, with no translation needed
+                "c": "#228B22, italics",  # Different to style
+                "sd": "#123",  # Style not defined in pygments
+            },
+            ["k", "nc", "s"],
+            id="some_redundant",
+        ),
+    ],
+)
+def test_redundant_pygments_overrides(
+    mocker: MockerFixture,
+    overrides: Optional[Dict[str, str]],
+    expected_redundant_overrides: List[str],
+    fake_theme_name: str = "sometheme",
+) -> None:
+    class FakeTheme:
+        META: Dict[str, Any] = {
+            "pygments": {
+                "styles": PerldocStyle().styles,
+                "background": "#def",
+                "overrides": overrides,
+            }
+        }
+
+    mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
+
+    assert redundant_pygments_overrides(fake_theme_name) == expected_redundant_overrides
+
+
+def test_redundant_pygments_overrides__no_META(
+    mocker: MockerFixture, fake_theme_name: str = "sometheme"
+) -> None:
+    class FakeTheme:
+        pass
+
+    mocker.patch(MODULE + ".THEMES", {fake_theme_name: FakeTheme})
+
+    assert redundant_pygments_overrides(fake_theme_name) == []
 
 
 def test_validate_colors(color_depth: int = 16) -> None:
