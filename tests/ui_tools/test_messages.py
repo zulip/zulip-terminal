@@ -933,10 +933,13 @@ class TestMessageBox:
                 [["stream", "PTEST"], ["topic", "b"]],
                 0,
                 f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR}",
-                (
-                    "bar",
-                    ("s#bd6", f" {STREAM_MARKER_PUBLIC} PTEST: topic narrow "),
-                ),
+                None,
+            ),
+            (
+                [["stream", "PTEST"], ["topic", "b"], ["search", "FOO"]],
+                0,
+                f" {STREAM_MARKER_PUBLIC} PTEST {STREAM_TOPIC_SEPARATOR}",
+                None,
             ),
             (
                 [["is", "private"]],
@@ -954,13 +957,19 @@ class TestMessageBox:
                 [["pm-with", "boo@zulip.com"]],
                 1,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
-                f" {DIRECT_MESSAGE_MARKER} Direct message conversation ",
+                None,
             ),
             (
                 [["pm-with", "boo@zulip.com, bar@zulip.com"]],
                 2,
                 f" {DIRECT_MESSAGE_MARKER} You and ",
-                f" {DIRECT_MESSAGE_MARKER} Group direct message conversation ",
+                None,
+            ),
+            (
+                [["pm-with", "boo@zulip.com"], ["search", "FOO"]],
+                1,
+                f" {DIRECT_MESSAGE_MARKER} You and ",
+                None,
             ),
             (
                 [["is", "starred"]],
@@ -1033,6 +1042,9 @@ class TestMessageBox:
             },
         }
         self.model.narrow = msg_narrow
+        self.model.is_search_narrow.return_value = any(
+            clause[0] == "search" for clause in msg_narrow
+        )
         messages = messages_successful_response["messages"]
         current_message = messages[msg_type]
         msg_box = MessageBox(current_message, self.model, messages[0])
@@ -1040,7 +1052,29 @@ class TestMessageBox:
         header_bar = msg_box.recipient_header()
 
         assert header_bar[0].text.startswith(assert_header_bar)
-        assert search_bar.text_to_fill == assert_search_bar
+        if assert_search_bar is None:
+            assert search_bar.text_to_fill == header_bar.markup
+        else:
+            assert search_bar.text_to_fill == assert_search_bar
+        if any(clause[0] == "search" for clause in msg_narrow):
+            assert "Search Results" in str(search_bar.markup)
+
+    @pytest.mark.parametrize(
+        "narrow, expected",
+        [
+            ([], False),
+            ([["stream", "PTEST"]], False),
+            ([["stream", "PTEST"], ["topic", "b"]], True),
+            ([["is", "private"]], False),
+            ([["pm-with", "boo@zulip.com"]], True),
+            ([["pm-with", "boo@zulip.com"], ["search", "FOO"]], True),
+            ([["stream", "PTEST"], ["topic", "b"], ["search", "FOO"]], True),
+            ([["is", "starred"], ["search", "FOO"]], False),
+        ],
+    )
+    def test_has_fixed_recipients(self, msg_box, narrow, expected):
+        msg_box.model.narrow = narrow
+        assert msg_box.has_fixed_recipients() is expected
 
     # Assume recipient (PM/stream/topic) header is unchanged below
     @pytest.mark.parametrize(

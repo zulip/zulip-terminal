@@ -252,14 +252,12 @@ class MessageView(urwid.ListBox):
     def update_search_box_narrow(self, message_view: Any) -> None:
         if not hasattr(self.model.controller, "view"):
             return
-        # if view is ready display current narrow
-        # at the bottom of the view.
         recipient_bar = message_view.recipient_header()
         top_header = message_view.top_search_bar()
-        self.model.controller.view.search_box.conversation_focus.set_text(
-            top_header.markup
-        )
-        self.model.controller.view.search_box.msg_narrow.set_text(recipient_bar.markup)
+        search_box = self.model.controller.view.search_box
+        search_box.conversation_focus.set_text(top_header.markup)
+        search_box.msg_narrow.set_text(recipient_bar.markup)
+        search_box.set_recipient_bar_visible(not message_view.has_fixed_recipients())
         self.model.controller.update_screen()
 
     def read_message(self, index: int = -1) -> None:
