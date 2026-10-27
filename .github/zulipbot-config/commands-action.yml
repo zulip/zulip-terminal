@@ -1,0 +1,36 @@
+# Enable @claim and @abandon issue commands.
+assign:
+  # Maximum users who can claim a single issue.
+  max_assignees: 1
+
+  # Whether or not to invite the contributors claiming an issue
+  # for the first time on your repository, as a collaborator
+  # with the "pull" (read) permission on you repository, before
+  # assigning them the issue.
+  add_as_collaborator: true
+
+  # Restrictions on the new contributors.
+  new_contributors:
+
+    # Maximum issues a new contributor can claim at the same
+    # time.
+    max_issue_claims: 1
+
+    # Allow the new contributors to claim an issue only if it
+    # contains/does no contain certain labels.
+    assign_only_if:
+      any_label_present: ["good first issue", "help wanted"]
+
+# Enable @add and @remove label commands.
+label:
+  # @keywords:
+  #   "all": All authenticated users on GitHub.
+  #   "author": Author of issue or pull request.
+  #   "member": Member of the organization containing the
+  #            repository.
+  #   "@username": Specific GitHub user.
+
+  # Users given full_permission can add or remove any labels on
+  # issues and pull requests.
+  full_permission:
+    to: ["author"]

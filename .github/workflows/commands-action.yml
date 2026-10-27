@@ -1,0 +1,18 @@
+name: Commands Action
+
+on:
+  # Run the action whenever a comment is added on an issue or PR.
+  # (`issue_comment` event is triggered on PR comments as well.)
+  issue_comment:
+    types: created
+
+jobs:
+  commands-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Handle commands
+        uses: garg3133/zulipbot-action/commands-action@main
+        with:
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+          # Relative path to the commands-action config file.
+          config-file-path: .github/zulipbot-config/commands-action.yml
