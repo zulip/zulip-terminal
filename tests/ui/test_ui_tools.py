@@ -1075,6 +1075,7 @@ class TestRightColumnView:
     def test_users_view(self, users, users_btn_len, editor_mode, status, mocker):
         self.view.users = [{"user_id": 1, "status": status}]
         self.view.controller.is_in_editor_mode = lambda: editor_mode
+        mocker.patch.object(self.view.model, "is_guest_user", return_value=False)
         user_btn = mocker.patch(VIEWS + ".UserButton")
         users_view = mocker.patch(VIEWS + ".UsersView")
         right_col_view = RightColumnView(self.view)
@@ -1087,6 +1088,7 @@ class TestRightColumnView:
                 state_marker=STATUS_ACTIVE,
                 count=1,
                 is_current_user=False,
+                is_guest=False,
             )
         users_view.assert_called_once_with(
             self.view.controller, right_col_view.users_btn_list

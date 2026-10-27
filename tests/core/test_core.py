@@ -239,6 +239,7 @@ class TestController:
         }
 
         emails = [user_email]
+        mocker.patch.object(controller.model, "is_guest_user", return_value=False)
 
         controller.narrow_to_user(recipient_emails=emails)
 
@@ -274,6 +275,7 @@ class TestController:
         }
         controller.model.muted_streams = set()
         mocker.patch(MODEL + ".is_muted_topic", return_value=False)
+        mocker.patch.object(controller.model, "is_guest_user", return_value=False)
 
         controller.narrow_to_all_messages(contextual_message_id=anchor)
 
@@ -295,6 +297,7 @@ class TestController:
         controller.view.message_view = mocker.patch("urwid.ListBox")
         controller.model.user_id = 1
         controller.model.user_email = "some@email"
+        mocker.patch.object(controller.model, "is_guest_user", return_value=False)
 
         controller.narrow_to_all_pm()  # FIXME: Add id narrowing test
 
@@ -321,6 +324,7 @@ class TestController:
                 "color": "#ffffff",
             }
         }
+        mocker.patch.object(controller.model, "is_guest_user", return_value=False)
         controller.view.message_view = mocker.patch("urwid.ListBox")
 
         controller.narrow_to_all_starred()  # FIXME: Add id narrowing test
@@ -349,7 +353,7 @@ class TestController:
             }
         }
         controller.view.message_view = mocker.patch("urwid.ListBox")
-
+        mocker.patch.object(controller.model, "is_guest_user", return_value=False)
         controller.narrow_to_all_mentions()  # FIXME: Add id narrowing test
 
         assert controller.model.narrow == [["is", "mentioned"]]

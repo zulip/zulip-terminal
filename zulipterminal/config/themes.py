@@ -78,6 +78,7 @@ REQUIRED_STYLES = {
     'task:error'      : 'standout',
     'task:warning'    : 'standout',
     'ui_code'         : 'bold',
+    'guest_suffix'    : '',
 }
 
 REQUIRED_META = {
