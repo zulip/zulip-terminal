@@ -280,6 +280,23 @@ def test_sort_unread_topics(
     assert sort_unread_topics(unread_topics, stream_list) == expected_value
 
 
+def test_sort_unread_topics_by_topic_list_order() -> None:
+    """With topic_order_by_stream, order follows topic list (most recent first)."""
+    unread_topics = {
+        (1, "topic1"): 1,
+        (1, "topic2"): 1,
+        (1, "topic3"): 1,
+    }
+    stream_list = [1]
+    topic_order_by_stream = {1: ["topic3", "topic1", "topic2"]}
+    result = sort_unread_topics(
+        unread_topics,
+        stream_list,
+        topic_order_by_stream=topic_order_by_stream,
+    )
+    assert result == [(1, "topic3"), (1, "topic1"), (1, "topic2")]
+
+
 @pytest.mark.parametrize(
     "muted_streams, muted_topics, vary_in_unreads",
     [
