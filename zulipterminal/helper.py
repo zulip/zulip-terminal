@@ -166,14 +166,20 @@ def asynch(func: Callable[ParamT, None]) -> Callable[ParamT, None]:
 
 
 def sort_unread_topics(
-    unread_topics: Dict[Tuple[int, str], int], stream_list: List[int]
+    unread_topics: Dict[Tuple[int, str], int],
+    stream_list: List[int],
+    topic_msg_ids: Optional[Dict[int, Dict[str, Set[int]]]] = None,
 ) -> List[Tuple[int, str]]:
+    if topic_msg_ids is None:
+        topic_msg_ids = {}
+
     return sorted(
         unread_topics.keys(),
         key=lambda stream_topic: (
             stream_list.index(stream_topic[0])
             if stream_topic[0] in stream_list
             else len(stream_list),
+            -max(topic_msg_ids.get(stream_topic[0], {}).get(stream_topic[1], {0})),
             stream_topic[1],
         ),
     )
