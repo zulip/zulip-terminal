@@ -152,6 +152,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Send a message',
         'key_category': 'compose_box',
     },
+    'OPEN_RECENT_CONVERSATIONS': {
+    'keys': ['^'],
+    'help_text': 'Open recent conversations',
+    'key_category': 'navigation',
+    },
     'SAVE_AS_DRAFT': {
         'keys': ['meta s'],
         'help_text': 'Save current message as a draft',
@@ -208,6 +213,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'keys': ['t'],
         'help_text': 'Toggle topics in a stream',
         'key_category': 'stream_list',
+    },
+    "SEARCH_RECENT_CONVERSATIONS": {
+        "keys": ["ctrl+f"],
+        "help_text": "Search recent conversations",
+        "key_category": "navigation"
     },
     'ALL_MESSAGES': {
         'keys': ['a', 'esc'],
