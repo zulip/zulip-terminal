@@ -137,3 +137,9 @@
 |Show/hide full rendered message|<kbd>f</kbd>|
 |Show/hide full raw message|<kbd>r</kbd>|
 
+## To-do list
+|Command|Key Combination|
+| :--- | :---: |
+|Rename todo list title|<kbd>t</kbd>|
+|Add new task to todo list|<kbd>a</kbd>|
+

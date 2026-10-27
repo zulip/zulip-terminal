@@ -209,6 +209,16 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Toggle topics in a stream',
         'key_category': 'stream_list',
     },
+    'TODO_RENAME': {
+        'keys': ['t'],
+        'help_text': 'Rename todo list title',
+        'key_category': 'todo',
+    },
+    'TODO_ADD': {
+        'keys': ['a'],
+        'help_text': 'Add new task to todo list',
+        'key_category': 'todo',
+    },
     'ALL_MESSAGES': {
         'keys': ['a', 'esc'],
         'help_text': 'View all messages',
@@ -485,6 +495,7 @@ HELP_CATEGORIES = {
         f"Message information (press {KEY_BINDINGS['MSG_INFO']['keys'][0]}"
         f" to view info of a message)"
     ),
+    "todo": "To-do list",
 }
 
 ZT_TO_URWID_CMD_MAPPING = {

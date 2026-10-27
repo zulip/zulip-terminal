@@ -994,7 +994,38 @@ class TestModel:
         "response, return_value",
         [
             case({"result": "success"}, True, id="API_success"),
-            case({"result": "some_failure"}, False, id="API_error"),
+            case({"result": "error", "msg": "Failed"}, False, id="API_error"),
+        ],
+    )
+    def test_send_widget_submessage(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        response: Dict[str, Any],
+        return_value: bool,
+    ) -> None:
+        self.client.call_endpoint = mocker.Mock(return_value=response)
+        widget_content = {"type": "strike", "key": "0,canned"}
+
+        result = model.send_widget_submessage(1, widget_content)
+
+        self.client.call_endpoint.assert_called_once_with(
+            "submessage",
+            method="POST",
+            request={
+                "message_id": 1,
+                "msg_type": "widget",
+                "content": '{"type":"strike","key":"0,canned"}',
+            },
+        )
+        assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    @pytest.mark.parametrize(
+        "response, return_value",
+        [
+            ({"result": "success"}, True),
+            ({"result": "some_failure"}, False),
         ],
     )
     @pytest.mark.parametrize(

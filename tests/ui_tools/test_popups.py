@@ -499,7 +499,7 @@ class TestFullRenderedMsgView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        mocker.patch(MODULE + ".MessageBox", return_value=msg_box)
+        mocker.patch("zulipterminal.ui_tools.messages.MessageBox", return_value=msg_box)
         # NOTE: Given that the FullRenderedMsgView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
@@ -575,7 +575,7 @@ class TestFullRawMsgView:
         self.controller.model.fetch_raw_message_content = mocker.Mock(
             return_value="This is a `raw` message content :+1:"
         )
-        mocker.patch(MODULE + ".MessageBox", return_value=msg_box)
+        mocker.patch("zulipterminal.ui_tools.messages.MessageBox", return_value=msg_box)
         # NOTE: Given that the FullRawMsgView just uses the message ID from
         # the message data currently, message_fixture is not used to avoid
         # adding extra test runs unnecessarily.
