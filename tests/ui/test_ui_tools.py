@@ -7,7 +7,7 @@ from urwid import Divider
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import STATUS_ACTIVE
-from zulipterminal.helper import powerset
+from zulipterminal.helper import SearchStatus, powerset
 from zulipterminal.ui_tools.views import (
     SIDE_PANELS_MOUSE_SCROLL_LINES,
     LeftColumnView,
@@ -565,6 +565,7 @@ class TestStreamsView:
         mocker.patch.object(stream_view, "set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
         mocker.patch.object(stream_view.stream_search_box, "reset_search_text")
+        stream_view.search_status = SearchStatus.FILTERED
         stream_view.streams_btn_list = ["FOO", "foo", "fan", "boo", "BOO"]
         stream_view.focus_index_before_search = 3
 
@@ -731,6 +732,7 @@ class TestTopicsView:
         mocker.patch(VIEWS + ".TopicsView.set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
         mocker.patch.object(topic_view.topic_search_box, "reset_search_text")
+        topic_view.search_status = SearchStatus.FILTERED
         topic_view.topics_btn_list = ["FOO", "foo", "fan", "boo", "BOO"]
         topic_view.focus_index_before_search = 3
 
@@ -1112,6 +1114,7 @@ class TestRightColumnView:
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch(VIEWS + ".RightColumnView.set_body")
         mocker.patch.object(right_col_view.user_search, "reset_search_text")
+        right_col_view.search_status = SearchStatus.FILTERED
         right_col_view.users_btn_list = []
 
         right_col_view.keypress(size, key)
