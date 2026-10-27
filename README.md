@@ -101,7 +101,7 @@ We also provide some sample Dockerfiles to build docker images in
 
 ### Installing into an isolated Python virtual environment
 
-With the python 3.6+ required for running, the following should work on most
+A python version between 3.8 to 3.11 is required for running, the following should work on most
 systems:
 1. `python3 -m venv zt_venv`
    (creates a virtual environment named `zt_venv` in the current directory)
