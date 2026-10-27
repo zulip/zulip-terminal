@@ -271,7 +271,7 @@ class TestModel:
             fetch_event_types=fetch_event_types,
             apply_markdown=True,
             client_gravatar=True,
-            include_subscribers=True,
+            include_subscribers="partial",
         )
 
     @pytest.mark.parametrize(
