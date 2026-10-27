@@ -276,6 +276,7 @@ class TestMessageView:
     @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
     def test_keypress_GO_DOWN(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
+        msg_view.model.controller.is_in_empty_narrow = False
         msg_view.new_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
         mocker.patch(MESSAGEVIEW + ".set_focus_valign")
@@ -291,6 +292,7 @@ class TestMessageView:
         self, mocker, msg_view, key, widget_size, view_is_focused
     ):
         size = widget_size(msg_view)
+        msg_view.model.controller.is_in_empty_narrow = False
         msg_view.new_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
         mocker.patch(MESSAGEVIEW + ".set_focus_valign")
@@ -315,6 +317,7 @@ class TestMessageView:
     @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
     def test_keypress_GO_UP(self, mocker, msg_view, key, widget_size):
         size = widget_size(msg_view)
+        msg_view.model.controller.is_in_empty_narrow = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
         mocker.patch(MESSAGEVIEW + ".set_focus_valign")
         msg_view.old_loading = False
@@ -330,6 +333,7 @@ class TestMessageView:
         self, mocker, msg_view, key, widget_size, view_is_focused
     ):
         size = widget_size(msg_view)
+        msg_view.model.controller.is_in_empty_narrow = False
         msg_view.old_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
         mocker.patch(MESSAGEVIEW + ".set_focus_valign")
