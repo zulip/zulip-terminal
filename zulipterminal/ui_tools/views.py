@@ -402,7 +402,8 @@ class StreamsView(urwid.Frame):
             self.log.clear()
             self.log.extend(self.streams_btn_list)
             self.set_focus("body")
-            self.log.set_focus(self.focus_index_before_search)
+            if self.log:  # Only set focus if list is not empty
+                self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
         return super().keypress(size, key)
@@ -478,7 +479,8 @@ class TopicsView(urwid.Frame):
             if topic_button.topic_name == topic_name:
                 self.log.insert(0, self.log.pop(topic_iterator))
                 self.list_box.set_focus_valign("bottom")
-                if sender_id == self.view.model.user_id:
+                # Only set focus if list is not empty
+                if sender_id == self.view.model.user_id and self.log:
                     self.list_box.set_focus(0)
                 return
         # No previous topics with same topic names are found
@@ -492,7 +494,8 @@ class TopicsView(urwid.Frame):
         )
         self.log.insert(0, new_topic_button)
         self.list_box.set_focus_valign("bottom")
-        if sender_id == self.view.model.user_id:
+        # Only set focus if list is not empty
+        if sender_id == self.view.model.user_id and self.log:
             self.list_box.set_focus(0)
 
     def mouse_event(
@@ -522,7 +525,8 @@ class TopicsView(urwid.Frame):
             self.log.clear()
             self.log.extend(self.topics_btn_list)
             self.set_focus("body")
-            self.log.set_focus(self.focus_index_before_search)
+            if self.log:  # Only set focus if list is not empty
+                self.log.set_focus(self.focus_index_before_search)
             self.view.controller.update_screen()
             return key
         return super().keypress(size, key)
