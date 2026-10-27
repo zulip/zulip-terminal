@@ -27,6 +27,7 @@ from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index, MinimalUserData
 from zulipterminal.ui_tools.boxes import (
     MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP,
+    MessageSearchBox,
     PanelSearchBox,
     WriteBox,
     _MessageEditState,
@@ -1963,3 +1964,28 @@ class TestPanelSearchBox:
         # FIXME This feels hacky to call keypress (with hardcoded 'esc' too)
         #       - should we add a second callback to update the panel?
         panel_view.keypress.assert_called_once_with(size, "esc")
+
+
+class TestMessageSearchBox:
+    @pytest.fixture
+    def search_box(self, mocker: MockerFixture) -> MessageSearchBox:
+        return MessageSearchBox(mocker.Mock())
+
+    @pytest.mark.parametrize("back_key", keys_for_command("CLEAR_SEARCH"))
+    def test_keypress_CLEAR_SEARCH(
+        self,
+        search_box: MessageSearchBox,
+        back_key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+    ) -> None:
+        view = search_box.controller.view
+        search_box.text_box.set_edit_text("key words")
+        size = widget_size(search_box)
+
+        search_box.keypress(size, back_key)
+
+        assert search_box.text_box.edit_text == ""
+        search_box.controller.exit_editor_mode.assert_called_once_with()
+        view.middle_column.set_focus.assert_called_once_with("body")
+        # Return to the column which had focus before the search started
+        view.restore_column_after_search.assert_called_once_with()
