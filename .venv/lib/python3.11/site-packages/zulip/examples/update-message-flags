@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+import argparse
+
+import zulip
+
+usage = """update-message-flags (add | remove) <flag> <message_id1> \
+[more_message_ids]
+
+Example: update-message-flags add read 4 8 15
+Example: update-message-flags remove starred 16 23 42
+"""
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("op", choices=["add", "remove"])
+parser.add_argument("flag")
+parser.add_argument("messages", type=int, nargs="+")
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+print(
+    client.update_message_flags(
+        {"op": options.op, "flag": options.flag, "messages": options.messages}
+    )
+)

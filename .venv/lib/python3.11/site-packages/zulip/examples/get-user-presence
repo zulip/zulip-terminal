@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+
+import argparse
+
+usage = """get-user-presence --email=<email address> [options]
+
+Get presence data for another user.
+"""
+
+import zulip
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("--email", required=True)
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+print(client.get_user_presence(options.email))

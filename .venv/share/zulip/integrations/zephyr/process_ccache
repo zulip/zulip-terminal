@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+import base64
+import os
+import subprocess
+import sys
+
+short_user = sys.argv[1]
+api_key = sys.argv[2]
+ccache_data_encoded = sys.argv[3]
+
+# Update the Kerberos ticket cache file
+program_name = f"zmirror-{short_user}"
+with open(f"/home/zulip/ccache/{program_name}", "wb") as f:
+    f.write(base64.b64decode(ccache_data_encoded))
+
+# Setup API key
+api_key_path = f"/home/zulip/api-keys/{program_name}"
+open(api_key_path, "w").write(api_key + "\n")
+
+# Setup supervisord configuration
+supervisor_path = f"/etc/supervisor/conf.d/zulip/{program_name}.conf"
+template = os.path.join(os.path.dirname(__file__), "zmirror_private.conf.template")
+template_data = open(template).read()
+session_path = f"/home/zulip/zephyr_sessions/{program_name}"
+
+# Preserve mail zephyrs forwarding setting across rewriting the config file
+
+try:
+    if "--forward-mail-zephyrs" in open(supervisor_path).read():
+        template_data = template_data.replace(
+            "--use-sessions", "--use-sessions --forward-mail-zephyrs"
+        )
+except Exception:
+    pass
+open(supervisor_path, "w").write(template_data.replace("USERNAME", short_user))
+
+# Delete your session
+subprocess.check_call(["rm", "-f", session_path])
+# Update your supervisor config, which may restart your mirror
+subprocess.check_call(["supervisorctl", "reread"])
+subprocess.check_call(["supervisorctl", "update"])
+# Restart your mirror, in case it wasn't restarted by the previous
+# (Otherwise if the mirror lost subs, this would do nothing)
+# TODO: check whether we JUST restarted it first
+subprocess.check_call(["supervisorctl", "restart", program_name])

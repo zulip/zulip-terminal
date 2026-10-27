@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+
+import argparse
+
+usage = """unsubscribe [options] --streams=<streams>
+
+Ensures the user is not subscribed to the listed streams.
+
+Examples: unsubscribe --streams=foo
+          unsubscribe --streams='foo bar'
+
+Specify your Zulip API credentials and server in a ~/.zuliprc file or using the options.
+"""
+
+import zulip
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("--streams", action="store", required=True)
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+print(client.remove_subscriptions(options.streams.split()))

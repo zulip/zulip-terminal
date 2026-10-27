@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+
+import argparse
+
+import zulip
+
+usage = """realm-emoji [options]
+
+Example: realm-emoji
+"""
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+print(client.get_realm_emoji())

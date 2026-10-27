@@ -548,9 +548,11 @@ def display_key_for_urwid_key(urwid_key: str) -> str:
         if urwid_map_key in urwid_key:
             urwid_key = urwid_key.replace(urwid_map_key, display_map_key)
     display_key = [
-        keyboard_key.capitalize()
-        if len(keyboard_key) > 1 and keyboard_key[0].islower()
-        else keyboard_key
+        (
+            keyboard_key.capitalize()
+            if len(keyboard_key) > 1 and keyboard_key[0].islower()
+            else keyboard_key
+        )
         for keyboard_key in urwid_key.split()
     ]
     return " ".join(display_key)
