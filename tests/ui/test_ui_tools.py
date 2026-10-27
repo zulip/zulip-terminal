@@ -942,6 +942,23 @@ class TestMiddleColumnView:
         assert mid_col_view.controller.narrow_to_topic.called is False
         assert return_value == key
 
+    @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
+    def test_keypress_NEXT_UNREAD_TOPIC_stream_narrow_without_topic(
+        self, mid_col_view, mocker, widget_size, key
+    ):
+        size = widget_size(mid_col_view)
+        mocker.patch(MIDCOLVIEW + ".focus_position")
+        message_view = mocker.patch.object(self.view, "message_view")
+        message_view.focus = None
+
+        mid_col_view.model.narrow = [["stream", "stream"]]
+
+        return_value = mid_col_view.keypress(size, key)
+
+        assert mid_col_view.model.next_unread_topic_from_message_id.called is False
+        assert mid_col_view.controller.narrow_to_topic.called is False
+        assert return_value == key
+
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_stream(
         self, mid_col_view, mocker, key, widget_size
