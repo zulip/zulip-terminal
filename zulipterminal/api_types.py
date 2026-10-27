@@ -19,6 +19,22 @@ from zulip import ModifiableMessageFlag  # directly modifiable read/starred/coll
 __all__ = [
     "EditPropagateMode",
     "EmojiType",
+    # Widget event types (parsed from Submessage.content JSON)
+    "PollNewOptionEvent",
+    "PollQuestionEvent",
+    "PollVoteEvent",
+    "PollWidgetEvent",
+    "PollWidgetInit",
+    "TodoNewTaskEvent",
+    "TodoNewTitleEvent",
+    "TodoStrikeEvent",
+    "TodoWidgetEvent",
+    "TodoWidgetInit",
+    "WidgetEvent",
+    # Widget result types
+    "PollOption",
+    "Submessage",
+    "TodoTask",
 ]
 
 
@@ -181,6 +197,144 @@ class SubscriptionSettingChange(TypedDict):
 ## TODO: Improve this typing to split private and stream message data
 
 
+###############################################################################
+# Submessage data (for widgets like polls and todos)
+
+
+class Submessage(TypedDict):
+    """Submessage data from Message.submessages list."""
+
+    id: int
+    message_id: int
+    sender_id: int
+    msg_type: Literal["widget"]  # Currently only widget submessages exist
+    content: str  # JSON-encoded widget event data
+
+
+###############################################################################
+# Widget event types (parsed from Submessage.content JSON)
+# These represent the JSON structures sent in widget submessages
+
+
+class TodoInitialTask(TypedDict):
+    """Task structure in the initial todo widget creation."""
+
+    task: str
+    desc: NotRequired[str]
+
+
+class TodoWidgetExtraData(TypedDict):
+    """Extra data for todo widget initialization."""
+
+    task_list_title: str
+    tasks: List[TodoInitialTask]
+
+
+class TodoWidgetInit(TypedDict):
+    """Initial todo widget creation event."""
+
+    widget_type: Literal["todo"]
+    extra_data: TodoWidgetExtraData
+
+
+class TodoNewTaskEvent(TypedDict):
+    """Event for adding a new task to a todo widget."""
+
+    type: Literal["new_task"]
+    key: int
+    task: str
+    desc: NotRequired[str]
+    completed: bool
+
+
+class TodoStrikeEvent(TypedDict):
+    """Event for toggling task completion status."""
+
+    type: Literal["strike"]
+    key: str
+
+
+class TodoNewTitleEvent(TypedDict):
+    """Event for updating the todo list title."""
+
+    type: Literal["new_task_list_title"]
+    title: str
+
+
+class PollWidgetExtraData(TypedDict):
+    """Extra data for poll widget initialization."""
+
+    question: str
+    options: List[str]
+
+
+class PollWidgetInit(TypedDict):
+    """Initial poll widget creation event."""
+
+    widget_type: Literal["poll"]
+    extra_data: PollWidgetExtraData
+
+
+class PollQuestionEvent(TypedDict):
+    """Event for updating the poll question."""
+
+    type: Literal["question"]
+    question: str
+
+
+class PollVoteEvent(TypedDict):
+    """Event for casting or removing a vote."""
+
+    type: Literal["vote"]
+    key: str
+    vote: Literal[1, -1]  # 1 = add vote, -1 = remove vote
+
+
+class PollNewOptionEvent(TypedDict):
+    """Event for adding a new poll option."""
+
+    type: Literal["new_option"]
+    idx: int
+    option: str
+
+
+# Union types for widget events
+TodoWidgetEvent = Union[
+    TodoWidgetInit,
+    TodoNewTaskEvent,
+    TodoStrikeEvent,
+    TodoNewTitleEvent,
+]
+
+PollWidgetEvent = Union[
+    PollWidgetInit,
+    PollQuestionEvent,
+    PollVoteEvent,
+    PollNewOptionEvent,
+]
+
+WidgetEvent = Union[TodoWidgetEvent, PollWidgetEvent]
+
+
+###############################################################################
+# Widget result types (returned by widget processing functions)
+
+
+class TodoTask(TypedDict):
+    """Single task within a todo widget."""
+
+    task: str
+    desc: str
+    completed: bool
+
+
+class PollOption(TypedDict):
+    """Single option within a poll widget."""
+
+    option: str
+    votes: List[int]  # List of sender_ids who voted
+
+
 class Message(TypedDict, total=False):
     id: int
     sender_id: int
@@ -195,7 +349,7 @@ class Message(TypedDict, total=False):
     subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
+    submessages: List["Submessage"]
     flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str
