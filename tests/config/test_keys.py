@@ -65,6 +65,38 @@ def test_is_command_key_invalid_command(invalid_command: str) -> None:
         keys.is_command_key(invalid_command, "esc")  # key doesn't matter
 
 
+def test_single_key_commands_are_valid_commands() -> None:
+    for command in keys.SINGLE_KEY_COMMANDS:
+        assert command in keys.KEY_BINDINGS
+
+
+def test_validate_single_key_commands__default_bindings() -> None:
+    keys.validate_single_key_commands()  # Should not raise
+
+
+@pytest.mark.parametrize(
+    "command_keys",
+    [["ctrl f", "tab"], []],
+    ids=["multiple_keys", "no_keys"],
+)
+def test_validate_single_key_commands__invalid_bindings(
+    mocker: MockerFixture, command_keys: List[str]
+) -> None:
+    mocker.patch.dict(
+        keys.KEY_BINDINGS,
+        {
+            "AUTOCOMPLETE": {
+                "keys": command_keys,
+                "help_text": "autocomplete",
+                "key_category": "compose_box",
+            }
+        },
+    )
+
+    with pytest.raises(keys.InvalidKeyBinding, match="AUTOCOMPLETE"):
+        keys.validate_single_key_commands()
+
+
 def test_HELP_is_not_allowed_as_tip() -> None:
     assert keys.KEY_BINDINGS["HELP"]["excluded_from_random_tips"] is True
     assert keys.KEY_BINDINGS["HELP"] not in keys.commands_for_random_tips()
