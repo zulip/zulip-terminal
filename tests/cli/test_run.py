@@ -398,6 +398,7 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
 
     # This is default base path to use
     zuliprc_path = os.path.join(str(tmp_path), path_to_use)
+    zuliprc_file = os.path.join(zuliprc_path, "zuliprc")
     monkeypatch.setenv("HOME", zuliprc_path)
 
     # Give some arbitrary input and fake that it's always valid
@@ -412,12 +413,18 @@ def test_main_cannot_write_zuliprc_given_good_credentials(
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
 
-    expected_line = (
-        "\x1b[91m"
-        f"{expected_exception}: zuliprc could not be created "
-        f"at {os.path.join(zuliprc_path, 'zuliprc')}"
-        "\x1b[0m"
-    )
+    if expected_exception == "FileNotFoundError":
+        expected_error = (
+            f"could not create {zuliprc_file} "
+            f"([Errno 2] No such file or directory: '{zuliprc_file}')"
+        )
+    else:  # PermissionError
+        expected_error = (
+            f"could not create {zuliprc_file} "
+            f"([Errno 13] Permission denied: '{zuliprc_file}')"
+        )
+
+    expected_line = f"\x1b[91m{expected_exception}: {expected_error}\x1b[0m"
     assert lines[-1] == expected_line
 
 
@@ -573,17 +580,29 @@ def test_exit_with_error(
 def test__write_zuliprc__success(
     tmp_path: Path, id: str = "id", key: str = "key", url: str = "url"
 ) -> None:
-    path = os.path.join(str(tmp_path), "zuliprc")
+    """Test successful creation of zuliprc and zulip_key files."""
+    path = tmp_path / "zuliprc"
+    key_path = tmp_path / "zulip_key"
 
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
+    error_message = _write_zuliprc(
+        to_path=str(path),
+        key_path=str(key_path),
+        login_id=id,
+        api_key=key,
+        server_url=url,
+    )
 
     assert error_message == ""
 
-    expected_contents = f"[api]\nemail={id}\nkey={key}\nsite={url}"
+    expected_contents = f"[api]\nemail={id}\npasscmd=cat zulip_key\nsite={url}"
     with open(path) as f:
         assert f.read() == expected_contents
 
+    with open(key_path) as f:
+        assert f.read() == key
+
     assert stat.filemode(os.stat(path).st_mode)[-6:] == 6 * "-"
+    assert stat.filemode(os.stat(key_path).st_mode)[-6:] == 6 * "-"
 
 
 def test__write_zuliprc__fail_file_exists(
@@ -593,11 +612,24 @@ def test__write_zuliprc__fail_file_exists(
     key: str = "key",
     url: str = "url",
 ) -> None:
-    path = os.path.join(str(tmp_path), "zuliprc")
+    """Test that _write_zuliprc fails when files already exist."""
+    path = tmp_path / "zuliprc"
+    key_path = tmp_path / "zulip_key"
 
-    error_message = _write_zuliprc(path, api_key=key, server_url=url, login_id=id)
+    # Create the files first to simulate they already exist
+    with open(path, "w") as f:
+        f.write("existing content")
 
-    assert error_message == "zuliprc already exists at " + path
+    error_message = _write_zuliprc(
+        to_path=str(path),
+        key_path=str(key_path),
+        login_id=id,
+        api_key=key,
+        server_url=url,
+    )
+
+    assert error_message == f"FileExistsError: {path} already exists"
+    assert not Path(key_path).exists()  # key_path should not be created
 
 
 @pytest.mark.parametrize(
