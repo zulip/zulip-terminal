@@ -1,15 +1,11 @@
 .PHONY: install-devel check lint test check-clean-tree fix force-fix venv
 
-# NOTE: ZT_VENV and BASEPYTHON are advanced undocumented features
+# NOTE: ZT_VENV is an advanced undocumented feature
 # Customize your venv name by running make as "ZT_VENV=my_venv_name make <command>"
 
-BASEPYTHON?=python3
-ZT_VENV?=zt_venv
+ZT_VENV?=.venv
 
-VENV_ACTIVATE=. $(ZT_VENV)/bin/activate
-PYTHON=${ZT_VENV}/bin/$(BASEPYTHON)
-
-SOURCES = zulipterminal tests setup.py
+SOURCES = zulipterminal tests
 
 # Default target at top
 install-devel: venv
@@ -19,10 +15,10 @@ install-devel: venv
 check: lint test
 
 lint: venv
-	@tools/lint-all
+	@uv run ./tools/lint-all
 
 test: venv
-	@pytest
+	@uv run pytest
 
 ### FIX FILES ###
 
@@ -34,16 +30,15 @@ fix: check-clean-tree
 
 force-fix: venv
 	@echo "=== Auto-fixing files ==="
-	isort $(SOURCES) tools
-	black zulipterminal/ tests/
-	ruff --fix $(SOURCES)
+	uv run isort $(SOURCES) tools
+	uv run black zulipterminal/ tests/
+	uv run ruff --fix $(SOURCES)
 
 ### VENV SETUP ###
 # Short name for file dependency
 venv: $(ZT_VENV)/bin/activate
 
-# If setup.py is updated or activate script doesn't exist, update virtual env
-$(ZT_VENV)/bin/activate: setup.py
+# If project metadata changes or activate script doesn't exist, update virtual env
+$(ZT_VENV)/bin/activate: pyproject.toml uv.lock
 	@echo "=== Installing development environment ==="
-	test -d $(ZT_VENV) || $(BASEPYTHON) -m venv $(ZT_VENV)
-	$(PYTHON) -m pip install wheel && $(PYTHON) -m pip install -U pip && $(PYTHON) -m pip install -e .[dev] && touch $(ZT_VENV)/bin/activate
+	uv sync --extra dev
