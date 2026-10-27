@@ -705,7 +705,9 @@ class MessageBox(urwid.Pile):
 
             if message["this"]["is_starred"]:
                 text["star"] = ("starred", "*")
-            if any(different[key] for key in ("recipients", "author", "timestamp")):
+            if any(different[key] for key in ("recipients", "author", "timestamp", "star_status")):
+                text["author"] = ("msg_sender", message["this"]["author"])
+                
                 this_year = date.today().year
                 msg_year = message["this"]["datetime"].year
                 if this_year != msg_year:
