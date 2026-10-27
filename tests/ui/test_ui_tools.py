@@ -1221,6 +1221,77 @@ class TestLeftColumnView:
             ]
         )
 
+    def test_update_stream_view_restores_focus_by_stream_id(self, mocker):
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        mocker.patch(VIEWS + ".LeftColumnView.menu_view")
+        mocker.patch(VIEWS + ".LeftColumnView.show_stream_view")
+        left_col_view = LeftColumnView(self.view)
+        left_col_view.is_in_topic_view = False
+
+        # Simulate focus on a stream widget with stream_id=42 at index 3.
+        focused_widget = mocker.Mock(stream_id=42)
+        self.view.stream_w = mocker.Mock()
+        self.view.stream_w.log.get_focus.return_value = (focused_widget, 3)
+        self.view.stream_w.stream_search_box.edit_text = ""
+
+        # After rebuild, stream_id=42 moved to index 1 (e.g. another stream
+        # was pinned and pushed to the top).
+        new_widgets = [
+            mocker.Mock(stream_id=99),
+            mocker.Mock(stream_id=42),
+            mocker.Mock(stream_id=7),
+        ]
+        self.view.stream_w.log.__iter__ = mocker.Mock(return_value=iter(new_widgets))
+
+        left_col_view.update_stream_view()
+
+        # Focus should follow stream_id=42 to its new position (index 1),
+        # not stay at the old index (3).
+        self.view.stream_w.log.set_focus.assert_called_once_with(1)
+        left_col_view.show_stream_view.assert_called_once()
+
+    def test_update_stream_view_restores_search_text(self, mocker):
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        mocker.patch(VIEWS + ".LeftColumnView.menu_view")
+        mocker.patch(VIEWS + ".LeftColumnView.show_stream_view")
+        left_col_view = LeftColumnView(self.view)
+        left_col_view.is_in_topic_view = False
+
+        focused_widget = mocker.Mock(stream_id=10)
+        self.view.stream_w = mocker.Mock()
+        self.view.stream_w.log.get_focus.return_value = (focused_widget, 0)
+        self.view.stream_w.stream_search_box.edit_text = "foo"
+
+        new_widgets = [mocker.Mock(stream_id=10)]
+        self.view.stream_w.log.__iter__ = mocker.Mock(return_value=iter(new_widgets))
+
+        left_col_view.update_stream_view()
+
+        self.view.stream_w.stream_search_box.set_edit_text.assert_called_once_with(
+            "foo"
+        )
+
+    def test_update_stream_view_no_set_focus_when_stream_not_found(self, mocker):
+        mocker.patch(VIEWS + ".LeftColumnView.streams_view")
+        mocker.patch(VIEWS + ".LeftColumnView.menu_view")
+        mocker.patch(VIEWS + ".LeftColumnView.show_stream_view")
+        left_col_view = LeftColumnView(self.view)
+        left_col_view.is_in_topic_view = False
+
+        # Focus was on stream_id=42 which no longer exists after rebuild.
+        focused_widget = mocker.Mock(stream_id=42)
+        self.view.stream_w = mocker.Mock()
+        self.view.stream_w.log.get_focus.return_value = (focused_widget, 2)
+        self.view.stream_w.stream_search_box.edit_text = ""
+
+        new_widgets = [mocker.Mock(stream_id=99), mocker.Mock(stream_id=7)]
+        self.view.stream_w.log.__iter__ = mocker.Mock(return_value=iter(new_widgets))
+
+        left_col_view.update_stream_view()
+
+        # Should not call set_focus since stream_id=42 is gone.
+        self.view.stream_w.log.set_focus.assert_not_called()
+
 
 class TestTabView:
     @pytest.fixture
