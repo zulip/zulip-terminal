@@ -195,9 +195,17 @@ class MessageView(urwid.ListBox):
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if is_command_key("GO_DOWN", key) and not self.new_loading:
             try:
-                position = self.log.next_position(self.focus_position)
-                self.set_focus(position, "above")
-                self.set_focus_valign("middle")
+                middle_cur, top_cur, bottom_cur = self.calculate_visible(size)
+                # if there is a widget just below the focus, only then scroll
+                if len(bottom_cur[1]) >= 1:
+                    position = self.log.next_position(self.focus_position)
+                    self.set_focus(position, "above")
+                    self.set_focus_valign("middle")
+                next, pos = self._body.get_next(position)
+
+                # in case there is no widget below, the focus does not change
+                # however, pressing the GO_DOWN key few times scrolls the widget,
+                # and keeps it in focus until the next widget is just below the focus
 
                 return key
             except Exception:
@@ -208,9 +216,17 @@ class MessageView(urwid.ListBox):
 
         elif is_command_key("GO_UP", key) and not self.old_loading:
             try:
-                position = self.log.prev_position(self.focus_position)
-                self.set_focus(position, "below")
-                self.set_focus_valign("middle")
+                offset, inset = self.get_focus_offset_inset(size)
+                # inset == 0 implies the top of the widget (here, the MessageBox) is in line
+                # with the top of the ListBox (here, top of the MessageView)
+                if inset == 0:
+                    position = self.log.prev_position(self.focus_position)
+                    self.set_focus(position)
+                    # self.set_focus_valign("middle")
+                else:
+                    id = self.focus.original_widget.message["id"]
+                    self.load_old_messages(id)
+
                 return key
             except Exception:
                 if self.focus:
