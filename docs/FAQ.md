@@ -14,6 +14,7 @@
   - [How do I access multiple servers?](#how-do-i-access-multiple-servers)
   - [What is autocomplete? Why is it useful?](#what-is-autocomplete-why-is-it-useful)
   - [Can I compose messages in another editor?](#can-i-compose-messages-in-another-editor)
+  - [Can I use Zulip Terminal with a screen reader?](#can-i-use-zulip-terminal-with-a-screen-reader)
 - Something is not working!
   - [Colors appear mismatched, don't change with theme, or look strange](#colors-appear-mismatched-dont-change-with-theme-or-look-strange)
   - [Symbols look different to in the provided screenshots, or just look incorrect](#symbols-look-different-to-in-the-provided-screenshots-or-just-look-incorrect)
@@ -422,6 +423,21 @@ the temporary file.
 
 **If you have success with other editors, these examples do not work, or have
 other problems, please let us know!**
+
+## Can I use Zulip Terminal with a screen reader?
+
+Screen readers on the command line generally read the screen line by line,
+from left to right. With the default layout, this mixes the content of the
+side-by-side panels together.
+
+The `single_panel` layout shows one panel at a time, using the full width of
+the terminal, and avoids vertical dividing lines. Use the left and right
+arrow keys (or other hotkeys) to move between the streams & topics, messages
+and users panels.
+
+You can set `layout=single_panel` in your [configuration
+file](https://github.com/zulip/zulip-terminal/#configuration), or use
+`--single-panel` on the command-line for a particular session.
 
 ## Colors appear mismatched, don't change with theme, or look strange
 

@@ -229,8 +229,13 @@ site=https://example.zulipchat.com
 ## Theme: available themes can be found by running `zulip-term --list-themes`, or in docs/FAQ.md
 theme=zt_dark
 
-## Autohide: set to 'autohide' to hide the left & right panels except when they're focused
-autohide=no_autohide
+## Layout: how the left (streams & topics), center (messages) & right (users) panels are shown
+##   no_autohide:  show all three panels side by side
+##   autohide:     hide the left & right panels except when they're focused
+##   single_panel: show one full-screen panel at a time, with no vertical lines;
+##                 this is easier to use with a screen reader
+## (the older 'autohide' setting is still read, if 'layout' is not set)
+layout=no_autohide
 
 ## Exit Confirmation: set to 'disabled' to exit directly with no warning popup first
 exit_confirmation=enabled

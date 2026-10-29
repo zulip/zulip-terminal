@@ -6,6 +6,7 @@ from urwid import Widget
 
 from zulipterminal.api_types import Composition
 from zulipterminal.config.keys import keys_for_command
+from zulipterminal.config.symbols import COLUMN_DIVIDER_LINE, COLUMN_TITLE_BAR_LINE
 from zulipterminal.config.ui_sizes import LEFT_WIDTH, RIGHT_WIDTH, TAB_WIDTH
 from zulipterminal.ui import View
 from zulipterminal.ui_tools.views import Layout
@@ -66,6 +67,34 @@ class TestView:
         )
         assert view.middle_column == middle_view()
         assert return_value == line_box()
+
+    @pytest.mark.parametrize(
+        "layout, side_line, corner",
+        [
+            ("autohide", COLUMN_DIVIDER_LINE, COLUMN_DIVIDER_LINE),
+            ("no_autohide", COLUMN_DIVIDER_LINE, COLUMN_DIVIDER_LINE),
+            ("single_panel", "", COLUMN_TITLE_BAR_LINE),
+        ],
+    )
+    def test_middle_column_view_borders(
+        self,
+        view: View,
+        mocker: MockerFixture,
+        layout: Layout,
+        side_line: str,
+        corner: str,
+    ) -> None:
+        mocker.patch(MODULE + ".MiddleColumnView")
+        line_box = mocker.patch(MODULE + ".urwid.LineBox")
+        view.layout = layout
+
+        view.middle_column_view()
+
+        _, line_box_options = line_box.call_args
+        assert line_box_options["lline"] == side_line
+        assert line_box_options["rline"] == side_line
+        assert line_box_options["tlcorner"] == corner
+        assert line_box_options["trcorner"] == corner
 
     def test_right_column_view(self, view: View, mocker: MockerFixture) -> None:
         right_view = mocker.patch(MODULE + ".RightColumnView")
@@ -239,6 +268,36 @@ class TestView:
         )
         assert view.frame == frame()
         show_left_panel.assert_called_once_with(visible=True)
+
+    def test_main_window__single_panel(
+        self, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        left_panel, right_panel = mocker.Mock(), mocker.Mock()
+        mocker.patch(VIEW + ".left_column_view", return_value=(left_panel, "TAB"))
+
+        def just_set_message_view(self: Any) -> Widget:
+            self.message_view = mocker.Mock(read_message=lambda: None)
+            return center_panel
+
+        center_panel = mocker.Mock()
+        monkeypatch.setattr(View, "middle_column_view", just_set_message_view)
+        mocker.patch(VIEW + ".right_column_view", return_value=(right_panel, "TAB"))
+        show_left_panel = mocker.patch(VIEW + ".show_left_panel")
+        show_right_panel = mocker.patch(VIEW + ".show_right_panel")
+        self.controller.model = self.model
+        self.controller.layout = "single_panel"
+
+        view = View(self.controller)
+
+        assert [widget for widget, _ in view.body.contents] == [
+            left_panel,
+            center_panel,
+            right_panel,
+        ]
+        assert view.frame.body == left_panel
+        assert view.body.focus_position == 0
+        show_left_panel.assert_not_called()
+        show_right_panel.assert_not_called()
 
     @pytest.mark.parametrize("layout", ["autohide", "no_autohide"])
     @pytest.mark.parametrize("visible", [True, False])
@@ -532,3 +591,21 @@ class TestView:
         view.controller.current_editor().keypress.assert_called_once_with(
             (size[1],), key
         )
+
+    @pytest.mark.parametrize("focus_pos", [0, 1, 2])
+    def test_focus_panel_property__single_panel(
+        self, mocker: MockerFixture, view: View, focus_pos: int
+    ) -> None:
+        show_left_panel = mocker.patch(VIEW + ".show_left_panel")
+        show_right_panel = mocker.patch(VIEW + ".show_right_panel")
+        panels = [mocker.Mock(spec=Widget) for _ in range(3)]
+        view.layout = "single_panel"
+        view.body.contents = [(panel, view.body.options()) for panel in panels]
+
+        view.focus_panel = focus_pos
+
+        assert view.frame.body == panels[focus_pos]
+        assert view.body.focus_position == focus_pos
+        assert view.focus_panel == focus_pos
+        show_left_panel.assert_not_called()
+        show_right_panel.assert_not_called()

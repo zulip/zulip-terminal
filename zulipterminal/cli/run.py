@@ -66,7 +66,7 @@ VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
     "transparency": ("enabled", "disabled"),
 }
 
-VALID_LAYOUTS: Tuple[Layout, ...] = ("autohide", "no_autohide")
+VALID_LAYOUTS: Tuple[Layout, ...] = ("autohide", "no_autohide", "single_panel")
 
 COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
     "1": 1,
@@ -212,6 +212,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_const",
         const="no_autohide",
         help="don't autohide list of users and streams",
+    )
+    layout_group.add_argument(
+        "--single-panel",
+        dest="layout",
+        default=None,
+        action="store_const",
+        const="single_panel",
+        help="show one full-screen panel at a time",
     )
 
     parser.add_argument(

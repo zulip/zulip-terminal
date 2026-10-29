@@ -143,6 +143,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--config-file CONFIG_FILE, -c CONFIG_FILE",
         "--autohide",
         "--no-autohide",
+        "--single-panel",
         "-v, --version",
         "-e, --explore",
         "--color-depth",
@@ -302,6 +303,7 @@ def test_zt_version(capsys: CaptureFixture[str], options: str) -> None:
     [
         ("--autohide", "autohide"),
         ("--no-autohide", "no_autohide"),
+        ("--single-panel", "single_panel"),
         ("--debug", None),  # no-autohide by default
     ],
 )
@@ -311,7 +313,13 @@ def test_parse_args_valid_layout_option(option: str, layout: Optional[str]) -> N
 
 
 @pytest.mark.parametrize(
-    "options", [["--autohide", "--no-autohide"], ["--no-autohide", "--autohide"]]
+    "options",
+    [
+        ["--autohide", "--no-autohide"],
+        ["--no-autohide", "--autohide"],
+        ["--autohide", "--single-panel"],
+        ["--single-panel", "--no-autohide"],
+    ],
 )
 def test_main_multiple_layout_options(
     capsys: CaptureFixture[str], options: List[str]
@@ -544,7 +552,9 @@ def test_cli_overrides_config(
 
 
 @pytest.mark.parametrize("autohide_option", ["autohide", "no_autohide", None])
-@pytest.mark.parametrize("layout_option", ["autohide", "no_autohide", None])
+@pytest.mark.parametrize(
+    "layout_option", ["autohide", "no_autohide", "single_panel", None]
+)
 def test_layout_overrides_autohide(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,

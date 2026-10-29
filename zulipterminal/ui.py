@@ -73,14 +73,22 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(
             self, self.model, self.write_box, self.search_box
         )
+        # Screen readers read out vertical lines, so avoid them when only one
+        # panel is shown at a time
+        if self.layout == "single_panel":
+            side_line, corner = "", COLUMN_TITLE_BAR_LINE
+        else:
+            side_line, corner = COLUMN_DIVIDER_LINE, COLUMN_DIVIDER_LINE
         return urwid.LineBox(
             self.middle_column,
             title="Messages",
             title_attr="column_title",
             tline=COLUMN_TITLE_BAR_LINE,
             bline="",
-            trcorner=COLUMN_DIVIDER_LINE,
-            tlcorner=COLUMN_DIVIDER_LINE,
+            lline=side_line,
+            rline=side_line,
+            trcorner=corner,
+            tlcorner=corner,
         )
 
     def right_column_view(self) -> Any:
@@ -171,6 +179,9 @@ class View(urwid.WidgetWrap):
                 ("weight", 10, self.center_panel),
                 (TAB_WIDTH, self.right_tab),
             ]
+        elif self.layout == "single_panel":
+            # Only the focused panel is shown, full-screen; see focus_panel
+            body = [self.left_panel, self.center_panel, self.right_panel]
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
@@ -206,7 +217,7 @@ class View(urwid.WidgetWrap):
             self.body, title_bar, focus_part="body", footer=self.footer_view()
         )
 
-        # Show left panel on startup in autohide mode
+        # Show left panel on startup in autohide and single_panel layouts
         self.focus_panel = 0
 
         return self.frame
@@ -259,6 +270,11 @@ class View(urwid.WidgetWrap):
 
     @focus_panel.setter
     def focus_panel(self, column: int) -> None:
+        if self.layout == "single_panel":
+            self.frame.body = self.body.contents[column][0]
+            self.body.focus_position = column
+            return
+
         if column == 0:
             self.show_right_panel(visible=False)
             self.show_left_panel(visible=True)
