@@ -13,6 +13,7 @@ from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
     COLOR_DEPTH_ARGS_TO_DEPTHS,
     VALID_BOOLEAN_SETTINGS,
+    VALID_LAYOUTS,
     NotAZulipOrganizationError,
     _write_zuliprc,
     exit_with_error,
@@ -576,10 +577,36 @@ def test_layout_overrides_autohide(
     assert expected_line in lines
 
 
+def test_main_error_with_invalid_autohide_setting(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+) -> None:
+    # Older zuliprc files use autohide, which is validated as the layout setting
+    zuliprc = parameterized_zuliprc({"autohide": "invalid_layout"})
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc])
+
+    assert str(e.value) == "1"
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_last_lines = [
+        "\033[91mInvalid layout setting 'invalid_layout' was specified"
+        " in zuliprc file.\033[0m",
+        "Valid values are:",
+        *(f"  {layout}" for layout in VALID_LAYOUTS),
+        "Specify the layout option in zuliprc file.",
+    ]
+    assert lines[-len(expected_last_lines) :] == expected_last_lines
+
+
 @pytest.mark.parametrize(
     "setting, valid_values",
     [
-        ("layout", VALID_BOOLEAN_SETTINGS["layout"]),
+        ("layout", VALID_LAYOUTS),
         ("notify", VALID_BOOLEAN_SETTINGS["notify"]),
         ("color-depth", COLOR_DEPTH_ARGS_TO_DEPTHS),
     ],

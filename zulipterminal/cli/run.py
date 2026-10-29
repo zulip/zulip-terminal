@@ -61,11 +61,12 @@ requests_logger.setLevel(logging.DEBUG)
 
 # Valid boolean settings, which map from (str, str) to (True, False)
 VALID_BOOLEAN_SETTINGS: Dict[str, Tuple[str, str]] = {
-    "layout": ("autohide", "no_autohide"),
     "notify": ("enabled", "disabled"),
     "exit_confirmation": ("enabled", "disabled"),
     "transparency": ("enabled", "disabled"),
 }
+
+VALID_LAYOUTS: Tuple[Layout, ...] = ("autohide", "no_autohide")
 
 COLOR_DEPTH_ARGS_TO_DEPTHS: Dict[str, int] = {
     "1": 1,
@@ -86,7 +87,7 @@ DEFAULT_SETTINGS = {
     "transparency": "disabled",
     "editor": "",
 }
-assert DEFAULT_SETTINGS["layout"] in VALID_BOOLEAN_SETTINGS["layout"]
+assert DEFAULT_SETTINGS["layout"] in VALID_LAYOUTS
 assert DEFAULT_SETTINGS["notify"] in VALID_BOOLEAN_SETTINGS["notify"]
 assert DEFAULT_SETTINGS["color-depth"] in COLOR_DEPTH_ARGS_TO_DEPTHS
 assert (
@@ -540,7 +541,7 @@ def main(options: Optional[List[str]] = None) -> None:
 
         valid_remaining_settings = dict(
             VALID_BOOLEAN_SETTINGS,
-            **{"color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
+            **{"layout": VALID_LAYOUTS, "color-depth": COLOR_DEPTH_ARGS_TO_DEPTHS},
         )
 
         # Validate remaining settings
@@ -618,9 +619,6 @@ def main(options: Optional[List[str]] = None) -> None:
             transparent_background=transparency_enabled,
         )
 
-        # Layout is not a boolean setting, so pass its value through directly
-        del boolean_settings["layout"]
-
         Controller(
             config_file=zuliprc_path,
             maximum_footlinks=maximum_footlinks,
@@ -628,7 +626,7 @@ def main(options: Optional[List[str]] = None) -> None:
             theme=theme_data,
             color_depth=color_depth,
             in_explore_mode=args.explore,
-            # Value is validated above, against VALID_BOOLEAN_SETTINGS
+            # Value is validated above, against VALID_LAYOUTS
             layout=cast(Layout, zterm["layout"].value),
             **boolean_settings,
             debug_path=debug_path,
