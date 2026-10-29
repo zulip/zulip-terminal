@@ -2,7 +2,7 @@ import builtins
 import os
 import stat
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Optional, Tuple
+from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 
 import pytest
 import requests
@@ -11,6 +11,8 @@ from pytest_mock import MockerFixture
 
 from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
+    COLOR_DEPTH_ARGS_TO_DEPTHS,
+    VALID_BOOLEAN_SETTINGS,
     NotAZulipOrganizationError,
     _write_zuliprc,
     exit_with_error,
@@ -572,6 +574,41 @@ def test_layout_overrides_autohide(
     lines = captured.out.strip().split("\n")
     expected_line = f"   layout setting '{layout_option}' specified {layout_source}"
     assert expected_line in lines
+
+
+@pytest.mark.parametrize(
+    "setting, valid_values",
+    [
+        ("layout", VALID_BOOLEAN_SETTINGS["layout"]),
+        ("notify", VALID_BOOLEAN_SETTINGS["notify"]),
+        ("color-depth", COLOR_DEPTH_ARGS_TO_DEPTHS),
+    ],
+)
+def test_main_error_with_invalid_setting(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    setting: str,
+    valid_values: Iterable[str],
+) -> None:
+    zuliprc = parameterized_zuliprc({setting: "invalid_value"})
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc])
+
+    assert str(e.value) == "1"
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_last_lines = [
+        f"\033[91mInvalid {setting} setting 'invalid_value' was specified"
+        " in zuliprc file.\033[0m",
+        "Valid values are:",
+        *(f"  {value}" for value in valid_values),
+        f"Specify the {setting} option in zuliprc file.",
+    ]
+    assert lines[-len(expected_last_lines) :] == expected_last_lines
 
 
 @pytest.mark.parametrize(

@@ -553,7 +553,7 @@ def main(options: Optional[List[str]] = None) -> None:
                 )
                 exit_with_error(
                     "Invalid {} setting '{}' was specified {}.".format(
-                        setting, *zterm[setting]
+                        setting, zterm[setting].value, zterm[setting].source.value
                     ),
                     helper_text="\n".join(helper_text),
                 )
