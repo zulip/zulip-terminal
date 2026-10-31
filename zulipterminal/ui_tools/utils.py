@@ -29,7 +29,7 @@ def create_msg_box_list(
     focus_msg = None
     last_msg = last_message
     muted_msgs = 0  # No of messages that are muted.
-    for msg in message_list:
+    for idx, msg in enumerate(message_list):
         if is_unsubscribed_message(msg, model):
             continue
         # Remove messages of muted topics / streams.
@@ -44,9 +44,9 @@ def create_msg_box_list(
         if flags and ("read" in flags):
             msg_flag = None
         elif focus_msg is None:
-            focus_msg = message_list.index(msg) - muted_msgs
+            focus_msg = idx - muted_msgs
         if msg["id"] == focus_msg_id:
-            focus_msg = message_list.index(msg) - muted_msgs
+            focus_msg = idx - muted_msgs
         w_list.append(
             urwid.AttrMap(MessageBox(msg, model, last_msg), msg_flag, "msg_selected")
         )
