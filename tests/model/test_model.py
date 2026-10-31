@@ -9,8 +9,15 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 from zulip import Client, ZulipError
 
+from zulipterminal.api_types import CustomFieldValue, CustomProfileField, Message
 from zulipterminal.config.symbols import STREAM_TOPIC_SEPARATOR
-from zulipterminal.helper import initial_index, powerset
+from zulipterminal.helper import (
+    CustomProfileData,
+    Index,
+    TidiedUserInfo,
+    initial_index,
+    powerset,
+)
 from zulipterminal.model import (
     MAX_MESSAGE_LENGTH,
     MAX_STREAM_NAME_LENGTH,
@@ -24,6 +31,7 @@ from zulipterminal.model import (
     ServerConnectionFailure,
     UserSettings,
 )
+from zulipterminal.ui_tools.buttons import StreamButton
 
 
 MODULE = "zulipterminal.model"
@@ -47,7 +55,13 @@ class TestModel:
         )
 
     @pytest.fixture
-    def model(self, mocker, initial_data, user_profile, unicode_emojis):
+    def model(
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+        user_profile: Dict[str, Any],
+        unicode_emojis: Any,
+    ) -> Model:
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register.return_value = initial_data
         mocker.patch(MODEL + "._update_users_data_from_initial_data")
@@ -62,14 +76,14 @@ class TestModel:
 
     def test_init(
         self,
-        model,
-        initial_data,
-        user_profile,
-        unicode_emojis,
-        realm_emojis_data,
-        zulip_emoji,
-        stream_dict,
-    ):
+        model: Model,
+        initial_data: Dict[str, Any],
+        user_profile: Dict[str, Any],
+        unicode_emojis: Any,
+        realm_emojis_data: Any,
+        zulip_emoji: Any,
+        stream_dict: Dict[int, Any],
+    ) -> None:
         assert hasattr(model, "controller")
         assert hasattr(model, "client")
         assert model.narrow == []
@@ -79,7 +93,7 @@ class TestModel:
         assert model.recipients == frozenset()
         assert model.index == initial_index
         assert model.last_unread_pm is None
-        model.get_messages.assert_called_once_with(
+        model.get_messages.assert_called_once_with(  # type: ignore[attr-defined]
             num_before=30, num_after=10, anchor=None
         )
         assert model.initial_data == initial_data
@@ -90,10 +104,11 @@ class TestModel:
         assert model.user_email == user_profile["email"]
         assert model.server_name == initial_data["realm_name"]
         # FIXME Add test here for model.server_url
-        model._update_users_data_from_initial_data.assert_called_once_with()
+        mock_update_users: Any = model._update_users_data_from_initial_data
+        mock_update_users.assert_called_once_with()
         assert model.users == []
         self.classify_unread_counts.assert_called_once_with(model)
-        assert model.unread_counts == []
+        assert model.unread_counts == []  # type: ignore[comparison-overlap]
         assert model.active_emoji_data == OrderedDict(
             sorted(
                 {**unicode_emojis, **realm_emojis_data, **zulip_emoji}.items(),
@@ -122,7 +137,13 @@ class TestModel:
         "sptn, expected_sptn_value",
         [(None, True), (True, True), (False, False)],
     )
-    def test_init_user_settings(self, mocker, initial_data, sptn, expected_sptn_value):
+    def test_init_user_settings(
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+        sptn: Optional[bool],
+        expected_sptn_value: bool,
+    ) -> None:
         assert "user_settings" not in initial_data  # we add it in tests
 
         if sptn is not None:
@@ -147,7 +168,7 @@ class TestModel:
             ],
         )
 
-    def test_user_settings_expected_contents(self, model):
+    def test_user_settings_expected_contents(self, model: Model) -> None:
         expected_keys = {
             "send_private_typing_notifications",
             "twenty_four_hour_time",
@@ -157,7 +178,7 @@ class TestModel:
         assert set(settings) == expected_keys
 
         # Ensure original settings are unchanged through accessor
-        settings["foo"] = "bar"
+        settings["foo"] = "bar"  # type: ignore[typeddict-unknown-key]
         assert set(model._user_settings) == expected_keys
 
     @pytest.mark.parametrize(
@@ -181,12 +202,12 @@ class TestModel:
     )
     def test_init_muted_topics(
         self,
-        mocker,
-        initial_data,
-        server_response,
-        locally_processed_data,
-        zulip_feature_level,
-    ):
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+        server_response: Any,
+        locally_processed_data: Any,
+        zulip_feature_level: Any,
+    ) -> None:
         mocker.patch(MODEL + ".get_messages", return_value="")
         initial_data["zulip_feature_level"] = zulip_feature_level
         initial_data["muted_topics"] = server_response
@@ -196,7 +217,11 @@ class TestModel:
 
         assert model._muted_topics == locally_processed_data
 
-    def test_init_InvalidAPIKey_response(self, mocker, initial_data):
+    def test_init_InvalidAPIKey_response(
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+    ) -> None:
         # Both network calls indicate the same response
         mocker.patch(MODEL + ".get_messages", return_value="Invalid API key")
         mocker.patch(
@@ -214,7 +239,12 @@ class TestModel:
 
         assert str(e.value) == "Invalid API key (get_messages, register)"
 
-    def test_init_ZulipError_exception(self, mocker, initial_data, exception_text="X"):
+    def test_init_ZulipError_exception(
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+        exception_text: Any = "X",
+    ) -> None:
         # Both network calls fail, resulting in exceptions
         mocker.patch(MODEL + ".get_messages", side_effect=ZulipError(exception_text))
         mocker.patch(
@@ -232,7 +262,11 @@ class TestModel:
 
         assert str(e.value) == exception_text + " (get_messages, register)"
 
-    def test_register_initial_desired_events(self, mocker, initial_data):
+    def test_register_initial_desired_events(
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+    ) -> None:
         mocker.patch(MODEL + ".get_messages", return_value="")
         mocker.patch(MODEL + "._update_users_data_from_initial_data")
         self.client.register.return_value = initial_data
@@ -327,13 +361,13 @@ class TestModel:
     )
     def test_normalize_and_cache_message_retention_text(
         self,
-        model,
-        stream_dict,
-        to_vary_in_stream_dict,
-        realm_msg_retention_days,
-        feature_level,
-        expect_msg_retention_text,
-    ):
+        model: Model,
+        stream_dict: Dict[int, Any],
+        to_vary_in_stream_dict: Any,
+        realm_msg_retention_days: Any,
+        feature_level: int,
+        expect_msg_retention_text: Any,
+    ) -> None:
         model.stream_dict = stream_dict
         model.server_feature_level = feature_level
         model.initial_data["realm_message_retention_days"] = realm_msg_retention_days
@@ -361,8 +395,13 @@ class TestModel:
             [["is", "starred"]],
         ],
     )
-    def test_get_focus_in_current_narrow_individually(self, model, msg_id, narrow):
-        model.index = {"pointer": {str(narrow): msg_id}}
+    def test_get_focus_in_current_narrow_individually(
+        self,
+        model: Model,
+        msg_id: int,
+        narrow: Any,
+    ) -> None:
+        model.index = {"pointer": {str(narrow): msg_id}}  # type: ignore[typeddict-item]
         model.narrow = narrow
         assert model.get_focus_in_current_narrow() == msg_id
 
@@ -379,8 +418,14 @@ class TestModel:
             [["is", "starred"]],
         ],
     )
-    def test_set_focus_in_current_narrow(self, mocker, model, narrow, msg_id):
-        model.index = dict(pointer=dict())
+    def test_set_focus_in_current_narrow(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        narrow: Any,
+        msg_id: int,
+    ) -> None:
+        model.index = dict(pointer=dict())  # type: ignore[typeddict-item]
         model.narrow = narrow
         model.set_focus_in_current_narrow(msg_id)
         assert model.index["pointer"][str(narrow)] == msg_id
@@ -401,7 +446,12 @@ class TestModel:
             ([["search", "FOO"], ["stream", "7"], ["topic", "Test"]], True),
         ],
     )
-    def test_is_search_narrow(self, model, narrow, is_search_narrow):
+    def test_is_search_narrow(
+        self,
+        model: Model,
+        narrow: Any,
+        is_search_narrow: Any,
+    ) -> None:
         model.narrow = narrow
         assert model.is_search_narrow() == is_search_narrow
 
@@ -414,7 +464,7 @@ class TestModel:
             dict(pm_with="someone", topic="foo"),
         ],
     )
-    def test_set_narrow_bad_input(self, model, bad_args):
+    def test_set_narrow_bad_input(self, model: Model, bad_args: Any) -> None:
         with pytest.raises(RuntimeError):
             model.set_narrow(**bad_args)
 
@@ -433,7 +483,12 @@ class TestModel:
             ([["pm-with", "FOO@zulip.com"]], dict(pm_with="FOO@zulip.com")),
         ],
     )
-    def test_set_narrow_already_set(self, model, narrow, good_args):
+    def test_set_narrow_already_set(
+        self,
+        model: Model,
+        narrow: Any,
+        good_args: Dict[str, Any],
+    ) -> None:
         model.narrow = narrow
         assert model.set_narrow(**good_args)
         assert model.narrow == narrow
@@ -455,10 +510,16 @@ class TestModel:
         ],
     )
     def test_set_narrow_not_already_set(
-        self, model, initial_narrow, narrow, good_args, user_dict, stream_dict
-    ):
+        self,
+        model: Model,
+        initial_narrow: Any,
+        narrow: Any,
+        good_args: Dict[str, Any],
+        user_dict: Dict[int, Any],
+        stream_dict: Dict[int, Any],
+    ) -> None:
         model.narrow = initial_narrow
-        model.user_dict = user_dict
+        model.user_dict = user_dict  # type: ignore[assignment]
         model.stream_dict = stream_dict
         assert not model.set_narrow(**good_args)
         assert model.narrow != initial_narrow
@@ -511,8 +572,13 @@ class TestModel:
         ],
     )
     def test_get_message_ids_in_current_narrow(
-        self, mocker, model, narrow, index, current_ids
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        narrow: Any,
+        index: Any,
+        current_ids: Any,
+    ) -> None:
         model.recipients = frozenset({1, 2})
         model.stream_id = 1
         model.narrow = narrow
@@ -536,7 +602,12 @@ class TestModel:
         ],
     )
     def test__fetch_topics_in_streams(
-        self, mocker, response, model, return_value, expected_index
+        self,
+        mocker: MockerFixture,
+        response: Any,
+        model: Model,
+        return_value: Any,
+        expected_index: Any,
     ) -> None:
         self.client.get_stream_topics = mocker.Mock(return_value=response)
 
@@ -557,13 +628,23 @@ class TestModel:
             ([], True),
         ],
     )
-    def test_topics_in_stream(self, mocker, model, topics_index, fetched, stream_id=1):
+    def test_topics_in_stream(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        topics_index: Any,
+        fetched: Any,
+        stream_id: int = 1,
+    ) -> None:
         model.index["topics"][stream_id] = topics_index
-        model._fetch_topics_in_streams = mocker.Mock()
+        model._fetch_topics_in_streams = mocker.Mock()  # type: ignore[method-assign]
 
         return_value = model.topics_in_stream(stream_id)
 
-        assert model._fetch_topics_in_streams.called == fetched
+        assert (
+            model._fetch_topics_in_streams.called  # type: ignore[attr-defined]
+            == fetched
+        )
         assert model.index["topics"][stream_id] == return_value
         assert model.index["topics"][stream_id] is not return_value
 
@@ -701,14 +782,14 @@ class TestModel:
     )
     def test_toggle_message_reaction_with_valid_emoji(
         self,
-        mocker,
-        model,
-        user_key,
-        emoji_unit,
-        existing_reactions,
-        expected_method,
-        msg_id=5,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        user_key: Any,
+        emoji_unit: Any,
+        existing_reactions: Any,
+        expected_method: Any,
+        msg_id: int = 5,
+    ) -> None:
         # Map 'id' to running user_id or an arbitrary other (+1)
         id = (
             model.user_id
@@ -733,7 +814,7 @@ class TestModel:
         model.client.add_reaction.return_value = response
         model.client.remove_reaction.return_value = response
 
-        model.toggle_message_reaction(message, emoji_name)
+        model.toggle_message_reaction(message, emoji_name)  # type: ignore[arg-type]
 
         if expected_method == "POST":
             model.client.add_reaction.assert_called_once_with(reaction_spec)
@@ -743,7 +824,7 @@ class TestModel:
             model.client.add_reaction.assert_not_called()
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-    def test_toggle_message_reaction_with_invalid_emoji(self, model):
+    def test_toggle_message_reaction_with_invalid_emoji(self, model: Model) -> None:
         with pytest.raises(AssertionError):
             model.toggle_message_reaction(dict(), "x")
 
@@ -778,17 +859,19 @@ class TestModel:
     )
     def test_has_user_reacted_to_message(
         self,
-        model,
-        emoji_code,
-        reactions,
-        expected_has_user_reacted,
-        user_id=1,
-        message_id=5,
-    ):
+        model: Model,
+        emoji_code: Any,
+        reactions: Any,
+        expected_has_user_reacted: Any,
+        user_id: int = 1,
+        message_id: int = 5,
+    ) -> None:
         model.user_id = user_id
         message = dict(id=message_id, reactions=reactions)
 
-        has_reacted = model.has_user_reacted_to_message(message, emoji_code=emoji_code)
+        has_reacted = model.has_user_reacted_to_message(
+            message, emoji_code=emoji_code  # type: ignore[arg-type]
+        )
 
         assert has_reacted == expected_has_user_reacted
 
@@ -818,7 +901,7 @@ class TestModel:
         model: Model,
         user_data: Dict[str, Any],
         expected_user_id: int,
-    ):
+    ) -> None:
         reaction = {
             "type": "reaction",
             "op": "add",
@@ -848,7 +931,7 @@ class TestModel:
         self,
         model: Model,
         user_data: Dict[str, Any],
-    ):
+    ) -> None:
         reaction = {
             "type": "reaction",
             "op": "add",
@@ -864,15 +947,21 @@ class TestModel:
     @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
     @pytest.mark.parametrize("status", ["start", "stop"])
     def test_send_typing_status_by_user_ids(
-        self, mocker, model, status, recipient_user_ids
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        status: str,
+        recipient_user_ids: List[int],
+    ) -> None:
         response = mocker.Mock()
         mock_api_query = mocker.patch(
             CONTROLLER + ".client.set_typing_status", return_value=response
         )
         model._user_settings["send_private_typing_notifications"] = True
 
-        model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
+        model.send_typing_status_by_user_ids(
+            recipient_user_ids, status=status  # type: ignore[arg-type]
+        )
 
         mock_api_query.assert_called_once_with(
             {"to": recipient_user_ids, "op": status},
@@ -882,21 +971,32 @@ class TestModel:
 
     @pytest.mark.parametrize("status", ["start", "stop"])
     def test_send_typing_status_with_no_recipients(
-        self, model, status, recipient_user_ids=[]
-    ):
+        self,
+        model: Model,
+        status: str,
+        recipient_user_ids: List[int] = [],
+    ) -> None:
         with pytest.raises(RuntimeError):
-            model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
+            model.send_typing_status_by_user_ids(
+                recipient_user_ids, status=status  # type: ignore[arg-type]
+            )
 
     @pytest.mark.parametrize("recipient_user_ids", [[5140], [5140, 5179]])
     @pytest.mark.parametrize("status", ["start", "stop"])
     def test_send_typing_status_avoided_due_to_user_setting(
-        self, mocker, model, status, recipient_user_ids
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        status: str,
+        recipient_user_ids: List[int],
+    ) -> None:
         model._user_settings["send_private_typing_notifications"] = False
 
         mock_api_query = mocker.patch(CONTROLLER + ".client.set_typing_status")
 
-        model.send_typing_status_by_user_ids(recipient_user_ids, status=status)
+        model.send_typing_status_by_user_ids(
+            recipient_user_ids, status=status  # type: ignore[arg-type]
+        )
 
         assert not mock_api_query.called
         assert not self.display_error_if_present.called
@@ -910,8 +1010,14 @@ class TestModel:
     )
     @pytest.mark.parametrize("recipients", [[5179], [5179, 5180]])
     def test_send_private_message(
-        self, mocker, model, recipients, response, return_value, content="hi!"
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        recipients: Any,
+        response: Any,
+        return_value: Any,
+        content: str = "hi!",
+    ) -> None:
         self.client.send_message = mocker.Mock(return_value=response)
 
         result = model.send_private_message(recipients, content)
@@ -921,14 +1027,17 @@ class TestModel:
 
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
-        if result == "success":
+        if result == "success":  # type: ignore[comparison-overlap]
             self.notify_if_message_sent_outside_narrow.assert_called_once_with(
                 req, self.controller
             )
 
     def test_send_private_message_with_no_recipients(
-        self, model, content="hi!", recipients=[]
-    ):
+        self,
+        model: Model,
+        content: str = "hi!",
+        recipients: Any = [],
+    ) -> None:
         with pytest.raises(RuntimeError):
             model.send_private_message(recipients, content)
 
@@ -941,14 +1050,14 @@ class TestModel:
     )
     def test_send_stream_message(
         self,
-        mocker,
-        model,
-        response,
-        return_value,
-        content="hi!",
-        stream="foo",
-        topic="bar",
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        response: Any,
+        return_value: Any,
+        content: str = "hi!",
+        stream: Any = "foo",
+        topic: str = "bar",
+    ) -> None:
         self.client.send_message = mocker.Mock(return_value=response)
 
         result = model.send_stream_message(stream, topic, content)
@@ -965,7 +1074,7 @@ class TestModel:
         assert result == return_value
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-        if result == "success":
+        if result == "success":  # type: ignore[comparison-overlap]
             self.notify_if_message_sent_outside_narrow.assert_called_once_with(
                 req, self.controller
             )
@@ -978,8 +1087,14 @@ class TestModel:
         ],
     )
     def test_update_private_message(
-        self, mocker, model, response, return_value, content="hi!", msg_id=1
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        response: Any,
+        return_value: Any,
+        content: str = "hi!",
+        msg_id: int = 1,
+    ) -> None:
         self.client.update_message = mocker.Mock(return_value=response)
 
         result = model.update_private_message(msg_id, content)
@@ -1097,17 +1212,17 @@ class TestModel:
     )
     def test_update_stream_message(
         self,
-        mocker,
-        model,
-        response,
-        return_value,
-        kwargs,
-        expected_report_success,
-        old_content="old content",
-        old_stream_name="stream",
-        old_topic_name="old topic",
-        message_id=1,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        response: Any,
+        return_value: Any,
+        kwargs: Any,
+        expected_report_success: Any,
+        old_content: str = "old content",
+        old_stream_name: str = "stream",
+        old_topic_name: Any = "old topic",
+        message_id: int = 1,
+    ) -> None:
         self.client.update_message = mocker.Mock(return_value=response)
         model.index["messages"][message_id]["subject"] = old_topic_name
         model.index["messages"][message_id]["display_recipient"] = old_stream_name
@@ -1150,18 +1265,18 @@ class TestModel:
     )
     def test_update_stream_message__notify_thread_vs_ZFL(
         self,
-        model,
-        ZFL,
-        expect_API_notify_args,
-        notify_args,
-        API_notify_old_thread,
-        API_notify_new_thread,
-        message_id=1,
-        old_content="old content",
-        old_topic="old topic",
-        old_stream_name="old stream name",
-        new_topic="new topic",
-        mode="change_all",
+        model: Model,
+        ZFL: Any,
+        expect_API_notify_args: Any,
+        notify_args: Any,
+        API_notify_old_thread: Any,
+        API_notify_new_thread: Any,
+        message_id: int = 1,
+        old_content: str = "old content",
+        old_topic: Any = "old topic",
+        old_stream_name: str = "old stream name",
+        new_topic: Any = "new topic",
+        mode: Any = "change_all",
     ) -> None:
         model.server_feature_level = ZFL
         model.index["messages"][message_id]["subject"] = old_topic
@@ -1223,13 +1338,13 @@ class TestModel:
     )
     def test_get_latest_message_in_topic(
         self,
-        mocker,
-        model,
-        response,
-        return_value,
-        topic_name="hi!",
-        stream_id=1,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        response: Any,
+        return_value: Any,
+        topic_name: str = "hi!",
+        stream_id: int = 1,
+    ) -> None:
         self.client.get_messages = mocker.Mock(return_value=response)
 
         result = model.get_latest_message_in_topic(stream_id, topic_name)
@@ -1397,15 +1512,17 @@ class TestModel:
     )
     def test_can_user_edit_topic(
         self,
-        mocker,
-        model,
-        initial_data,
-        user_role,
-        user_type,
-        realm_editing_settings,
-        expected_response,
-    ):
-        model.get_user_info = mocker.Mock(return_value=user_role)
+        mocker: MockerFixture,
+        model: Model,
+        initial_data: Dict[str, Any],
+        user_role: Any,
+        user_type: Any,
+        realm_editing_settings: Any,
+        expected_response: Any,
+    ) -> None:
+        model.get_user_info = mocker.Mock(  # type: ignore[method-assign]
+            return_value=user_role
+        )
         model.initial_data = initial_data
         initial_data["realm_allow_message_editing"] = realm_editing_settings[
             "allow_message_editing"
@@ -1435,13 +1552,13 @@ class TestModel:
     # NOTE: This tests only getting next-unread, not a fixed anchor
     def test_success_get_messages(
         self,
-        mocker,
-        messages_successful_response,
-        index_all_messages,
-        initial_data,
-        num_before=30,
-        num_after=10,
-    ):
+        mocker: MockerFixture,
+        messages_successful_response: Dict[str, Any],
+        index_all_messages: Any,
+        initial_data: Dict[str, Any],
+        num_before: int = 30,
+        num_after: int = 10,
+    ) -> None:
         self.client.register.return_value = initial_data
         mocker.patch(MODEL + "._update_users_data_from_initial_data")
         mocker.patch(MODEL + "._subscribe_to_streams")
@@ -1502,8 +1619,11 @@ class TestModel:
         ],
     )
     def test_modernize_message_response(
-        self, model, messages, expected_messages_response
-    ):
+        self,
+        model: Model,
+        messages: Any,
+        expected_messages_response: Any,
+    ) -> None:
         assert model.modernize_message_response(messages) == expected_messages_response
 
     @pytest.mark.parametrize(
@@ -1529,8 +1649,12 @@ class TestModel:
         ],
     )
     def test__store_content_length_restrictions(
-        self, model, initial_data, feature_level, to_vary_in_initial_data
-    ):
+        self,
+        model: Model,
+        initial_data: Dict[str, Any],
+        feature_level: int,
+        to_vary_in_initial_data: Any,
+    ) -> None:
         initial_data.update(to_vary_in_initial_data)
         model.initial_data = initial_data
         model.server_feature_level = feature_level
@@ -1552,7 +1676,11 @@ class TestModel:
             assert model.max_topic_length == MAX_TOPIC_NAME_LENGTH
             assert model.max_message_length == MAX_MESSAGE_LENGTH
 
-    def test__store_typing_duration_settings__default_values(self, model, initial_data):
+    def test__store_typing_duration_settings__default_values(
+        self,
+        model: Model,
+        initial_data: Dict[str, Any],
+    ) -> None:
         model.initial_data = initial_data
 
         model._store_typing_duration_settings()
@@ -1563,13 +1691,13 @@ class TestModel:
 
     def test__store_typing_duration_settings__with_values(
         self,
-        model,
-        initial_data,
-        feature_level=204,
-        typing_started_wait=7500,
-        typing_stopped_wait=3000,
-        typing_started_expiry=10000,
-    ):
+        model: Model,
+        initial_data: Dict[str, Any],
+        feature_level: int = 204,
+        typing_started_wait: Any = 7500,
+        typing_stopped_wait: Any = 3000,
+        typing_started_expiry: Any = 10000,
+    ) -> None:
         # Ensure inputs are not the defaults, to avoid the test accidentally passing
         assert typing_started_wait != TYPING_STARTED_WAIT_PERIOD
         assert typing_stopped_wait != TYPING_STOPPED_WAIT_PERIOD
@@ -1615,13 +1743,13 @@ class TestModel:
     )
     def test__store_server_presence_intervals(
         self,
-        model,
-        initial_data,
-        feature_level,
-        to_vary_in_initial_data,
-        expected_offline_threshold,
-        expected_presence_ping_interval,
-    ):
+        model: Model,
+        initial_data: Dict[str, Any],
+        feature_level: int,
+        to_vary_in_initial_data: Any,
+        expected_offline_threshold: Any,
+        expected_presence_ping_interval: Any,
+    ) -> None:
         # Ensure inputs are not the defaults, to avoid the test accidentally passing
         assert (
             to_vary_in_initial_data.get("server_presence_offline_threshold_seconds")
@@ -1647,13 +1775,13 @@ class TestModel:
 
     def test_get_message_false_first_anchor(
         self,
-        mocker,
-        messages_successful_response,
-        index_all_messages,
-        initial_data,
-        num_before=30,
-        num_after=10,
-    ):
+        mocker: MockerFixture,
+        messages_successful_response: Dict[str, Any],
+        index_all_messages: Any,
+        initial_data: Dict[str, Any],
+        num_before: int = 30,
+        num_after: int = 10,
+    ) -> None:
         # TEST FOR get_messages() with first_anchor=False
         # and anchor=0
 
@@ -1683,8 +1811,13 @@ class TestModel:
 
     # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(
-        self, mocker, error_response, initial_data, num_before=30, num_after=10
-    ):
+        self,
+        mocker: MockerFixture,
+        error_response: Any,
+        initial_data: Dict[str, Any],
+        num_before: int = 30,
+        num_after: int = 10,
+    ) -> None:
         # Initialize Model
         self.client.register.return_value = initial_data
         mocker.patch(MODEL + "._update_users_data_from_initial_data")
@@ -1725,13 +1858,13 @@ class TestModel:
     )
     def test_fetch_raw_message_content(
         self,
-        mocker,
-        model,
-        expected_raw_content,
-        response,
-        display_error_called,
-        message_id=1,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        expected_raw_content: Any,
+        response: Any,
+        display_error_called: Any,
+        message_id: int = 1,
+    ) -> None:
         self.client.get_raw_message.return_value = response
 
         return_value = model.fetch_raw_message_content(message_id)
@@ -1752,12 +1885,12 @@ class TestModel:
     )
     def test_toggle_stream_muted_status(
         self,
-        mocker,
-        model,
-        initial_muted_streams,
-        value,
-        response={"result": "success"},
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        initial_muted_streams: Any,
+        value: Any,
+        response: Any = {"result": "success"},
+    ) -> None:
         model.muted_streams = initial_muted_streams
         model.client.update_subscription_settings.return_value = response
         model.toggle_stream_muted_status(205)
@@ -1766,8 +1899,12 @@ class TestModel:
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
     def test_stream_access_type(
-        self, model, general_stream, secret_stream, web_public_stream
-    ):
+        self,
+        model: Model,
+        general_stream: Dict[str, Any],
+        secret_stream: Dict[str, Any],
+        web_public_stream: Dict[str, Any],
+    ) -> None:
         assert model.stream_access_type(general_stream["stream_id"]) == "public"
         assert model.stream_access_type(secret_stream["stream_id"]) == "private"
         assert model.stream_access_type(web_public_stream["stream_id"]) == "web-public"
@@ -1783,8 +1920,12 @@ class TestModel:
         ],
     )
     def test_toggle_message_star_status(
-        self, mocker, model, flags_before, expected_operator
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        flags_before: List[str],
+        expected_operator: Any,
+    ) -> None:
         mocker.patch("zulip.Client")
         response = mocker.Mock()
         model.client.update_message_flags.return_value = response
@@ -1792,13 +1933,13 @@ class TestModel:
             "id": 99,
             "flags": flags_before,
         }
-        model.toggle_message_star_status(message)
+        model.toggle_message_star_status(message)  # type: ignore[arg-type]
 
         request = {"flag": "starred", "messages": [99], "op": expected_operator}
         model.client.update_message_flags.assert_called_once_with(request)
         self.display_error_if_present.assert_called_once_with(response, self.controller)
 
-    def test_mark_message_ids_as_read(self, model, mocker: Any) -> None:
+    def test_mark_message_ids_as_read(self, model: Model, mocker: Any) -> None:
         mock_api_query = mocker.patch(CONTROLLER + ".client.update_message_flags")
 
         model.mark_message_ids_as_read([1, 2])
@@ -1807,13 +1948,21 @@ class TestModel:
             {"flag": "read", "messages": [1, 2], "op": "add"},
         )
 
-    def test_mark_message_ids_as_read_empty_message_view(self, model) -> None:
+    def test_mark_message_ids_as_read_empty_message_view(self, model: Model) -> None:
         assert model.mark_message_ids_as_read([]) is None
 
-    def test__update_initial_data(self, model, initial_data):
+    def test__update_initial_data(
+        self,
+        model: Model,
+        initial_data: Dict[str, Any],
+    ) -> None:
         assert model.initial_data == initial_data
 
-    def test__group_info_from_realm_user_groups(self, model, user_groups_fixture):
+    def test__group_info_from_realm_user_groups(
+        self,
+        model: Model,
+        user_groups_fixture: List[Dict[str, Any]],
+    ) -> None:
         user_group_names = model._group_info_from_realm_user_groups(user_groups_fixture)
         assert model.user_group_by_id == {
             group["id"]: {
@@ -1827,11 +1976,11 @@ class TestModel:
 
     def test__clean_and_order_custom_profile_data(
         self,
-        model,
-        custom_profile_fields_fixture,
-        custom_profile_data_fixture,
-        clean_custom_profile_data_fixture,
-    ):
+        model: Model,
+        custom_profile_fields_fixture: List[CustomProfileField],
+        custom_profile_data_fixture: Dict[str, CustomFieldValue],
+        clean_custom_profile_data_fixture: List[CustomProfileData],
+    ) -> None:
         model.initial_data["custom_profile_fields"] = custom_profile_fields_fixture
         assert (
             clean_custom_profile_data_fixture
@@ -1917,32 +2066,43 @@ class TestModel:
     )
     def test_get_user_info(
         self,
-        model,
-        mocker,
-        _all_users_by_id,
-        user_dict,
-        to_vary_in_each_user,
-        key,
-        expected_value,
-    ):
+        model: Model,
+        mocker: MockerFixture,
+        _all_users_by_id: Dict[int, Any],
+        user_dict: Dict[int, Any],
+        to_vary_in_each_user: Any,
+        key: str,
+        expected_value: Any,
+    ) -> None:
         _all_users_by_id[11] = dict({"user_id": 11}, **to_vary_in_each_user)
         model._all_users_by_id = _all_users_by_id
-        model.user_dict = user_dict
+        model.user_dict = user_dict  # type: ignore[assignment]
 
-        assert model.get_user_info(11)[key] == expected_value
+        assert (
+            model.get_user_info(11)[key]  # type: ignore[index, literal-required]
+            == expected_value
+        )
 
-    def test_get_user_info_USER_NOT_FOUND(self, model):
+    def test_get_user_info_USER_NOT_FOUND(self, model: Model) -> None:
         assert model.get_user_info(-1) is None
 
     def test_get_user_info_sample_response(
-        self, model, _all_users_by_id, tidied_user_info_response
-    ):
+        self,
+        model: Model,
+        _all_users_by_id: Dict[int, Any],
+        tidied_user_info_response: TidiedUserInfo,
+    ) -> None:
         model._all_users_by_id = _all_users_by_id
         assert model.get_user_info(12) == tidied_user_info_response
 
     def test__update_users_data_from_initial_data(
-        self, mocker, initial_data, user_list, user_dict, user_id
-    ):
+        self,
+        mocker: MockerFixture,
+        initial_data: Dict[str, Any],
+        user_list: List[Dict[str, Any]],
+        user_dict: Dict[int, Any],
+        user_id: int,
+    ) -> None:
         mocker.patch(MODEL + ".get_messages", return_value="")
         self.client.register.return_value = initial_data
         mocker.patch(MODEL + "._subscribe_to_streams")
@@ -1950,14 +2110,18 @@ class TestModel:
             MODULE + ".classify_unread_counts", return_value=[]
         )
         model = Model(self.controller)
-        assert model.user_dict == user_dict
+        assert model.user_dict == user_dict  # type: ignore[comparison-overlap]
         assert model.users == user_list
 
     @pytest.mark.parametrize("muted", powerset([99, 1000]))
     @pytest.mark.parametrize("visual_notification_enabled", powerset([99, 1000]))
     def test__subscribe_to_streams(
-        self, initial_data, muted, visual_notification_enabled, model
-    ):
+        self,
+        initial_data: Dict[str, Any],
+        muted: Any,
+        visual_notification_enabled: Any,
+        model: Model,
+    ) -> None:
         subs = [
             dict(
                 entry,
@@ -1967,7 +2131,7 @@ class TestModel:
             for entry in initial_data["subscriptions"]
         ]
 
-        model._subscribe_to_streams(subs)
+        model._subscribe_to_streams(subs)  # type: ignore[arg-type]
 
         assert len(model.stream_dict)
         assert all(
@@ -1979,8 +2143,11 @@ class TestModel:
         assert model.visual_notified_streams == visual_notification_enabled
 
     def test__handle_message_event_with_Falsey_log(
-        self, mocker, model, message_fixture
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+    ) -> None:
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
@@ -1988,18 +2155,25 @@ class TestModel:
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
-        model.notify_user = mocker.Mock()
+        model.notify_user = mocker.Mock()  # type: ignore[method-assign]
         event = {"type": "message", "message": message_fixture}
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         assert len(self.controller.view.message_view.log) == 1  # Added "msg_w"
-        model.notify_user.assert_called_once_with(event["message"])
+        model.notify_user.assert_called_once_with(  # type: ignore[attr-defined]
+            event["message"]
+        )
         create_msg_box_list.assert_called_once_with(
             model, [message_fixture["id"]], last_message=None
         )
 
-    def test__handle_message_event_with_valid_log(self, mocker, model, message_fixture):
+    def test__handle_message_event_with_valid_log(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+    ) -> None:
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
@@ -2007,27 +2181,34 @@ class TestModel:
         create_msg_box_list = mocker.patch(
             MODULE + ".create_msg_box_list", return_value=["msg_w"]
         )
-        model.notify_user = mocker.Mock()
+        model.notify_user = mocker.Mock()  # type: ignore[method-assign]
         event = {"type": "message", "message": message_fixture}
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         log = self.controller.view.message_view.log
         assert len(log) == 2  # Added "msg_w"
-        model.notify_user.assert_called_once_with(event["message"])
+        model.notify_user.assert_called_once_with(  # type: ignore[attr-defined]
+            event["message"]
+        )
         # NOTE: So we expect the first element *was* the last_message parameter
         expected_last_msg = log[0].original_widget.message
         create_msg_box_list.assert_called_once_with(
             model, [message_fixture["id"]], last_message=expected_last_msg
         )
 
-    def test__handle_message_event_with_flags(self, mocker, model, message_fixture):
+    def test__handle_message_event_with_flags(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+    ) -> None:
         model._have_last_message[repr([])] = True
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
         self.controller.view.message_view = mocker.Mock(log=[mocker.Mock()])
         mocker.patch(MODULE + ".create_msg_box_list", return_value=["msg_w"])
-        model.notify_user = mocker.Mock()
+        model.notify_user = mocker.Mock()  # type: ignore[method-assign]
         set_count = mocker.patch(MODULE + ".set_count")
 
         # Test event with flags
@@ -2037,13 +2218,15 @@ class TestModel:
             "flags": ["read", "mentioned"],
         }
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         # set count not called since 'read' flag present.
         set_count.assert_not_called()
 
         # Test event without flags
-        model.notify_user.assert_called_once_with(event["message"])
+        model.notify_user.assert_called_once_with(  # type: ignore[attr-defined]
+            event["message"]
+        )
         self.controller.view.message_view.log = [mocker.Mock()]
         event = {
             "type": "message",
@@ -2051,10 +2234,14 @@ class TestModel:
             "flags": [],
         }
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         # set count called since the message is unread.
-        set_count.assert_called_once_with([event["message"]["id"]], self.controller, 1)
+        set_count.assert_called_once_with(
+            [event["message"]["id"]],  # type: ignore[index]
+            self.controller,
+            1,
+        )
 
     @pytest.mark.parametrize(
         "response, narrow, recipients, log",
@@ -2158,8 +2345,15 @@ class TestModel:
         ],
     )
     def test__handle_message_event(
-        self, mocker, user_profile, response, narrow, recipients, model, log
-    ):
+        self,
+        mocker: MockerFixture,
+        user_profile: Dict[str, Any],
+        response: Any,
+        narrow: Any,
+        recipients: Any,
+        model: Model,
+        log: Any,
+    ) -> None:
         model._have_last_message[repr(narrow)] = True
         mocker.patch(MODEL + "._update_topic_index")
         mocker.patch(MODULE + ".index_messages", return_value={})
@@ -2169,7 +2363,7 @@ class TestModel:
         (
             self.controller.view.left_panel.is_in_topic_view_with_stream_id.return_value
         ) = False
-        model.notify_user = mocker.Mock()
+        model.notify_user = mocker.Mock()  # type: ignore[method-assign]
         model.narrow = narrow
         model.recipients = recipients
         model.user_id = user_profile["user_id"]
@@ -2179,15 +2373,17 @@ class TestModel:
             "flags": response["flags"] if "flags" in response else [],
         }
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         assert self.controller.view.message_view.log == log
         set_count.assert_called_once_with([response["id"]], self.controller, 1)
 
         model._have_last_message[repr(narrow)] = False
-        model.notify_user.assert_called_once_with(response)
+        model.notify_user.assert_called_once_with(  # type: ignore[attr-defined]
+            response
+        )
 
-        model._handle_message_event(event)
+        model._handle_message_event(event)  # type: ignore[arg-type]
 
         # LOG REMAINS THE SAME IF UPDATE IS FALSE
         assert self.controller.view.message_view.log == log
@@ -2212,18 +2408,25 @@ class TestModel:
         ],
     )
     def test__update_topic_index(
-        self, topic_name, topic_order_initial, topic_order_final, model, mocker
-    ):
-        model.index = {
+        self,
+        topic_name: str,
+        topic_order_initial: Any,
+        topic_order_final: Any,
+        model: Model,
+        mocker: MockerFixture,
+    ) -> None:
+        model.index = {  # type: ignore[typeddict-item]
             "topics": {
                 86: topic_order_initial,
             }
         }
-        model.topics_in_stream = mocker.Mock(return_value=topic_order_initial)
+        model.topics_in_stream = mocker.Mock(  # type: ignore[method-assign]
+            return_value=topic_order_initial
+        )
 
         model._update_topic_index(86, topic_name)
 
-        model.topics_in_stream.assert_called_once_with(86)
+        model.topics_in_stream.assert_called_once_with(86)  # type: ignore[attr-defined]
         assert model.index["topics"][86] == topic_order_final
 
     # TODO: Ideally message_fixture would use standardized ids?
@@ -2256,14 +2459,14 @@ class TestModel:
     )
     def test_notify_users_calling_msg_type(
         self,
-        mocker,
-        model,
-        message_fixture,
-        user_id,
-        vary_each_msg,
-        visual_notification_status,
-        types_when_notify_called,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+        user_id: int,
+        vary_each_msg: Any,
+        visual_notification_status: Any,
+        types_when_notify_called: Any,
+    ) -> None:
         message_fixture.update(vary_each_msg)
         model.user_id = user_id
         mocker.patch(
@@ -2322,8 +2525,13 @@ class TestModel:
         ],
     )
     def test_notify_user_transformed_content(
-        self, mocker, model, message_fixture, content, expected_notification_text
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+        content: str,
+        expected_notification_text: Any,
+    ) -> None:
         mocker.patch(MODEL + ".is_visual_notifications_enabled", lambda s, id: True)
         notify = mocker.patch(MODULE + ".notify")
         message_fixture["content"] = content
@@ -2340,8 +2548,13 @@ class TestModel:
         ],
     )
     def test_notify_users_enabled(
-        self, mocker, model, message_fixture, notify_enabled, is_notify_called
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_fixture: Message,
+        notify_enabled: Any,
+        is_notify_called: Any,
+    ) -> None:
         message_fixture.update({"sender_id": 2, "flags": ["mentioned"]})
         model.controller.notify_enabled = notify_enabled
         model.user_id = 1
@@ -2354,13 +2567,18 @@ class TestModel:
         [(True, "New direct message from Foo Foo"), (False, "private content here.")],
     )
     def test_notify_users_hides_PM_content_based_on_user_setting(
-        self, mocker, model, private_message_fixture, hide_content, expected_content
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        private_message_fixture: Message,
+        hide_content: Any,
+        expected_content: Any,
+    ) -> None:
         notify = mocker.patch(MODULE + ".notify")
         model._user_settings["pm_content_in_desktop_notifications"] = not hide_content
 
         message = private_message_fixture
-        message["user_id"] = 5179
+        message["user_id"] = 5179  # type: ignore[typeddict-unknown-key]
         message["flags"] = []
 
         model.notify_user(message)
@@ -2740,14 +2958,14 @@ class TestModel:
     )
     def test__handle_update_message_event(
         self,
-        mocker,
-        model,
-        event,
-        initially_me_message,
-        expected_index,
-        expected_times_messages_rerendered,
-        topic_view_enabled,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        event: Dict[str, Any],
+        initially_me_message: Any,
+        expected_index: Any,
+        expected_times_messages_rerendered: Any,
+        topic_view_enabled: Any,
+    ) -> None:
         event["type"] = "update_message"
 
         initial_message_data = {  # for all messages in index, base data
@@ -2757,7 +2975,7 @@ class TestModel:
             "is_me_message": initially_me_message,
         }
 
-        model.index = {
+        model.index = {  # type: ignore[typeddict-item]
             "messages": {
                 message_id: dict(initial_message_data, id=message_id)
                 for message_id in [1, 2]
@@ -2770,7 +2988,7 @@ class TestModel:
         }
         mocker.patch(MODEL + "._update_rendered_view")
 
-        def _set_topics_to_old_and_new(event):
+        def _set_topics_to_old_and_new(event: Any) -> None:
             model.index["topics"][10] = ["new subject", "old subject"]
 
         fetch_topics = mocker.patch(
@@ -2782,11 +3000,13 @@ class TestModel:
             topic_view_enabled
         )
 
-        model._handle_update_message_event(event)
+        model._handle_update_message_event(event)  # type: ignore[arg-type]
 
         assert model.index == expected_index
 
-        calls_to_update_messages = model._update_rendered_view.call_count
+        calls_to_update_messages = (
+            model._update_rendered_view.call_count  # type: ignore[attr-defined]
+        )
         assert calls_to_update_messages == expected_times_messages_rerendered
 
         if topic_view_enabled:
@@ -2809,8 +3029,14 @@ class TestModel:
         ],
     )
     def test__update_rendered_view(
-        self, mocker, model, subject, narrow, new_log_len, msg_id=1
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        subject: str,
+        narrow: Any,
+        new_log_len: Any,
+        msg_id: int = 1,
+    ) -> None:
         msg_w = mocker.Mock()
         other_msg_w = mocker.Mock()
         msg_w.original_widget.message = {"id": msg_id, "subject": subject}
@@ -2846,8 +3072,14 @@ class TestModel:
         ],
     )
     def test__update_rendered_view_change_narrow(
-        self, mocker, model, subject, narrow, narrow_changed, msg_id=1
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        subject: str,
+        narrow: Any,
+        narrow_changed: Any,
+        msg_id: int = 1,
+    ) -> None:
         msg_w = mocker.Mock()
         msg_w.original_widget.message = {"id": msg_id, "subject": subject}
         model.narrow = narrow
@@ -2863,8 +3095,10 @@ class TestModel:
         assert model.controller.update_screen.called
 
     @pytest.fixture
-    def reaction_event_factory(self):
-        def _factory(*, op: str, message_id: int, user=None, user_id=None):
+    def reaction_event_factory(self) -> Any:
+        def _factory(
+            *, op: str, message_id: int, user: Any = None, user_id: Any = None
+        ) -> Dict[str, Any]:
             base_event = {
                 "id": 2,
                 "emoji_code": "1f44d",
@@ -2887,7 +3121,7 @@ class TestModel:
         return _factory
 
     @pytest.fixture
-    def reaction_event_index_factory(self):
+    def reaction_event_index_factory(self) -> Any:
         """
         Generate index for reaction tests based on minimal specification
 
@@ -2906,21 +3140,23 @@ class TestModel:
         """
         MsgsType = List[Tuple[int, Optional[List[Tuple[int, str, str, str]]]]]
 
-        def _factory(msgs: MsgsType, schema="with_user"):
-            def build_reaction(user_id, type, code, name):
+        def _factory(msgs: MsgsType, schema: str = "with_user") -> Any:
+            def build_reaction(
+                user_id: int, type: str, code: str, name: str
+            ) -> Dict[str, Any]:
                 reaction = {
                     "reaction_type": type,
                     "emoji_code": code,
                     "emoji_name": name,
                 }
                 if schema in {"with_user", "with_both"}:
-                    reaction["user"] = {
+                    reaction["user"] = {  # type: ignore[assignment]
                         "email": f"User email #{user_id}",
                         "full_name": f"User #{user_id}",
                         "id": user_id,
                     }
                 if schema in {"with_user_id", "with_both"}:
-                    reaction["user_id"] = user_id
+                    reaction["user_id"] = user_id  # type: ignore[assignment]
                 return reaction
 
             return {
@@ -2949,15 +3185,15 @@ class TestModel:
     )
     def test__handle_reaction_event_not_in_index(
         self,
-        mocker,
-        model,
-        reaction_event_factory,
-        reaction_event_index_factory,
-        op,
-        reaction_event_schema,
-        reaction_schema,
-        unindexed_message_id=1,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        reaction_event_factory: Any,
+        reaction_event_index_factory: Any,
+        op: str,
+        reaction_event_schema: Any,
+        reaction_schema: Any,
+        unindexed_message_id: Any = 1,
+    ) -> None:
         common_args = {
             "op": op,
             "message_id": unindexed_message_id,
@@ -2979,14 +3215,14 @@ class TestModel:
             ],
             reaction_schema,
         )
-        model._update_rendered_view = mocker.Mock()
+        model._update_rendered_view = mocker.Mock()  # type: ignore[method-assign]
         previous_index = deepcopy(model.index)
 
         model._handle_reaction_event(reaction_event)
 
         # If there was no message earlier then don't update
         assert model.index == previous_index
-        assert not model._update_rendered_view.called
+        assert not model._update_rendered_view.called  # type: ignore[attr-defined]
 
     @pytest.mark.parametrize(
         "reaction_event_schema", ["with_user", "with_user_id", "with_both"]
@@ -3103,17 +3339,17 @@ class TestModel:
     )
     def test__handle_reaction_event_for_msg_in_index(
         self,
-        mocker,
-        model,
-        reaction_event_factory,
-        reaction_event_index_factory,
-        op,
-        reaction_event_schema,
-        reaction_schema,
-        msgs,
-        expected_number_after,
-        event_message_id=2,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        reaction_event_factory: Any,
+        reaction_event_index_factory: Any,
+        op: str,
+        reaction_event_schema: Any,
+        reaction_schema: Any,
+        msgs: Any,
+        expected_number_after: Any,
+        event_message_id: Any = 2,
+    ) -> None:
         common_args = {
             "op": op,
             "message_id": event_message_id,
@@ -3128,14 +3364,15 @@ class TestModel:
             )
 
         model.index = reaction_event_index_factory(msgs, reaction_schema)
-        model._update_rendered_view = mocker.Mock()
+        model._update_rendered_view = mocker.Mock()  # type: ignore[method-assign]
 
         model._handle_reaction_event(reaction_event)
 
         end_reactions = model.index["messages"][event_message_id]["reactions"]
         assert len(end_reactions) == expected_number_after
 
-        model._update_rendered_view.assert_called_once_with(event_message_id)
+        mock_update_view: Any = model._update_rendered_view
+        mock_update_view.assert_called_once_with(event_message_id)
 
     @pytest.mark.parametrize(
         "submessages, event, expected_updated_submessage",
@@ -3352,17 +3589,17 @@ class TestModel:
     )
     def test__handle_submessage_event(
         self,
-        mocker,
-        model,
-        submessages,
-        event,
-        expected_updated_submessage,
-        id=1958326,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        submessages: Any,
+        event: Dict[str, Any],
+        expected_updated_submessage: Any,
+        id: Any = 1958326,
+    ) -> None:
         model.index["messages"][id]["submessages"] = submessages
-        model._update_rendered_view = mocker.Mock()
+        model._update_rendered_view = mocker.Mock()  # type: ignore[method-assign]
 
-        model._handle_submessage_event(event)
+        model._handle_submessage_event(event)  # type: ignore[arg-type]
 
         assert model.index["messages"][id]["submessages"] == expected_updated_submessage
 
@@ -3373,15 +3610,18 @@ class TestModel:
             ("operation", 0),
         ]
     )
-    def update_message_flags_operation(self, request):
+    def update_message_flags_operation(self, request: Any) -> Any:
         return request.param
 
     def test_update_star_status_no_index(
-        self, mocker, model, update_message_flags_operation
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        update_message_flags_operation: Any,
+    ) -> None:
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={})  # Not indexed
+        model.index = dict(messages={})  # type: ignore[typeddict-item]  # Not indexed
         event = {
             "type": "update_message_flags",
             "messages": [1],
@@ -3392,22 +3632,24 @@ class TestModel:
         mocker.patch(MODEL + "._update_rendered_view")
         set_count = mocker.patch(MODULE + ".set_count")
 
-        model._handle_update_message_flags_event(event)
+        model._handle_update_message_flags_event(event)  # type: ignore[arg-type]
 
-        assert model.index == dict(messages={})
-        model._update_rendered_view.assert_not_called()
+        assert model.index == dict(messages={})  # type: ignore[comparison-overlap]
+        model._update_rendered_view.assert_not_called()  # type: ignore[attr-defined]
         set_count.assert_not_called()
         self.controller.view.starred_button.update_count.assert_called()
 
     def test_update_star_status_invalid_operation(
         self,
-        mocker,
-        model,
-        update_message_flags_operation,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        update_message_flags_operation: Any,
+    ) -> None:
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(messages={1: {"flags": None}})  # Minimal
+        model.index = dict(  # type: ignore[typeddict-item]
+            messages={1: {"flags": None}}  # Minimal
+        )
         event = {
             "type": "update_message_flags",
             "messages": [1],
@@ -3418,8 +3660,8 @@ class TestModel:
         mocker.patch(MODEL + "._update_rendered_view")
         set_count = mocker.patch(MODULE + ".set_count")
         with pytest.raises(RuntimeError):
-            model._handle_update_message_flags_event(event)
-        model._update_rendered_view.assert_not_called()
+            model._handle_update_message_flags_event(event)  # type: ignore[arg-type]
+        model._update_rendered_view.assert_not_called()  # type: ignore[attr-defined]
         set_count.assert_not_called()
         self.controller.view.starred_button.update_count.assert_not_called()
 
@@ -3450,19 +3692,19 @@ class TestModel:
     )
     def test_update_star_status(
         self,
-        mocker,
-        model,
-        event_op,
-        event_message_ids,
-        indexed_ids,
-        scaling,
-        flags_before,
-        flags_after,
-        update_message_flags_operation,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        event_op: str,
+        event_message_ids: List[int],
+        indexed_ids: List[int],
+        scaling: Any,
+        flags_before: List[str],
+        flags_after: List[str],
+        update_message_flags_operation: Any,
+    ) -> None:
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(
+        model.index = dict(  # type: ignore[typeddict-item]
             messages={msg_id: {"flags": flags_before} for msg_id in indexed_ids},
             starred_msg_ids={
                 msg_id for msg_id in indexed_ids if "starred" in flags_before
@@ -3480,7 +3722,7 @@ class TestModel:
         set_count = mocker.patch(MODULE + ".set_count")
         update_star_count = self.controller.view.starred_button.update_count
 
-        model._handle_update_message_flags_event(event)
+        model._handle_update_message_flags_event(event)  # type: ignore[arg-type]
 
         assert model.index["starred_msg_ids"] == {
             message_id
@@ -3490,7 +3732,7 @@ class TestModel:
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
             assert model.index["messages"][changed_id]["flags"] == flags_after
-        model._update_rendered_view.assert_has_calls(
+        model._update_rendered_view.assert_has_calls(  # type: ignore[attr-defined]
             [mocker.call(changed_id) for changed_id in changed_ids]
         )
 
@@ -3531,18 +3773,18 @@ class TestModel:
     )
     def test_update_read_status(
         self,
-        mocker,
-        model,
-        event_op,
-        event_message_ids,
-        indexed_ids,
-        flags_before,
-        flags_after,
-        update_message_flags_operation,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        event_op: str,
+        event_message_ids: List[int],
+        indexed_ids: List[int],
+        flags_before: List[str],
+        flags_after: List[str],
+        update_message_flags_operation: Any,
+    ) -> None:
         operation, model.server_feature_level = update_message_flags_operation
 
-        model.index = dict(
+        model.index = dict(  # type: ignore[typeddict-item]
             messages={msg_id: {"flags": flags_before} for msg_id in indexed_ids},
             starred_msg_ids={
                 msg_id for msg_id in indexed_ids if "starred" in flags_before
@@ -3559,16 +3801,17 @@ class TestModel:
         mocker.patch(MODEL + "._update_rendered_view")
         set_count = mocker.patch(MODULE + ".set_count")
 
-        model._handle_update_message_flags_event(event)
+        model._handle_update_message_flags_event(event)  # type: ignore[arg-type]
 
         changed_ids = set(indexed_ids) & set(event_message_ids)
         for changed_id in changed_ids:
             assert model.index["messages"][changed_id]["flags"] == flags_after
 
+            mock_update_view: Any = model._update_rendered_view
             if event_op == "add":
-                model._update_rendered_view.assert_has_calls([mocker.call(changed_id)])
+                mock_update_view.assert_has_calls([mocker.call(changed_id)])
             elif event_op == "remove":
-                model._update_rendered_view.assert_not_called()
+                mock_update_view.assert_not_called()
 
         for unchanged_id in set(indexed_ids) - set(event_message_ids):
             assert model.index["messages"][unchanged_id]["flags"] == flags_before
@@ -3589,8 +3832,13 @@ class TestModel:
         ids=["pinning", "unpinning", "first_pinned", "last_unpinned"],
     )
     def test_toggle_stream_pinned_status(
-        self, mocker, model, pinned_streams, pin_to_top, stream_id=1
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        pinned_streams: Any,
+        pin_to_top: Any,
+        stream_id: int = 1,
+    ) -> None:
         model.pinned_streams = deepcopy(pinned_streams)
         model.client.update_subscription_settings.return_value = {"result": "success"}
 
@@ -3618,12 +3866,12 @@ class TestModel:
     )
     def test_toggle_stream_visual_notifications(
         self,
-        model,
-        initial_visual_notified_streams,
-        expected_new_value,
-        response={"result": "success"},
-        stream_id=205,
-    ):
+        model: Model,
+        initial_visual_notified_streams: Any,
+        expected_new_value: Any,
+        response: Any = {"result": "success"},
+        stream_id: int = 205,
+    ) -> None:
         model.visual_notified_streams = initial_visual_notified_streams
         model.client.update_subscription_settings.return_value = response
 
@@ -3783,18 +4031,20 @@ class TestModel:
     )
     def test__handle_typing_event(
         self,
-        mocker,
-        model,
-        narrow,
-        event,
-        is_notification_in_progress,
-        expected_active_conversation_info,
-        expected_show_typing_notification,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        narrow: Any,
+        event: Dict[str, Any],
+        is_notification_in_progress: Any,
+        expected_active_conversation_info: Any,
+        expected_show_typing_notification: Any,
+    ) -> None:
         event["type"] = "typing"
 
         model.narrow = narrow
-        model.user_dict = {"hamlet@zulip.com": {"full_name": "hamlet"}}
+        model.user_dict = {
+            "hamlet@zulip.com": {"full_name": "hamlet"}  # type: ignore[typeddict-item]
+        }
         model.user_id = 5  # Iago's user_id
         model.controller.active_conversation_info = {}
         model.controller.is_typing_notification_in_progress = (
@@ -3804,7 +4054,7 @@ class TestModel:
             CONTROLLER + ".show_typing_notification"
         )
 
-        model._handle_typing_event(event)
+        model._handle_typing_event(event)  # type: ignore[arg-type]
 
         if expected_active_conversation_info:
             assert (
@@ -3901,12 +4151,20 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_mute_streams(
-        self, model, mocker, stream_button, event, final_muted_streams
-    ):
+        self,
+        model: Model,
+        mocker: MockerFixture,
+        stream_button: StreamButton,
+        event: Dict[str, Any],
+        final_muted_streams: Any,
+    ) -> None:
         event["type"] = "subscription"
 
         model.muted_streams = {15, 19}
-        model.unread_counts = {"all_msg": 300, "streams": {event["stream_id"]: 99}}
+        model.unread_counts = {  # type: ignore[typeddict-item]
+            "all_msg": 300,
+            "streams": {event["stream_id"]: 99},
+        }
         model.controller.view.stream_id_to_button = {
             event["stream_id"]: stream_button  # stream id is known
         }
@@ -3917,7 +4175,7 @@ class TestModel:
             "zulipterminal.ui_tools.buttons.StreamButton.mark_unmuted"
         )
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         assert model.muted_streams == final_muted_streams
 
@@ -3964,16 +4222,16 @@ class TestModel:
     )
     def test__handle_subscription_event_pin_streams(
         self,
-        model,
-        mocker,
-        stream_button,
-        event,
-        expected_pinned_streams,
-        expected_unpinned_streams,
-        initial_pinned_streams=[{"name": "design", "id": 8}],
-        initial_unpinned_streams=[{"name": "all", "id": 6}],
-    ):
-        def set_from_list_of_dict(data):
+        model: Model,
+        mocker: MockerFixture,
+        stream_button: StreamButton,
+        event: Dict[str, Any],
+        expected_pinned_streams: Any,
+        expected_unpinned_streams: Any,
+        initial_pinned_streams: Any = [{"name": "design", "id": 8}],
+        initial_unpinned_streams: Any = [{"name": "all", "id": 6}],
+    ) -> None:
+        def set_from_list_of_dict(data: Any) -> Any:
             return {tuple(sorted(d.items())) for d in data}
 
         event["type"] = "subscription"
@@ -3982,7 +4240,7 @@ class TestModel:
         model.pinned_streams = deepcopy(initial_pinned_streams)
         model.unpinned_streams = deepcopy(initial_unpinned_streams)
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         assert set_from_list_of_dict(model.pinned_streams) == set_from_list_of_dict(
             expected_pinned_streams
@@ -4045,15 +4303,15 @@ class TestModel:
     )
     def test__handle_subscription_event_visual_notifications(
         self,
-        model,
-        initial_visual_notified_streams,
-        event,
-        final_visual_notified_streams,
-    ):
+        model: Model,
+        initial_visual_notified_streams: Any,
+        event: Dict[str, Any],
+        final_visual_notified_streams: Any,
+    ) -> None:
         event["type"] = "subscription"
         model.visual_notified_streams = initial_visual_notified_streams
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         assert model.visual_notified_streams == final_visual_notified_streams
 
@@ -4112,20 +4370,20 @@ class TestModel:
     )
     def test__handle_subscription_event_subscribers(
         self,
-        model,
-        mocker,
-        stream_dict,
-        event,
-        feature_level,
-        stream_id,
-        expected_subscribers,
-    ):
+        model: Model,
+        mocker: MockerFixture,
+        stream_dict: Dict[int, Any],
+        event: Dict[str, Any],
+        feature_level: int,
+        stream_id: int,
+        expected_subscribers: List[int],
+    ) -> None:
         event["type"] = "subscription"
 
         model.stream_dict = stream_dict
         model.server_feature_level = feature_level
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         new_subscribers = model.stream_dict[stream_id]["subscribers"]
         assert new_subscribers == expected_subscribers
@@ -4146,14 +4404,19 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_to_unsubscribed_streams(
-        self, model, mocker, stream_dict, event, feature_level
-    ):
+        self,
+        model: Model,
+        mocker: MockerFixture,
+        stream_dict: Dict[int, Any],
+        event: Dict[str, Any],
+        feature_level: int,
+    ) -> None:
         event["type"] = "subscription"
 
         model.stream_dict = deepcopy(stream_dict)
         model.server_feature_level = feature_level
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         assert model.stream_dict == stream_dict
 
@@ -4174,22 +4437,31 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_multiple_users_one_stream(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
-    ):
+        self,
+        model: Model,
+        mocker: MockerFixture,
+        stream_dict: Dict[int, Any],
+        event: Dict[str, Any],
+        feature_level: int,
+        expected_subscribers: List[int],
+    ) -> None:
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [2]
 
         model.stream_dict = stream_dict
         model.server_feature_level = feature_level
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         new_subscribers = model.stream_dict[stream_ids[0]]["subscribers"]
         assert new_subscribers == expected_subscribers
 
     def test__handle_subscription_event_peer_remove_user_not_subscribed(
-        self, model, mocker, stream_dict
-    ):
+        self,
+        model: Model,
+        mocker: MockerFixture,
+        stream_dict: Dict[int, Any],
+    ) -> None:
         # Regression test for #1220: peer_remove for a user_id that is
         # not present in subscribers (e.g. because we missed the
         # corresponding peer_add event) should not raise ValueError.
@@ -4203,7 +4475,7 @@ class TestModel:
         model.stream_dict = stream_dict
         model.server_feature_level = 35
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         new_subscribers = model.stream_dict[2]["subscribers"]
         assert new_subscribers == [1001, 11, 12]
@@ -4225,15 +4497,21 @@ class TestModel:
         ],
     )
     def test__handle_subscription_event_subscribers_one_user_multiple_streams(
-        self, model, mocker, stream_dict, event, feature_level, expected_subscribers
-    ):
+        self,
+        model: Model,
+        mocker: MockerFixture,
+        stream_dict: Dict[int, Any],
+        event: Dict[str, Any],
+        feature_level: int,
+        expected_subscribers: List[int],
+    ) -> None:
         event["type"] = "subscription"
         event["stream_ids"] = stream_ids = [1, 2]
 
         model.stream_dict = stream_dict
         model.server_feature_level = feature_level
 
-        model._handle_subscription_event(event)
+        model._handle_subscription_event(event)  # type: ignore[arg-type]
 
         for stream_id in stream_ids:
             new_subscribers = model.stream_dict[stream_id]["subscribers"]
@@ -4273,13 +4551,18 @@ class TestModel:
         ],
     )
     def test__handle_realm_user_event__general(
-        self, person, event_field, updated_field_if_different, model, initial_data
-    ):
+        self,
+        person: Any,
+        event_field: Any,
+        updated_field_if_different: Any,
+        model: Model,
+        initial_data: Dict[str, Any],
+    ) -> None:
         # id 11 matches initial_data["realm_users"][1] in the initial_data fixture
         person["user_id"] = 11
         event = {"type": "realm_user", "op": "update", "id": 1000, "person": person}
 
-        model._handle_realm_user_event(event)
+        model._handle_realm_user_event(event)  # type: ignore[arg-type]
 
         if updated_field_if_different is not None:
             new_data_field = updated_field_if_different
@@ -4373,12 +4656,12 @@ class TestModel:
     )
     def test__handle_realm_user_event__custom_profile_data__update_data(
         self,
-        user_id,
-        update_data,
-        expected_modified_field_id,
-        model,
-        initial_data,
-    ):
+        user_id: int,
+        update_data: Any,
+        expected_modified_field_id: Any,
+        model: Model,
+        initial_data: Dict[str, Any],
+    ) -> None:
         REALM_USER_INDEX = user_id - 10
         user_data = initial_data["realm_users"][REALM_USER_INDEX]
         # Ensure indices match user id
@@ -4397,7 +4680,7 @@ class TestModel:
             key: update_data[key] for key in update_data if key != "id"
         }
 
-        model._handle_realm_user_event(event)
+        model._handle_realm_user_event(event)  # type: ignore[arg-type]
 
         assert (
             user_data["profile_data"][expected_modified_field_id]
@@ -4424,12 +4707,12 @@ class TestModel:
     )
     def test__handle_realm_user_event__custom_profile_data__remove_data(
         self,
-        user_id,
-        update_data,
-        expected_removed_field_id,
-        model,
-        initial_data,
-    ):
+        user_id: int,
+        update_data: Any,
+        expected_removed_field_id: Any,
+        model: Model,
+        initial_data: Dict[str, Any],
+    ) -> None:
         REALM_USER_INDEX = user_id - 10
         user_data = initial_data["realm_users"][REALM_USER_INDEX]
         # Ensure indices match user id
@@ -4440,7 +4723,7 @@ class TestModel:
 
         profile_data_before_update = copy.deepcopy(user_data["profile_data"])
 
-        model._handle_realm_user_event(event)
+        model._handle_realm_user_event(event)  # type: ignore[arg-type]
 
         assert expected_removed_field_id not in user_data["profile_data"]
         assert all(
@@ -4450,7 +4733,12 @@ class TestModel:
         )
 
     @pytest.mark.parametrize("value", [True, False])
-    def test__handle_user_settings_event(self, mocker, model, value):
+    def test__handle_user_settings_event(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        value: Any,
+    ) -> None:
         setting = "send_private_typing_notifications"
         event = {
             "type": "user_settings",
@@ -4458,11 +4746,16 @@ class TestModel:
             "property": setting,
             "value": value,
         }
-        model._handle_user_settings_event(event)
-        assert model.user_settings()[setting] == value
+        model._handle_user_settings_event(event)  # type: ignore[arg-type]
+        assert model.user_settings()[setting] == value  # type: ignore[literal-required]
 
     @pytest.mark.parametrize("value", [True, False])
-    def test_update_pm_content_in_desktop_notifications(self, mocker, model, value):
+    def test_update_pm_content_in_desktop_notifications(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        value: Any,
+    ) -> None:
         setting = "pm_content_in_desktop_notifications"
         event = {
             "type": "user_settings",
@@ -4470,14 +4763,22 @@ class TestModel:
             "property": setting,
             "value": value,
         }
-        model._user_settings[setting] = not value
+        model._user_settings[setting] = not value  # type: ignore[literal-required]
 
-        model._handle_user_settings_event(event)
+        model._handle_user_settings_event(event)  # type: ignore[arg-type]
 
-        assert model.user_settings()[setting] == event["value"]
+        assert (
+            model.user_settings()[setting]  # type: ignore[literal-required]
+            == event["value"]
+        )
 
     @pytest.mark.parametrize("value", [True, False])
-    def test_update_twenty_four_hour_format(self, mocker, model, value):
+    def test_update_twenty_four_hour_format(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        value: Any,
+    ) -> None:
         setting = "twenty_four_hour_time"
         event = {
             "type": "user_settings",
@@ -4491,9 +4792,11 @@ class TestModel:
         second_msg_w.original_widget.message = {"id": 2}
         self.controller.view.message_view = mocker.Mock(log=[first_msg_w, second_msg_w])
         create_msg_box_list = mocker.patch(MODULE + ".create_msg_box_list")
-        model._user_settings["twenty_four_hour_format"] = not value
+        model._user_settings[
+            "twenty_four_hour_format"  # type: ignore[typeddict-unknown-key]
+        ] = not value
 
-        model._handle_user_settings_event(event)
+        model._handle_user_settings_event(event)  # type: ignore[arg-type]
 
         assert model.user_settings()["twenty_four_hour_time"] == event["value"]
         assert create_msg_box_list.call_count == len(
@@ -4511,8 +4814,13 @@ class TestModel:
         ids=["muted_stream", "unmuted_stream", "unmuted_stream_nostreamsmuted"],
     )
     def test_is_muted_stream(
-        self, muted_streams, stream_id, is_muted, stream_dict, model
-    ):
+        self,
+        muted_streams: Any,
+        stream_id: int,
+        is_muted: Any,
+        stream_dict: Dict[int, Any],
+        model: Model,
+    ) -> None:
         model.stream_dict = stream_dict
         model.muted_streams = muted_streams
         assert model.is_muted_stream(stream_id) == is_muted
@@ -4531,8 +4839,13 @@ class TestModel:
         ],
     )
     def test_is_visual_notifications_enabled(
-        self, visual_notified_streams, stream_id, is_enabled, stream_dict, model
-    ):
+        self,
+        visual_notified_streams: Any,
+        stream_id: int,
+        is_enabled: Any,
+        stream_dict: Dict[int, Any],
+        model: Model,
+    ) -> None:
         model.stream_dict = stream_dict
         model.visual_notified_streams = visual_notified_streams
 
@@ -4548,12 +4861,20 @@ class TestModel:
         ],
     )
     def test_is_muted_topic(
-        self, topic, is_muted, stream_dict, model, processed_muted_topics
-    ):
+        self,
+        topic: str,
+        is_muted: Any,
+        stream_dict: Dict[int, Any],
+        model: Model,
+        processed_muted_topics: Any,
+    ) -> None:
         model.stream_dict = stream_dict
         model._muted_topics = processed_muted_topics
 
-        return_value = model.is_muted_topic(stream_id=topic[0], topic=topic[1])
+        return_value = model.is_muted_topic(
+            stream_id=topic[0],  # type: ignore[arg-type]
+            topic=topic[1],
+        )
 
         assert return_value == is_muted
 
@@ -4684,15 +5005,22 @@ class TestModel:
         ],
     )
     def test_next_unread_topic_from_message(
-        self, mocker, model, unread_topics, current_topic, next_unread_topic
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        unread_topics: Any,
+        current_topic: Any,
+        next_unread_topic: Any,
+    ) -> None:
         # NOTE Not important how many unreads per topic, so just use '1'
-        model.unread_counts = {
+        model.unread_counts = {  # type: ignore[typeddict-item]
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
 
         current_message_id = 10  # Arbitrary value due to mock below
-        model.stream_topic_from_message_id = mocker.Mock(return_value=current_topic)
+        model.stream_topic_from_message_id = mocker.Mock(  # type: ignore[method-assign]
+            return_value=current_topic
+        )
 
         # Minimal extra streams for muted stream testing (should not exist otherwise)
         assert {3, 4} & set(model.stream_dict) == set()
@@ -4705,13 +5033,13 @@ class TestModel:
         model.stream_dict[5] = {"name": "First Stream"}
 
         model.pinned_streams = [
-            {"name": "First Stream", "id": 5},
-            {"name": "Stream 1", "id": 1},
-            {"name": "Stream 2", "id": 2},
+            {"name": "First Stream", "id": 5},  # type: ignore[typeddict-item]
+            {"name": "Stream 1", "id": 1},  # type: ignore[typeddict-item]
+            {"name": "Stream 2", "id": 2},  # type: ignore[typeddict-item]
         ]
         model.unpinned_streams = [
-            {"name": "Stream 3", "id": 3},
-            {"name": "Stream 4", "id": 4},
+            {"name": "Stream 3", "id": 3},  # type: ignore[typeddict-item]
+            {"name": "Stream 4", "id": 4},  # type: ignore[typeddict-item]
         ]
 
         # date data unimportant (if present)
@@ -4741,48 +5069,54 @@ class TestModel:
     )
     def test_next_unread_topic_from_message__empty_narrow(
         self,
-        mocker,
-        model,
-        unread_topics,
-        empty_narrow,
-        narrow_stream_id,
-        next_unread_topic,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        unread_topics: Any,
+        empty_narrow: Any,
+        narrow_stream_id: Any,
+        next_unread_topic: Any,
+    ) -> None:
         # NOTE Not important how many unreads per topic, so just use '1'
-        model.unread_counts = {
+        model.unread_counts = {  # type: ignore[typeddict-item]
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
         model.pinned_streams = [
-            {"name": "Stream 1", "id": 1},
-            {"name": "Stream 2", "id": 2},
+            {"name": "Stream 1", "id": 1},  # type: ignore[typeddict-item]
+            {"name": "Stream 2", "id": 2},  # type: ignore[typeddict-item]
         ]
         model.unpinned_streams = [
-            {"name": "Stream 3", "id": 3},
-            {"name": "Stream 4", "id": 4},
+            {"name": "Stream 3", "id": 3},  # type: ignore[typeddict-item]
+            {"name": "Stream 4", "id": 4},  # type: ignore[typeddict-item]
         ]
 
-        model.stream_id_from_name = mocker.Mock(return_value=narrow_stream_id)
+        model.stream_id_from_name = mocker.Mock(  # type: ignore[method-assign]
+            return_value=narrow_stream_id
+        )
         model.narrow = empty_narrow
 
         unread_topic = model.next_unread_topic_from_message_id(None)
 
         assert unread_topic == next_unread_topic
 
-    def test_get_next_unread_pm(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
+    def test_get_next_unread_pm(self, model: Model) -> None:
+        model.unread_counts = {  # type: ignore[typeddict-item]
+            "unread_pms": {1: 1, 2: 1}
+        }
         return_value = model.get_next_unread_pm()
         assert return_value == 1
         assert model.last_unread_pm == 1
 
-    def test_get_next_unread_pm_again(self, model):
-        model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
-        model.last_unread_pm = 1
+    def test_get_next_unread_pm_again(self, model: Model) -> None:
+        model.unread_counts = {  # type: ignore[typeddict-item]
+            "unread_pms": {1: 1, 2: 1}
+        }
+        model.last_unread_pm = 1  # type: ignore[assignment]
         return_value = model.get_next_unread_pm()
         assert return_value == 2
         assert model.last_unread_pm == 2
 
-    def test_get_next_unread_pm_no_unread(self, model):
-        model.unread_counts = {"unread_pms": {}}
+    def test_get_next_unread_pm_no_unread(self, model: Model) -> None:
+        model.unread_counts = {"unread_pms": {}}  # type: ignore[typeddict-item]
         return_value = model.get_next_unread_pm()
         assert return_value is None
         assert model.last_unread_pm is None
@@ -4796,8 +5130,13 @@ class TestModel:
         ],
     )
     def test_stream_topic_from_message_id(
-        self, mocker, model, message_id, expected_value, empty_index
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_id: int,
+        expected_value: Any,
+        empty_index: Index,
+    ) -> None:
         model.index = empty_index
         current_topic = model.stream_topic_from_message_id(message_id)
         assert current_topic == expected_value
@@ -4814,8 +5153,12 @@ class TestModel:
         ],
     )
     def test_is_user_subscribed_to_stream(
-        self, model, stream_dict, stream_id, expected_response
-    ):
+        self,
+        model: Model,
+        stream_dict: Dict[int, Any],
+        stream_id: int,
+        expected_response: Any,
+    ) -> None:
         model.stream_dict = stream_dict
 
         return_value = model.is_user_subscribed_to_stream(stream_id)
@@ -4832,8 +5175,13 @@ class TestModel:
         ],
     )
     def test_fetch_message_history_success(
-        self, mocker, model, message_history, response, message_id=1
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        message_history: List[Dict[str, Any]],
+        response: Any,
+        message_id: int = 1,
+    ) -> None:
         response["message_history"] = message_history
         expected_return_value = message_history
         self.client.get_message_history.return_value = response
@@ -4854,8 +5202,13 @@ class TestModel:
         ],
     )
     def test_fetch_message_history_error(
-        self, mocker, model, response, message_id=1, expected_return_value=list()
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        response: Any,
+        message_id: int = 1,
+        expected_return_value: List[Any] = list(),
+    ) -> None:
         self.client.get_message_history.return_value = response
 
         return_value = model.fetch_message_history(message_id)
@@ -4865,16 +5218,22 @@ class TestModel:
         assert return_value == expected_return_value
 
     @pytest.mark.parametrize("user_id, full_name", [(1001, "Human Myself")])
-    def test_user_name_from_id_valid(self, model, user_dict, user_id, full_name):
+    def test_user_name_from_id_valid(
+        self,
+        model: Model,
+        user_dict: Dict[int, Any],
+        user_id: int,
+        full_name: Any,
+    ) -> None:
         model.user_id_email_dict = {1001: "FOOBOO@gmail.com"}
-        model.user_dict = user_dict
+        model.user_dict = user_dict  # type: ignore[assignment]
 
         return_value = model.user_name_from_id(user_id)
 
         assert return_value == full_name
 
     @pytest.mark.parametrize("user_id", [-1])
-    def test_user_name_from_id_invalid(self, model, user_id):
+    def test_user_name_from_id_invalid(self, model: Model, user_id: int) -> None:
         model.user_id_email_dict = {1001: "FOOBOO@gmail.com"}
 
         with pytest.raises(RuntimeError, match="Invalid user ID."):
@@ -4882,14 +5241,16 @@ class TestModel:
 
     def test_generate_all_emoji_data(
         self,
-        mocker,
-        model,
-        zulip_emoji,
-        unicode_emojis,
-        realm_emojis_data,
-        realm_emojis,
-    ):
-        all_emoji_data, all_emoji_names = model.generate_all_emoji_data(realm_emojis)
+        mocker: MockerFixture,
+        model: Model,
+        zulip_emoji: Any,
+        unicode_emojis: Any,
+        realm_emojis_data: Any,
+        realm_emojis: Dict[str, Dict[str, Any]],
+    ) -> None:
+        all_emoji_data, all_emoji_names = model.generate_all_emoji_data(
+            realm_emojis  # type: ignore[arg-type]
+        )
 
         assert all_emoji_data == OrderedDict(
             sorted(
@@ -4960,18 +5321,18 @@ class TestModel:
     )
     def test__handle_update_emoji_event(
         self,
-        mocker,
-        model,
-        realm_emojis,
-        emoji_should_be_active,
-        expected_emoji_type,
-        to_vary_in_realm_emoji,
-    ):
+        mocker: MockerFixture,
+        model: Model,
+        realm_emojis: Dict[str, Dict[str, Any]],
+        emoji_should_be_active: Any,
+        expected_emoji_type: Any,
+        to_vary_in_realm_emoji: Any,
+    ) -> None:
         emoji_name = to_vary_in_realm_emoji["name"]
         realm_emojis[to_vary_in_realm_emoji["id"]] = to_vary_in_realm_emoji
         event = {"type": "realm_emoji", "realm_emoji": realm_emojis}
 
-        model._handle_update_emoji_event(event)
+        model._handle_update_emoji_event(event)  # type: ignore[arg-type]
 
         if emoji_should_be_active:
             assert emoji_name in model.active_emoji_data
@@ -4985,13 +5346,18 @@ class TestModel:
         pass
 
     @pytest.fixture
-    def raising_event(self, mocker):
-        def raiser(*args):
+    def raising_event(self, mocker: MockerFixture) -> Any:
+        def raiser(*args: Any) -> Any:
             raise TestModel.LoopEnder
 
         return mocker.MagicMock(__getitem__=raiser)
 
-    def test_poll_for_events__no_disconnect(self, mocker, model, raising_event):
+    def test_poll_for_events__no_disconnect(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        raising_event: Any,
+    ) -> None:
         mocker.patch(MODEL + "._register_desired_events")
         sleep = mocker.patch(MODULE + ".time.sleep")
 
@@ -5005,7 +5371,7 @@ class TestModel:
         with pytest.raises(self.LoopEnder):
             model.poll_for_events()
 
-        assert not model._register_desired_events.called
+        assert not model._register_desired_events.called  # type: ignore[attr-defined]
         assert self.client.get_events.called
         assert not sleep.called
 
@@ -5018,8 +5384,12 @@ class TestModel:
         ],
     )
     def test_poll_for_events__reconnect_ok(
-        self, mocker, model, raising_event, register_return_value
-    ):
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        raising_event: Any,
+        register_return_value: Any,
+    ) -> None:
         mocker.patch(
             MODEL + "._register_desired_events", side_effect=register_return_value
         )
@@ -5038,6 +5408,7 @@ class TestModel:
             model.poll_for_events()
 
         registers = [mocker.call() for _ in range(len(register_return_value))]
-        model._register_desired_events.assert_has_calls(registers)
+        mock_register: Any = model._register_desired_events
+        mock_register.assert_has_calls(registers)
         assert self.client.get_events.called
         assert sleep.call_count == len(registers) - 1

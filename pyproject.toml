@@ -126,7 +126,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 # Tests remaining to be typed
 module = [
-    "tests.model.test_model",
     "tests.ui.test_ui_tools",
     "tests.ui_tools.test_messages",
 ]
