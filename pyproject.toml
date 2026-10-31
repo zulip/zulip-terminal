@@ -128,7 +128,6 @@ ignore_missing_imports = true
 module = [
     "tests.model.test_model",
     "tests.ui.test_ui_tools",
-    "tests.ui_tools.test_messages",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
