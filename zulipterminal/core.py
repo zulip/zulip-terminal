@@ -20,7 +20,11 @@ from typing_extensions import Literal
 
 from zulipterminal.api_types import Composition, Message
 from zulipterminal.config.keys import primary_display_key_for_command
-from zulipterminal.config.symbols import POPUP_CONTENT_BORDER, POPUP_TOP_LINE
+from zulipterminal.config.symbols import (
+    POPUP_CONTENT_BORDER,
+    POPUP_CONTENT_BORDER_NO_SIDES,
+    POPUP_TOP_LINE,
+)
 from zulipterminal.config.themes import ThemeSpec
 from zulipterminal.config.ui_sizes import (
     MAX_LINEAR_SCALING_WIDTH,
@@ -211,12 +215,17 @@ class Controller:
         which popup width remains full width.
         The screen estate's rows are always scaled by 3/4th to get the
         popup rows.
+        In the single_panel layout, popups instead use the full screen.
         """
 
         def clamp(n: int, minn: int, maxn: int) -> int:
             return max(min(maxn, n), minn)
 
         max_cols, max_rows = self.loop.screen.get_cols_rows()
+        if self.layout == "single_panel":
+            # -4 rows for the title enhancement and the LineBox (see show_pop_up)
+            return max_cols, max_rows - 4
+
         min_width = MIN_SUPPORTED_POPUP_WIDTH
         max_width = MAX_LINEAR_SCALING_WIDTH
         # Scale Width
@@ -235,17 +244,25 @@ class Controller:
         title_top = urwid.AttrMap(urwid.Divider(POPUP_TOP_LINE), "popup_border")
         title = urwid.Pile([title_top, title_box_adapter])
 
-        content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
+        # Use the full screen in single_panel layout, so that only the popup is
+        # read by screen readers
+        if self.layout == "single_panel":
+            content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER_NO_SIDES)
+            size: Dict[str, Any] = dict(
+                width=("relative", 100), height=("relative", 100)
+            )
+        else:
+            content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
+            # +2 to both of the following, due to LineBox
+            # +2 to height, due to title enhancement
+            size = dict(width=to_show.width + 2, height=to_show.height + 4)
 
         self.loop.widget = urwid.Overlay(
             urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
             self.view,
             align="center",
             valign="middle",
-            # +2 to both of the following, due to LineBox
-            # +2 to height, due to title enhancement
-            width=to_show.width + 2,
-            height=to_show.height + 4,
+            **size,
         )
 
     def is_any_popup_open(self) -> bool:

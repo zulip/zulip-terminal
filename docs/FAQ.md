@@ -433,7 +433,8 @@ side-by-side panels together.
 The `single_panel` layout shows one panel at a time, using the full width of
 the terminal, and avoids vertical dividing lines. Use the left and right
 arrow keys (or other hotkeys) to move between the streams & topics, messages
-and users panels.
+and users panels. Popups, such as the help menu, also fill the screen in this
+layout.
 
 You can set `layout=single_panel` in your [configuration
 file](https://github.com/zulip/zulip-terminal/#configuration), or use

@@ -9,6 +9,10 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
+from zulipterminal.config.symbols import (
+    POPUP_CONTENT_BORDER,
+    POPUP_CONTENT_BORDER_NO_SIDES,
+)
 from zulipterminal.config.themes import generate_theme
 from zulipterminal.core import Controller
 from zulipterminal.helper import Index
@@ -585,6 +589,54 @@ class TestController:
         popup_size = controller.maximum_popup_dimensions()
 
         assert popup_size == expected_popup_size
+
+    @pytest.mark.parametrize("screen_size", [(150, 90), (90, 75), (70, 60)])
+    def test_maximum_popup_dimensions__single_panel(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        screen_size: Tuple[int, int],
+    ) -> None:
+        controller.layout = "single_panel"
+        controller.loop.screen.get_cols_rows = mocker.Mock(return_value=screen_size)
+
+        popup_size = controller.maximum_popup_dimensions()
+
+        # Full screen, apart from the popup title and top/bottom border lines
+        cols, rows = screen_size
+        assert popup_size == (cols, rows - 4)
+
+    @pytest.mark.parametrize(
+        "layout, expected_border, expected_size",
+        [
+            ("autohide", POPUP_CONTENT_BORDER, dict(width=42, height=14)),
+            ("no_autohide", POPUP_CONTENT_BORDER, dict(width=42, height=14)),
+            (
+                "single_panel",
+                POPUP_CONTENT_BORDER_NO_SIDES,
+                dict(width=("relative", 100), height=("relative", 100)),
+            ),
+        ],
+    )
+    def test_show_pop_up(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+        layout: Layout,
+        expected_border: Dict[str, str],
+        expected_size: Dict[str, Any],
+    ) -> None:
+        controller.layout = layout
+        line_box = mocker.patch(MODULE + ".urwid.LineBox")
+        overlay = mocker.patch(MODULE + ".urwid.Overlay")
+        to_show = mocker.Mock(title="Title", width=40, height=10)
+
+        controller.show_pop_up(to_show, "area:help")
+
+        line_box.assert_called_once_with(to_show, **expected_border)
+        _, overlay_options = overlay.call_args
+        assert overlay_options == dict(align="center", valign="middle", **expected_size)
+        assert controller.loop.widget == overlay()
 
     @pytest.mark.parametrize(
         "active_conversation_info",
