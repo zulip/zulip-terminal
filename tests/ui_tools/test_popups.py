@@ -205,7 +205,7 @@ class TestAboutView:
             theme_name="zt_dark",
             color_depth=256,
             notify_enabled=False,
-            autohide_enabled=False,
+            layout="no_autohide",
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
@@ -257,7 +257,7 @@ class TestAboutView:
             theme_name="zt_dark",
             color_depth=256,
             notify_enabled=False,
-            autohide_enabled=False,
+            layout="no_autohide",
             maximum_footlinks=3,
             exit_confirmation_enabled=False,
             transparency_enabled=False,
@@ -293,7 +293,7 @@ Version: {MINIMUM_SUPPORTED_SERVER_VERSION[0]}
 
 #### Application Configuration
 Theme: zt_dark
-Autohide: disabled
+Layout: no_autohide
 Maximum footlinks: 3
 Color depth: 256
 Notifications: disabled

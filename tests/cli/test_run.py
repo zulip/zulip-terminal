@@ -2,7 +2,7 @@ import builtins
 import os
 import stat
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Optional, Tuple
+from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 
 import pytest
 import requests
@@ -11,6 +11,9 @@ from pytest_mock import MockerFixture
 
 from zulipterminal.api_types import ServerSettings
 from zulipterminal.cli.run import (
+    COLOR_DEPTH_ARGS_TO_DEPTHS,
+    VALID_BOOLEAN_SETTINGS,
+    VALID_LAYOUTS,
     NotAZulipOrganizationError,
     _write_zuliprc,
     exit_with_error,
@@ -140,6 +143,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "--config-file CONFIG_FILE, -c CONFIG_FILE",
         "--autohide",
         "--no-autohide",
+        "--single-panel",
         "-v, --version",
         "-e, --explore",
         "--color-depth",
@@ -202,7 +206,7 @@ def test_valid_zuliprc_but_no_connection(
     expected_lines = expected_platform_output + [
         "Loading with:",
         "   theme 'zt_dark' specified from default config.",
-        "   autohide setting 'no_autohide' specified from default config.",
+        "   layout setting 'no_autohide' specified from default config.",
         "   exit confirmation setting 'enabled' specified from default config.",
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
@@ -263,7 +267,7 @@ def test_warning_regarding_incomplete_theme(
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
         f"      {expected_warning}\x1b[0m",
-        "   autohide setting 'no_autohide' specified from default config.",
+        "   layout setting 'no_autohide' specified from default config.",
         "   exit confirmation setting 'enabled' specified from default config.",
         "   maximum footlinks value '3' specified from default config.",
         "   color depth setting '256' specified from default config.",
@@ -295,22 +299,29 @@ def test_zt_version(capsys: CaptureFixture[str], options: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "option, autohide",
+    "option, layout",
     [
         ("--autohide", "autohide"),
         ("--no-autohide", "no_autohide"),
+        ("--single-panel", "single_panel"),
         ("--debug", None),  # no-autohide by default
     ],
 )
-def test_parse_args_valid_autohide_option(option: str, autohide: Optional[str]) -> None:
+def test_parse_args_valid_layout_option(option: str, layout: Optional[str]) -> None:
     args = parse_args([option])
-    assert args.autohide == autohide
+    assert args.layout == layout
 
 
 @pytest.mark.parametrize(
-    "options", [["--autohide", "--no-autohide"], ["--no-autohide", "--autohide"]]
+    "options",
+    [
+        ["--autohide", "--no-autohide"],
+        ["--no-autohide", "--autohide"],
+        ["--autohide", "--single-panel"],
+        ["--single-panel", "--no-autohide"],
+    ],
 )
-def test_main_multiple_autohide_options(
+def test_main_multiple_layout_options(
     capsys: CaptureFixture[str], options: List[str]
 ) -> None:
     with pytest.raises(SystemExit) as e:
@@ -451,6 +462,8 @@ def parameterized_zuliprc(tmp_path: Path) -> Callable[[Dict[str, str]], str]:
         "maximum-footlinks_0",
     ],
 )
+@pytest.mark.parametrize("layout_setting", ["layout", "autohide"])
+@pytest.mark.parametrize("layout_option", ["autohide", "no_autohide"])
 def test_successful_main_function_with_config(
     capsys: CaptureFixture[str],
     mocker: MockerFixture,
@@ -459,16 +472,18 @@ def test_successful_main_function_with_config(
     config_key: str,
     config_value: str,
     footlinks_output: str,
+    layout_setting: str,
+    layout_option: str,
     platform: str = "some_platform",
     python: str = "3.99 (Zython) [cool]",
 ) -> None:
     config = {
         "theme": "default",
-        "autohide": "autohide",
         "notify": "enabled",
         "color-depth": "256",
     }
     config[config_key] = config_value
+    config[layout_setting] = layout_option
     zuliprc = parameterized_zuliprc(config)
 
     mocker.patch(CONTROLLER + ".__init__", return_value=None)
@@ -484,7 +499,7 @@ def test_successful_main_function_with_config(
     expected_lines = expected_platform_output + [
         "Loading with:",
         "   theme 'zt_dark' specified in zuliprc file (by alias 'default').",
-        "   autohide setting 'autohide' specified in zuliprc file.",
+        f"   layout setting '{layout_option}' specified in zuliprc file.",
         "   exit confirmation setting 'enabled' specified from default config.",
         f"   maximum footlinks value {footlinks_output}",
         "   color depth setting '256' specified in zuliprc file.",
@@ -493,6 +508,144 @@ def test_successful_main_function_with_config(
         "   external editor command '' specified from environment.",
     ]
     assert lines == expected_lines
+
+
+def test_cli_overrides_config(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+) -> None:
+    config = {
+        "theme": "default",
+        "notify": "enabled",
+        "color-depth": "256",
+        "layout": "autohide",
+    }
+    zuliprc = parameterized_zuliprc(config)
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+    mocker.patch(CONTROLLER + ".main", return_value=None)
+
+    with pytest.raises(SystemExit):
+        main(
+            [
+                "-c",
+                zuliprc,
+                "--no-autohide",
+                "--no-notify",
+                "-t",
+                "zt_light",
+                "--color-depth",
+                "24bit",
+            ]
+        )
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_lines = [
+        "   theme 'zt_light' specified on command line.",
+        "   layout setting 'no_autohide' specified on command line.",
+        "   color depth setting '24bit' specified on command line.",
+        "   notify setting 'disabled' specified on command line.",
+    ]
+    for expected_line in expected_lines:
+        assert expected_line in lines
+
+
+@pytest.mark.parametrize("autohide_option", ["autohide", "no_autohide", None])
+@pytest.mark.parametrize(
+    "layout_option", ["autohide", "no_autohide", "single_panel", None]
+)
+def test_layout_overrides_autohide(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    autohide_option: Optional[str],
+    layout_option: Optional[str],
+) -> None:
+    config = {}
+    layout_source = "in zuliprc file."
+    if layout_option is not None:
+        config["layout"] = layout_option
+    if autohide_option is not None:
+        config["autohide"] = autohide_option
+        if layout_option is None:
+            layout_option = autohide_option
+    elif layout_option is None:
+        layout_option = "no_autohide"  # default
+        layout_source = "from default config."
+
+    zuliprc = parameterized_zuliprc(config)
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+    mocker.patch(CONTROLLER + ".main", return_value=None)
+
+    with pytest.raises(SystemExit):
+        main(["-c", zuliprc])
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_line = f"   layout setting '{layout_option}' specified {layout_source}"
+    assert expected_line in lines
+
+
+def test_main_error_with_invalid_autohide_setting(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+) -> None:
+    # Older zuliprc files use autohide, which is validated as the layout setting
+    zuliprc = parameterized_zuliprc({"autohide": "invalid_layout"})
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc])
+
+    assert str(e.value) == "1"
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_last_lines = [
+        "\033[91mInvalid layout setting 'invalid_layout' was specified"
+        " in zuliprc file.\033[0m",
+        "Valid values are:",
+        *(f"  {layout}" for layout in VALID_LAYOUTS),
+        "Specify the layout option in zuliprc file.",
+    ]
+    assert lines[-len(expected_last_lines) :] == expected_last_lines
+
+
+@pytest.mark.parametrize(
+    "setting, valid_values",
+    [
+        ("layout", VALID_LAYOUTS),
+        ("notify", VALID_BOOLEAN_SETTINGS["notify"]),
+        ("color-depth", COLOR_DEPTH_ARGS_TO_DEPTHS),
+    ],
+)
+def test_main_error_with_invalid_setting(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    parameterized_zuliprc: Callable[[Dict[str, str]], str],
+    setting: str,
+    valid_values: Iterable[str],
+) -> None:
+    zuliprc = parameterized_zuliprc({setting: "invalid_value"})
+    mocker.patch(CONTROLLER + ".__init__", return_value=None)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", zuliprc])
+
+    assert str(e.value) == "1"
+
+    captured = capsys.readouterr()
+    lines = captured.out.strip().split("\n")
+    expected_last_lines = [
+        f"\033[91mInvalid {setting} setting 'invalid_value' was specified"
+        " in zuliprc file.\033[0m",
+        "Valid values are:",
+        *(f"  {value}" for value in valid_values),
+        f"Specify the {setting} option in zuliprc file.",
+    ]
+    assert lines[-len(expected_last_lines) :] == expected_last_lines
 
 
 @pytest.mark.parametrize(

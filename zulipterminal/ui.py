@@ -44,6 +44,7 @@ class View(urwid.WidgetWrap):
         self.palette = controller.theme
         self.model = controller.model
         self.users = self.model.users
+        self.layout = self.controller.layout
         self.pinned_streams = self.model.pinned_streams
         self.unpinned_streams = self.model.unpinned_streams
         self.write_box = WriteBox(self)
@@ -72,14 +73,22 @@ class View(urwid.WidgetWrap):
         self.middle_column = MiddleColumnView(
             self, self.model, self.write_box, self.search_box
         )
+        # Screen readers read out vertical lines, so avoid them when only one
+        # panel is shown at a time
+        if self.layout == "single_panel":
+            side_line, corner = "", COLUMN_TITLE_BAR_LINE
+        else:
+            side_line, corner = COLUMN_DIVIDER_LINE, COLUMN_DIVIDER_LINE
         return urwid.LineBox(
             self.middle_column,
             title="Messages",
             title_attr="column_title",
             tline=COLUMN_TITLE_BAR_LINE,
             bline="",
-            trcorner=COLUMN_DIVIDER_LINE,
-            tlcorner=COLUMN_DIVIDER_LINE,
+            lline=side_line,
+            rline=side_line,
+            trcorner=corner,
+            tlcorner=corner,
         )
 
     def right_column_view(self) -> Any:
@@ -164,12 +173,15 @@ class View(urwid.WidgetWrap):
         self.left_panel, self.left_tab = self.left_column_view()
         self.center_panel = self.middle_column_view()
         self.right_panel, self.right_tab = self.right_column_view()
-        if self.controller.autohide:
+        if self.layout == "autohide":
             body = [
                 (TAB_WIDTH, self.left_tab),
                 ("weight", 10, self.center_panel),
                 (TAB_WIDTH, self.right_tab),
             ]
+        elif self.layout == "single_panel":
+            # Only the focused panel is shown, full-screen; see focus_panel
+            body = [self.left_panel, self.center_panel, self.right_panel]
         else:
             body = [
                 (LEFT_WIDTH, self.left_panel),
@@ -205,13 +217,13 @@ class View(urwid.WidgetWrap):
             self.body, title_bar, focus_part="body", footer=self.footer_view()
         )
 
-        # Show left panel on startup in autohide mode
-        self.show_left_panel(visible=True)
+        # Show left panel on startup in autohide and single_panel layouts
+        self.focus_panel = 0
 
         return self.frame
 
     def show_left_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if self.layout != "autohide":
             return
 
         if visible:
@@ -227,12 +239,9 @@ class View(urwid.WidgetWrap):
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
 
     def show_right_panel(self, *, visible: bool) -> None:
-        if not self.controller.autohide:
+        if self.layout != "autohide":
             return
 
         if visible:
@@ -248,9 +257,35 @@ class View(urwid.WidgetWrap):
             )
         else:
             self.frame.body = self.body
-            # FIXME: This can be avoided after fixing the "sacrificing 1st
-            # unread msg" issue and setting focus_column=1 when initializing.
-            self.body.focus_position = 1
+
+    @property
+    def focus_panel(self) -> int:
+        if hasattr(self.frame.body, "top_w"):
+            if self.left_panel == self.frame.body.top_w.contents[0][0]:
+                return 0
+            else:
+                return 2
+
+        return self.body.focus_position
+
+    @focus_panel.setter
+    def focus_panel(self, column: int) -> None:
+        if self.layout == "single_panel":
+            self.frame.body = self.body.contents[column][0]
+            self.body.focus_position = column
+            return
+
+        if column == 0:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=True)
+        elif column == 1:
+            self.show_right_panel(visible=False)
+            self.show_left_panel(visible=False)
+        elif column == 2:
+            self.show_left_panel(visible=False)
+            self.show_right_panel(visible=True)
+
+        self.body.focus_position = column
 
     def keypress(self, size: urwid_Box, key: str) -> Optional[str]:
         self.model.new_user_input = True
@@ -264,9 +299,7 @@ class View(urwid.WidgetWrap):
             or is_command_key("STREAM_MESSAGE", key)
             or is_command_key("PRIVATE_MESSAGE", key)
         ):
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=False)
-            self.body.focus_col = 1
+            self.focus_panel = 1
             self.middle_column.keypress(size, key)
             return key
         elif is_command_key("ALL_PM", key):
@@ -277,25 +310,19 @@ class View(urwid.WidgetWrap):
             self.mentioned_button.activate(key)
         elif is_command_key("SEARCH_PEOPLE", key):
             # Start User Search if not in editor_mode
-            self.show_left_panel(visible=False)
-            self.show_right_panel(visible=True)
-            self.body.focus_position = 2
+            self.focus_panel = 2
             self.users_view.keypress(size, key)
             return key
         elif is_command_key("SEARCH_STREAMS", key) or is_command_key(
             "SEARCH_TOPICS", key
         ):
             # jump stream search
-            self.show_right_panel(visible=False)
-            self.show_left_panel(visible=True)
-            self.body.focus_position = 0
+            self.focus_panel = 0
             self.left_panel.keypress(size, key)
             return key
         elif is_command_key("OPEN_DRAFT", key):
             saved_draft = self.model.session_draft_message()
             if saved_draft:
-                self.show_left_panel(visible=False)
-                self.show_right_panel(visible=False)
                 if saved_draft["type"] == "stream":
                     stream_id = self.model.stream_id_from_name(saved_draft["to"])
                     self.write_box.stream_box_view(
@@ -311,7 +338,7 @@ class View(urwid.WidgetWrap):
                 content = saved_draft["content"]
                 self.write_box.msg_write_box.edit_text = content
                 self.write_box.msg_write_box.edit_pos = len(content)
-                self.body.focus_col = 1
+                self.focus_panel = 1
                 self.middle_column.set_focus("footer")
             else:
                 self.controller.report_error(
