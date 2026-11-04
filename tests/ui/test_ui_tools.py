@@ -98,6 +98,24 @@ class TestMessageView:
         assert msg_view.focus_msg == expected_focus_msg
 
     @pytest.mark.parametrize(
+        "msg_list, narrow_focus_pos",
+        [
+            (["MSG1", "MSG2"], 15490883),  # stored value larger than the list
+            (["MSG1", "MSG2"], 1),  # a valid stored position stays valid
+        ],
+    )
+    def test_main_view_focus_is_valid_index(self, mocker, msg_list, narrow_focus_pos):
+        mocker.patch(MESSAGEVIEW + ".read_message")
+        self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
+        mocker.patch(MESSAGEVIEW + ".set_focus")
+        mocker.patch(VIEWS + ".create_msg_box_list", return_value=msg_list)
+        self.model.get_focus_in_current_narrow.return_value = narrow_focus_pos
+
+        msg_view = MessageView(self.model, self.view)
+
+        assert 0 <= msg_view.focus_msg <= max(0, len(msg_list) - 1)
+
+    @pytest.mark.parametrize(
         "messages_fetched",
         [
             {},
