@@ -1837,7 +1837,7 @@ class TestWriteBox:
 
 
 class TestPanelSearchBox:
-    search_caption = " Search Results  "
+    search_caption = " Search Results  [X] "
 
     @pytest.fixture
     def panel_search_box(self, mocker: MockerFixture) -> PanelSearchBox:
