@@ -71,6 +71,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Close popup',
         'key_category': 'navigation',
     },
+    'SUBMIT_POPUP': {
+        'keys': ['enter'],
+        'help_text': 'Submit text entered in a popup',
+        'key_category': 'general',
+    },
     'GO_UP': {
         'keys': ['up', 'k'],
         'help_text': 'Go up / Previous message',
@@ -469,6 +474,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
     'TODO_TOGGLE_TASK': {
         'keys': [str(number) for number in range(1, TODO_TOGGLE_TASK_LIMIT + 1)],
         'help_text': 'Toggle a to-do task by its number',
+        'key_category': 'todo',
+    },
+    'TODO_RENAME': {
+        'keys': ['T'],
+        'help_text': 'Rename a to-do list (creator only)',
         'key_category': 'todo',
     },
 }

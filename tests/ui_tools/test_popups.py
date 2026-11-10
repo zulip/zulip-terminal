@@ -27,6 +27,7 @@ from zulipterminal.ui_tools.views import (
     PopUpView,
     StreamInfoView,
     StreamMembersView,
+    TodoTextInputPopup,
     UserInfoView,
 )
 from zulipterminal.urwid_types import urwid_Size
@@ -1758,3 +1759,46 @@ class TestEmojiPickerView:
         self.emoji_picker_view.keypress(size, key)
 
         assert self.controller.exit_popup.called
+
+
+class TestTodoTextInputPopup:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
+        self.controller = mocker.Mock()
+        self.controller.maximum_popup_dimensions.return_value = (64, 64)
+        self.on_submit = mocker.Mock()
+        self.popup = TodoTextInputPopup(
+            self.controller,
+            title="TITLE",
+            prompt="PROMPT:",
+            on_submit=self.on_submit,
+            initial_text="initial",
+        )
+
+    def test_init(self) -> None:
+        assert self.popup.title == "TITLE"
+        assert self.popup._edit.edit_text == "initial"
+        assert self.popup.height == 3
+
+    @pytest.mark.parametrize("key", keys_for_command("SUBMIT_POPUP"))
+    def test_keypress_SUBMIT_POPUP(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        self.popup._edit.set_edit_text("  new text  ")
+        size = widget_size(self.popup)
+
+        self.popup.keypress(size, key)
+
+        self.controller.exit_popup.assert_called_once_with()
+        self.on_submit.assert_called_once_with("new text")
+
+    @pytest.mark.parametrize("key", keys_for_command("EXIT_POPUP"))
+    def test_keypress_EXIT_POPUP(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        size = widget_size(self.popup)
+
+        self.popup.keypress(size, key)
+
+        self.controller.exit_popup.assert_called_once_with()
+        self.on_submit.assert_not_called()

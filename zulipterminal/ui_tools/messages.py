@@ -992,11 +992,39 @@ class MessageBox(urwid.Pile):
             self.message["id"], {"type": "strike", "key": task_ids[task_index]}
         )
 
+    def rename_todo_list(self) -> None:
+        if self.message["sender_id"] != self.model.user_id:
+            self.model.controller.report_error(
+                [" Only the creator can rename this to-do list."]
+            )
+            return
+
+        current_title, _ = process_todo_widget(self.message["submessages"])
+
+        def on_title_submit(new_title: str) -> None:
+            if not new_title:
+                return
+            self.model.send_widget_submessage(
+                self.message["id"],
+                {"type": "new_task_list_title", "title": new_title},
+            )
+
+        self.model.controller.show_todo_text_input_popup(
+            title="Rename to-do list",
+            prompt="Title:",
+            initial_text=current_title,
+            on_submit=on_title_submit,
+            footer_text="Enter to save • Esc to cancel",
+        )
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if find_widget_type(self.message.get("submessages", [])) == "todo":
             toggle_task_keys = keys_for_command("TODO_TOGGLE_TASK")
             if key in toggle_task_keys:
                 self.toggle_todo_task(toggle_task_keys.index(key))
+                return None
+            if is_command_key("TODO_RENAME", key):
+                self.rename_todo_list()
                 return None
 
         if is_command_key("REPLY_MESSAGE", key):

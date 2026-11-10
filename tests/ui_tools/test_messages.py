@@ -2040,3 +2040,53 @@ class TestMessageBox:
         self.model.send_widget_submessage.assert_called_once_with(
             100, {"type": "strike", "key": "0,canned"}
         )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_RENAME"))
+    @pytest.mark.parametrize(
+        "submitted_title, expected_submessages",
+        [
+            case(
+                "New",
+                [{"type": "new_task_list_title", "title": "New"}],
+                id="new_title",
+            ),
+            case("", [], id="empty_title_ignored"),
+        ],
+    )
+    def test_keypress_TODO_RENAME(
+        self, mocker, widget_size, key, submitted_title, expected_submessages
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 42
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        message = todo_message(tasks=["A"], sender_id=42, title="Old")
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        show_popup = self.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+        _, popup_kwargs = show_popup.call_args
+        assert popup_kwargs["initial_text"] == "Old"
+
+        popup_kwargs["on_submit"](submitted_title)
+
+        assert [
+            args[1] for args, _ in self.model.send_widget_submessage.call_args_list
+        ] == expected_submessages
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_RENAME"))
+    def test_keypress_TODO_RENAME__not_creator(self, mocker, widget_size, key):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 1
+        msg_box = MessageBox(todo_message(tasks=["A"], sender_id=42), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+
+        self.model.controller.show_todo_text_input_popup.assert_not_called()
+        self.model.controller.report_error.assert_called_once_with(
+            [" Only the creator can rename this to-do list."]
+        )
