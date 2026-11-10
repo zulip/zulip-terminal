@@ -973,6 +973,33 @@ class TestModel:
     @pytest.mark.parametrize(
         "response, return_value",
         [
+            case({"result": "success"}, True, id="API_success"),
+            case({"result": "error", "msg": "Failed"}, False, id="API_error"),
+        ],
+    )
+    def test_send_widget_submessage(
+        self, mocker, model, response, return_value, message_id=1
+    ):
+        self.client.call_endpoint = mocker.Mock(return_value=response)
+        widget_content = {"type": "strike", "key": "0,canned"}
+
+        result = model.send_widget_submessage(message_id, widget_content)
+
+        self.client.call_endpoint.assert_called_once_with(
+            "submessage",
+            method="POST",
+            request={
+                "message_id": message_id,
+                "msg_type": "widget",
+                "content": '{"type": "strike", "key": "0,canned"}',
+            },
+        )
+        assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    @pytest.mark.parametrize(
+        "response, return_value",
+        [
             ({"result": "success"}, True),
             ({"result": "some_failure"}, False),
         ],
