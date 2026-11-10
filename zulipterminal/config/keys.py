@@ -25,6 +25,10 @@ class KeyBinding(TypedDict):
     key_category: str
 
 
+# Number of to-do tasks which can be toggled using number keys (1-9)
+TODO_TOGGLE_TASK_LIMIT = 9
+
+
 # fmt: off
 KEY_BINDINGS: Dict[str, KeyBinding] = {
     # Key that is displayed in the UI is determined by the method
@@ -462,6 +466,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'New footer hotkey hint',
         'key_category': 'general',
     },
+    'TODO_TOGGLE_TASK': {
+        'keys': [str(number) for number in range(1, TODO_TOGGLE_TASK_LIMIT + 1)],
+        'help_text': 'Toggle a to-do task by its number',
+        'key_category': 'todo',
+    },
 }
 # fmt: on
 
@@ -485,6 +494,7 @@ HELP_CATEGORIES = {
         f"Message information (press {KEY_BINDINGS['MSG_INFO']['keys'][0]}"
         f" to view info of a message)"
     ),
+    "todo": "To-do list actions",
 }
 
 ZT_TO_URWID_CMD_MAPPING = {

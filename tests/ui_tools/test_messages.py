@@ -29,6 +29,31 @@ MODULE = "zulipterminal.ui_tools.messages"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
+def todo_message(*, tasks, sender_id=42, title="Chores"):
+    task_list = ", ".join(f'{{"task": "{task}"}}' for task in tasks)
+    return dict(
+        id=100,
+        type="stream",
+        display_recipient="general",
+        stream_id=5,
+        subject="todo",
+        sender_id=sender_id,
+        sender_email="foo@zulip.com",
+        sender_full_name="Foo",
+        content="<p>/todo</p>",
+        submessages=[
+            {
+                "msg_type": "widget",
+                "sender_id": sender_id,
+                "content": (
+                    '{"widget_type": "todo", "extra_data": {'
+                    f'"task_list_title": "{title}", "tasks": [{task_list}]}}}}'
+                ),
+            }
+        ],
+    )
+
+
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
@@ -1963,3 +1988,55 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    @pytest.mark.parametrize(
+        "key, expected_task_id",
+        [
+            case("1", "0,canned", id="first_task"),
+            case("2", "1,canned", id="second_task"),
+        ],
+    )
+    def test_keypress_TODO_TOGGLE_TASK(
+        self, mocker, widget_size, key, expected_task_id
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        msg_box = MessageBox(todo_message(tasks=["A", "B"]), self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": expected_task_id}
+        )
+        self.model.controller.report_warning.assert_not_called()
+
+    def test_keypress_TODO_TOGGLE_TASK__no_such_task(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock()
+        msg_box = MessageBox(todo_message(tasks=["A"]), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "5")
+
+        self.model.send_widget_submessage.assert_not_called()
+        self.model.controller.report_error.assert_called_once_with(
+            [" No such to-do task."]
+        )
+
+    def test_keypress_TODO_TOGGLE_TASK__more_tasks_than_keys(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        tasks = [chr(ord("A") + i) for i in range(10)]
+        msg_box = MessageBox(todo_message(tasks=tasks), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "1")
+
+        self.model.controller.report_warning.assert_called_once_with(
+            [" This to-do list has 10 tasks, but only the first 9 can be toggled."]
+        )
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": "0,canned"}
+        )

@@ -16,7 +16,12 @@ from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.keys import (
+    TODO_TOGGLE_TASK_LIMIT,
+    is_command_key,
+    keys_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
@@ -967,7 +972,33 @@ class MessageBox(urwid.Pile):
 
         return super().mouse_event(size, event, button, col, row, focus)
 
+    def toggle_todo_task(self, task_index: int) -> None:
+        _, tasks = process_todo_widget(self.message["submessages"])
+        task_ids = list(tasks)
+
+        if len(task_ids) > TODO_TOGGLE_TASK_LIMIT:
+            self.model.controller.report_warning(
+                [
+                    f" This to-do list has {len(task_ids)} tasks, but only the"
+                    f" first {TODO_TOGGLE_TASK_LIMIT} can be toggled."
+                ]
+            )
+
+        if task_index >= len(task_ids):
+            self.model.controller.report_error([" No such to-do task."])
+            return
+
+        self.model.send_widget_submessage(
+            self.message["id"], {"type": "strike", "key": task_ids[task_index]}
+        )
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if find_widget_type(self.message.get("submessages", [])) == "todo":
+            toggle_task_keys = keys_for_command("TODO_TOGGLE_TASK")
+            if key in toggle_task_keys:
+                self.toggle_todo_task(toggle_task_keys.index(key))
+                return None
+
         if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(
