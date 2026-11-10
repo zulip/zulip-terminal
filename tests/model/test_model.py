@@ -4545,6 +4545,9 @@ class TestModel:
             ((2, "muted topic"), True),
             ((1, "muted stream muted topic"), True),
             ((2, "unmuted topic"), False),
+            # An unknown stream (eg. from a message event for a stream
+            # missing from local data) is treated as unmuted, not a KeyError.
+            ((12345, "any topic"), False),
         ],
     )
     def test_is_muted_topic(
