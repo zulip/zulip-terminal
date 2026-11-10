@@ -2090,3 +2090,58 @@ class TestMessageBox:
         self.model.controller.report_error.assert_called_once_with(
             [" Only the creator can rename this to-do list."]
         )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_ADD"))
+    @pytest.mark.parametrize(
+        "submitted_text, expected_submessages",
+        [
+            case(
+                "Task",
+                [
+                    {
+                        "type": "new_task",
+                        "task": "Task",
+                        "desc": "",
+                        "key": 2,
+                        "completed": False,
+                    }
+                ],
+                id="task_only",
+            ),
+            case(
+                " Task : Some: description ",
+                [
+                    {
+                        "type": "new_task",
+                        "task": "Task",
+                        "desc": "Some: description",
+                        "key": 2,
+                        "completed": False,
+                    }
+                ],
+                id="task_with_description",
+            ),
+            case("", [], id="empty_text_ignored"),
+            case(": description", [], id="empty_task_ignored"),
+        ],
+    )
+    def test_keypress_TODO_ADD(
+        self, mocker, widget_size, key, submitted_text, expected_submessages
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        msg_box = MessageBox(todo_message(tasks=["A", "B"]), self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        show_popup = self.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+
+        _, popup_kwargs = show_popup.call_args
+        popup_kwargs["on_submit"](submitted_text)
+
+        assert [
+            args[1] for args, _ in self.model.send_widget_submessage.call_args_list
+        ] == expected_submessages

@@ -1017,6 +1017,41 @@ class MessageBox(urwid.Pile):
             footer_text="Enter to save • Esc to cancel",
         )
 
+    def add_todo_task(self) -> None:
+        def on_task_submit(task_text: str) -> None:
+            task, _, desc = task_text.partition(":")
+            task, desc = task.strip(), desc.strip()
+            if not task:
+                return
+
+            # Zulip requires the key of a new task to be an integer, unique
+            # for the sender, so use one more than the largest existing key
+            _, tasks = process_todo_widget(self.message["submessages"])
+            existing_keys = [
+                int(task_id.split(",", 1)[0])
+                for task_id in tasks
+                if task_id.split(",", 1)[0].isdigit()
+            ]
+            next_key = max(existing_keys, default=-1) + 1
+
+            self.model.send_widget_submessage(
+                self.message["id"],
+                {
+                    "type": "new_task",
+                    "task": task,
+                    "desc": desc,
+                    "key": next_key,
+                    "completed": False,
+                },
+            )
+
+        self.model.controller.show_todo_text_input_popup(
+            title="Add to-do task",
+            prompt="Task (optional: task: description):",
+            on_submit=on_task_submit,
+            footer_text="Enter to add • Esc to cancel",
+        )
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
         if find_widget_type(self.message.get("submessages", [])) == "todo":
             toggle_task_keys = keys_for_command("TODO_TOGGLE_TASK")
@@ -1025,6 +1060,9 @@ class MessageBox(urwid.Pile):
                 return None
             if is_command_key("TODO_RENAME", key):
                 self.rename_todo_list()
+                return None
+            if is_command_key("TODO_ADD", key):
+                self.add_todo_task()
                 return None
 
         if is_command_key("REPLY_MESSAGE", key):
