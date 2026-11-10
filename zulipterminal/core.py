@@ -11,7 +11,7 @@ import webbrowser
 from functools import partial
 from platform import platform
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import pyperclip
 import urwid
@@ -46,6 +46,7 @@ from zulipterminal.ui_tools.views import (
     PopUpConfirmationView,
     StreamInfoView,
     StreamMembersView,
+    TodoTextInputPopup,
     UserInfoView,
 )
 from zulipterminal.version import ZT_VERSION
@@ -263,6 +264,25 @@ class Controller:
 
     def show_topic_edit_mode(self, button: Any) -> None:
         self.show_pop_up(EditModeView(self, button), "area:msg")
+
+    def show_todo_text_input_popup(
+        self,
+        *,
+        title: str,
+        prompt: str,
+        on_submit: Callable[[str], None],
+        initial_text: str = "",
+        footer_text: Optional[str] = None,
+    ) -> None:
+        popup = TodoTextInputPopup(
+            self,
+            title=title,
+            prompt=prompt,
+            on_submit=on_submit,
+            initial_text=initial_text,
+            footer_text=footer_text,
+        )
+        self.show_pop_up(popup, "area:msg")
 
     def show_msg_info(
         self,

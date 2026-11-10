@@ -2003,6 +2003,10 @@ class TestMessageBox:
                     keys_for_command("TODO_TOGGLE_TASK"), start=1
                 )
             ],
+            *[
+                case(key, "_rename_todo_list", (), id=f"TODO_RENAME_{key}")
+                for key in keys_for_command("TODO_RENAME")
+            ],
         ],
     )
     def test_keypress__todo_widget(
@@ -2020,8 +2024,14 @@ class TestMessageBox:
     @pytest.mark.parametrize(
         "key, todo_helper",
         [
-            case(key, "_toggle_todo_task_by_number", id=f"TODO_TOGGLE_TASK_{key}")
-            for key in keys_for_command("TODO_TOGGLE_TASK")
+            *[
+                case(key, "_toggle_todo_task_by_number", id=f"TODO_TOGGLE_TASK_{key}")
+                for key in keys_for_command("TODO_TOGGLE_TASK")
+            ],
+            *[
+                case(key, "_rename_todo_list", id=f"TODO_RENAME_{key}")
+                for key in keys_for_command("TODO_RENAME")
+            ],
         ],
     )
     def test_keypress__not_todo_widget(
@@ -2083,3 +2093,59 @@ class TestMessageBox:
             model.controller.report_error.assert_called_once_with([expected_error])
         else:
             model.controller.report_error.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "sender_id, expect_popup",
+        [
+            case(42, True, id="creator"),
+            case(1, False, id="not_creator"),
+        ],
+    )
+    def test__rename_todo_list(self, mocker, msg_box, sender_id, expect_popup):
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Old title", {}))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box.message["sender_id"] = sender_id
+        msg_box.model.user_id = 42
+        controller = msg_box.model.controller
+
+        msg_box._rename_todo_list()
+
+        if expect_popup:
+            controller.show_todo_text_input_popup.assert_called_once()
+            _, popup_kwargs = controller.show_todo_text_input_popup.call_args
+            assert popup_kwargs["initial_text"] == "Old title"
+            controller.report_error.assert_not_called()
+        else:
+            controller.show_todo_text_input_popup.assert_not_called()
+            controller.report_error.assert_called_once_with(
+                [" Only the creator can rename this to-do list."]
+            )
+
+    @pytest.mark.parametrize(
+        "submitted_title, expected_submessage",
+        [
+            case(
+                "New title",
+                {"type": "new_task_list_title", "title": "New title"},
+                id="title_sent",
+            ),
+            case("", None, id="empty_title_not_sent"),
+        ],
+    )
+    def test__rename_todo_list__on_submit(
+        self, mocker, msg_box, submitted_title, expected_submessage
+    ):
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Old title", {}))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box.message["sender_id"] = msg_box.model.user_id
+        msg_box._rename_todo_list()
+        _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
+
+        popup_kwargs["on_submit"](submitted_title)
+
+        if expected_submessage:
+            msg_box.model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], expected_submessage
+            )
+        else:
+            msg_box.model.send_widget_submessage.assert_not_called()

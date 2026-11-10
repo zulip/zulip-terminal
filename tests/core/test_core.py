@@ -504,6 +504,31 @@ class TestController:
         )
         pop_up.assert_called_once_with(controller, text(), partial())
 
+    def test_show_todo_text_input_popup(
+        self, mocker: MockerFixture, controller: Controller
+    ) -> None:
+        popup = mocker.patch(MODULE + ".TodoTextInputPopup")
+        show_pop_up = mocker.patch(MODULE + ".Controller.show_pop_up")
+        on_submit = mocker.Mock()
+
+        controller.show_todo_text_input_popup(
+            title="TITLE",
+            prompt="PROMPT",
+            on_submit=on_submit,
+            initial_text="TEXT",
+            footer_text="FOOTER",
+        )
+
+        popup.assert_called_once_with(
+            controller,
+            title="TITLE",
+            prompt="PROMPT",
+            on_submit=on_submit,
+            initial_text="TEXT",
+            footer_text="FOOTER",
+        )
+        show_pop_up.assert_called_once_with(popup(), "area:msg")
+
     @pytest.mark.parametrize(
         "initial_narrow, final_narrow",
         [
