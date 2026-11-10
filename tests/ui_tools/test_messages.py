@@ -800,6 +800,47 @@ class TestMessageBox:
             msg_box.message["content"].find(message["sender_full_name"]) == name_index
         )
 
+    def test_main_view_renders_numbered_todo_tasks(self, mocker):
+        mocker.patch(MODULE + ".urwid.Text")
+        message = {
+            "id": 4,
+            "type": "stream",
+            "display_recipient": "Verona",
+            "stream_id": 5,
+            "subject": "Test topic",
+            "flags": [],
+            "is_me_message": False,
+            "content": "<p>/todo</p>",
+            "reactions": [],
+            "sender_full_name": "Alice",
+            "timestamp": 1532103879,
+            "submessages": [
+                {
+                    "msg_type": "widget",
+                    "sender_id": 1,
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": {'
+                        '"task_list_title": "Chores", "tasks": ['
+                        '{"task": "Wash", "desc": "dishes"}, {"task": "Cook"}]}}'
+                    ),
+                },
+                {
+                    "msg_type": "widget",
+                    "sender_id": 1,
+                    "content": '{"type": "strike", "key": "1,canned"}',
+                },
+            ],
+        }
+        msg_box = MessageBox(message, self.model, message)
+
+        msg_box.main_view()
+
+        assert msg_box.message["content"] == (
+            "<strong>To-do</strong>\n<strong>Chores</strong>"
+            "\n1. [ ] <strong>Wash</strong>: dishes"
+            "\n2. [✔] <strong>Cook</strong>"
+        )
+
     @pytest.mark.parametrize(
         "message",
         [
