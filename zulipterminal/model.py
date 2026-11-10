@@ -872,6 +872,10 @@ class Model:
             if topic_links:
                 message["topic_links"] = topic_links
 
+        # (3) Ensure `submessages` is always present, so that submessage
+        # events can be applied to any indexed message
+        message.setdefault("submessages", [])
+
         return message
 
     def fetch_message_history(

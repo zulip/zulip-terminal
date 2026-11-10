@@ -1501,23 +1501,36 @@ class TestModel:
         [
             (
                 {"topic_links": [{"url": "www.foo.com", "text": "Bar"}]},
-                {"topic_links": [{"url": "www.foo.com", "text": "Bar"}]},
+                {
+                    "topic_links": [{"url": "www.foo.com", "text": "Bar"}],
+                    "submessages": [],
+                },
             ),
             (
                 {"topic_links": ["www.foo1.com"]},
-                {"topic_links": [{"url": "www.foo1.com", "text": ""}]},
+                {
+                    "topic_links": [{"url": "www.foo1.com", "text": ""}],
+                    "submessages": [],
+                },
             ),
             (
                 {"topic_links": []},
-                {"topic_links": []},
+                {"topic_links": [], "submessages": []},
             ),
             (
                 {"subject_links": ["www.foo2.com"]},
-                {"topic_links": [{"url": "www.foo2.com", "text": ""}]},
+                {
+                    "topic_links": [{"url": "www.foo2.com", "text": ""}],
+                    "submessages": [],
+                },
             ),
             (
                 {"subject_links": []},
-                {"topic_links": []},
+                {"topic_links": [], "submessages": []},
+            ),
+            (
+                {"submessages": [{"msg_type": "widget", "content": "{}"}]},
+                {"submessages": [{"msg_type": "widget", "content": "{}"}]},
             ),
         ],
         ids=[
@@ -1526,6 +1539,7 @@ class TestModel:
             "Zulip_3.0+_ZFL1_response_empty_topic_links",
             "Zulip_2.1+_response_with_subject_links",
             "Zulip_2.1+_response_empty_subject_links",
+            "response_with_existing_submessages",
         ],
     )
     def test_modernize_message_response(
