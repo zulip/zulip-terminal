@@ -949,7 +949,13 @@ class Model:
         """
         Returns True if topic is muted via muted_topics.
         """
-        stream_name = self.stream_dict[stream_id]["name"]
+        stream = self.stream_dict.get(stream_id)
+        if stream is None:
+            # The stream is missing from local data (eg. a message event
+            # arrived for an unknown stream); it can't be muted, so avoid a
+            # KeyError here.
+            return False
+        stream_name = stream["name"]
         topic_to_search = (stream_name, topic)
         return topic_to_search in self._muted_topics
 
