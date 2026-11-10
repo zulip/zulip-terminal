@@ -1988,3 +1988,98 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    @pytest.mark.parametrize(
+        "key, expected_helper, expected_args",
+        [
+            *[
+                case(
+                    key,
+                    "_toggle_todo_task_by_number",
+                    (number,),
+                    id=f"TODO_TOGGLE_TASK_{number}",
+                )
+                for number, key in enumerate(
+                    keys_for_command("TODO_TOGGLE_TASK"), start=1
+                )
+            ],
+        ],
+    )
+    def test_keypress__todo_widget(
+        self, mocker, msg_box, widget_size, key, expected_helper, expected_args
+    ):
+        mocker.patch(MODULE + ".find_widget_type", return_value="todo")
+        helper = mocker.patch.object(msg_box, expected_helper)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        helper.assert_called_once_with(*expected_args)
+
+    @pytest.mark.parametrize(
+        "key, todo_helper",
+        [
+            case(key, "_toggle_todo_task_by_number", id=f"TODO_TOGGLE_TASK_{key}")
+            for key in keys_for_command("TODO_TOGGLE_TASK")
+        ],
+    )
+    def test_keypress__not_todo_widget(
+        self, mocker, msg_box, widget_size, key, todo_helper
+    ):
+        mocker.patch(MODULE + ".find_widget_type", return_value="poll")
+        helper = mocker.patch.object(msg_box, todo_helper)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+
+        helper.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "number_of_tasks, task_number, "
+        "expected_task_key, expected_warning, expected_error",
+        [
+            case(2, 1, "0,canned", None, None, id="first_task"),
+            case(2, 2, "1,canned", None, None, id="last_task"),
+            case(2, 3, None, None, " No such to-do task.", id="no_such_task"),
+            case(
+                10,
+                1,
+                "0,canned",
+                " This to-do list has 10 tasks, but only the first 9 can be toggled.",
+                None,
+                id="more_tasks_than_toggle_keys",
+            ),
+        ],
+    )
+    def test__toggle_todo_task_by_number(
+        self,
+        mocker,
+        msg_box,
+        number_of_tasks,
+        task_number,
+        expected_task_key,
+        expected_warning,
+        expected_error,
+    ):
+        tasks = todo_tasks(*[("Task", "", False)] * number_of_tasks)
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Title", tasks))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        model = msg_box.model
+
+        msg_box._toggle_todo_task_by_number(task_number)
+
+        if expected_task_key:
+            model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], {"type": "strike", "key": expected_task_key}
+            )
+        else:
+            model.send_widget_submessage.assert_not_called()
+        if expected_warning:
+            model.controller.report_warning.assert_called_once_with([expected_warning])
+        else:
+            model.controller.report_warning.assert_not_called()
+        if expected_error:
+            model.controller.report_error.assert_called_once_with([expected_error])
+        else:
+            model.controller.report_error.assert_not_called()
