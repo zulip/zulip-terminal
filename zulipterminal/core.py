@@ -77,11 +77,13 @@ class Controller:
         autohide: bool,
         notify: bool,
         exit_confirmation: bool,
+        ascii_channel_markers: bool = False,
     ) -> None:
         self.theme_name = theme_name
         self.theme = theme
         self.color_depth = color_depth
         self.in_explore_mode = in_explore_mode
+        self.ascii_channel_markers = ascii_channel_markers
         self.transparency_enabled = transparency
         self.autohide = autohide
         self.exit_confirmation = exit_confirmation

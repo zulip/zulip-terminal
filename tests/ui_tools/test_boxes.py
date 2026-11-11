@@ -1334,8 +1334,10 @@ class TestWriteBox:
             "invalid_stream_name",
         ],
     )
+    @pytest.mark.parametrize("ascii_only", [False, True])
     def test__set_stream_write_box_style_markers(
         self,
+        ascii_only: bool,
         write_box: WriteBox,
         stream_id: int,
         stream_name: str,
@@ -1351,6 +1353,9 @@ class TestWriteBox:
         write_box.model.stream_id_from_name.return_value = stream_id
         write_box.model.stream_access_type.return_value = stream_access_type
 
+        write_box.model.controller.ascii_channel_markers = ascii_only
+        if ascii_only and stream_access_type == "web-public":
+            expected_marker = "W"
         write_box.stream_box_view(stream_id)
 
         write_box._set_stream_write_box_style(write_box, stream_name)

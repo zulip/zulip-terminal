@@ -38,7 +38,7 @@ from zulipterminal.config.symbols import (
     MESSAGE_RECIPIENTS_BORDER,
     STREAM_TOPIC_SEPARATOR,
 )
-from zulipterminal.config.ui_mappings import STREAM_ACCESS_TYPE
+from zulipterminal.config.ui_mappings import get_stream_marker
 from zulipterminal.helper import (
     asynch,
     format_string,
@@ -429,7 +429,10 @@ class WriteBox(urwid.Pile):
         if self.model.is_valid_stream(new_text):
             stream_id = self.model.stream_id_from_name(new_text)
             stream_access_type = self.model.stream_access_type(stream_id)
-            stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+            stream_marker = get_stream_marker(
+                stream_access_type,
+                ascii_only=self.model.controller.ascii_channel_markers,
+            )
             stream = self.model.stream_dict[stream_id]
             color = stream["color"]
         self.header_write_box[self.FOCUS_HEADER_PREFIX_STREAM].set_text(

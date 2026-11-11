@@ -144,6 +144,11 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help=f"choose color theme (default: {DEFAULT_SETTINGS['theme']})",
     )
     parser.add_argument(
+        "--ascii-channel-markers",
+        action="store_true",
+        help="use ASCII characters for channel markers",
+    )
+    parser.add_argument(
         "--list-themes",
         action="store_true",
         help="list all the color themes and exit",
@@ -620,6 +625,7 @@ def main(options: Optional[List[str]] = None) -> None:
             theme=theme_data,
             color_depth=color_depth,
             in_explore_mode=args.explore,
+            ascii_channel_markers=args.ascii_channel_markers,
             **boolean_settings,
             debug_path=debug_path,
             editor_command=editor_command,

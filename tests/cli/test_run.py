@@ -143,6 +143,7 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
         "-v, --version",
         "-e, --explore",
         "--color-depth",
+        "--ascii-channel-markers",
         "--notify",
         "--no-notify",
         "--transparency",
