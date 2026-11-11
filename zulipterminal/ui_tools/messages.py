@@ -16,7 +16,12 @@ from bs4.element import NavigableString, Tag
 from tzlocal import get_localzone
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, primary_key_for_command
+from zulipterminal.config.keys import (
+    TODO_TOGGLE_TASK_LIMIT,
+    is_command_key,
+    keys_for_command,
+    primary_key_for_command,
+)
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
     DIRECT_MESSAGE_MARKER,
@@ -741,12 +746,15 @@ class MessageBox(urwid.Pile):
                 todo_widget = "<strong>To-do</strong>\n" + f"<strong>{title}</strong>"
 
                 if tasks:
-                    for task_id, task_info in tasks.items():
+                    for task_number, task_info in enumerate(tasks.values(), start=1):
                         task_status = "[✔]" if task_info["completed"] else "[ ]"
                         task_name = task_info["task"]
                         task_description = task_info["desc"]
 
-                        todo_widget += f"\n{task_status} <strong>{task_name}</strong>"
+                        todo_widget += (
+                            f"\n{task_number}. {task_status} "
+                            f"<strong>{task_name}</strong>"
+                        )
 
                         if task_description:
                             todo_widget += f": {task_description}"
@@ -964,7 +972,99 @@ class MessageBox(urwid.Pile):
 
         return super().mouse_event(size, event, button, col, row, focus)
 
+    def toggle_todo_task(self, task_index: int) -> None:
+        _, tasks = process_todo_widget(self.message["submessages"])
+        task_ids = list(tasks)
+
+        if len(task_ids) > TODO_TOGGLE_TASK_LIMIT:
+            self.model.controller.report_warning(
+                [
+                    f" This to-do list has {len(task_ids)} tasks, but only the"
+                    f" first {TODO_TOGGLE_TASK_LIMIT} can be toggled."
+                ]
+            )
+
+        if task_index >= len(task_ids):
+            self.model.controller.report_error([" No such to-do task."])
+            return
+
+        self.model.send_widget_submessage(
+            self.message["id"], {"type": "strike", "key": task_ids[task_index]}
+        )
+
+    def rename_todo_list(self) -> None:
+        if self.message["sender_id"] != self.model.user_id:
+            self.model.controller.report_error(
+                [" Only the creator can rename this to-do list."]
+            )
+            return
+
+        current_title, _ = process_todo_widget(self.message["submessages"])
+
+        def on_title_submit(new_title: str) -> None:
+            if not new_title:
+                return
+            self.model.send_widget_submessage(
+                self.message["id"],
+                {"type": "new_task_list_title", "title": new_title},
+            )
+
+        self.model.controller.show_todo_text_input_popup(
+            title="Rename to-do list",
+            prompt="Title:",
+            initial_text=current_title,
+            on_submit=on_title_submit,
+            footer_text="Enter to save • Esc to cancel",
+        )
+
+    def add_todo_task(self) -> None:
+        def on_task_submit(task_text: str) -> None:
+            task, _, desc = task_text.partition(":")
+            task, desc = task.strip(), desc.strip()
+            if not task:
+                return
+
+            # Zulip requires the key of a new task to be an integer, unique
+            # for the sender, so use one more than the largest existing key
+            _, tasks = process_todo_widget(self.message["submessages"])
+            existing_keys = [
+                int(task_id.split(",", 1)[0])
+                for task_id in tasks
+                if task_id.split(",", 1)[0].isdigit()
+            ]
+            next_key = max(existing_keys, default=-1) + 1
+
+            self.model.send_widget_submessage(
+                self.message["id"],
+                {
+                    "type": "new_task",
+                    "task": task,
+                    "desc": desc,
+                    "key": next_key,
+                    "completed": False,
+                },
+            )
+
+        self.model.controller.show_todo_text_input_popup(
+            title="Add to-do task",
+            prompt="Task (optional: task: description):",
+            on_submit=on_task_submit,
+            footer_text="Enter to add • Esc to cancel",
+        )
+
     def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+        if find_widget_type(self.message.get("submessages", [])) == "todo":
+            toggle_task_keys = keys_for_command("TODO_TOGGLE_TASK")
+            if key in toggle_task_keys:
+                self.toggle_todo_task(toggle_task_keys.index(key))
+                return None
+            if is_command_key("TODO_RENAME", key):
+                self.rename_todo_list()
+                return None
+            if is_command_key("TODO_ADD", key):
+                self.add_todo_task()
+                return None
+
         if is_command_key("REPLY_MESSAGE", key):
             if self.message["type"] == "private":
                 self.model.controller.view.write_box.private_box_view(

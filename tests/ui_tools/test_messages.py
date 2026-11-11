@@ -29,6 +29,31 @@ MODULE = "zulipterminal.ui_tools.messages"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
+def todo_message(*, tasks, sender_id=42, title="Chores"):
+    task_list = ", ".join(f'{{"task": "{task}"}}' for task in tasks)
+    return dict(
+        id=100,
+        type="stream",
+        display_recipient="general",
+        stream_id=5,
+        subject="todo",
+        sender_id=sender_id,
+        sender_email="foo@zulip.com",
+        sender_full_name="Foo",
+        content="<p>/todo</p>",
+        submessages=[
+            {
+                "msg_type": "widget",
+                "sender_id": sender_id,
+                "content": (
+                    '{"widget_type": "todo", "extra_data": {'
+                    f'"task_list_title": "{title}", "tasks": [{task_list}]}}}}'
+                ),
+            }
+        ],
+    )
+
+
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
@@ -798,6 +823,47 @@ class TestMessageBox:
         name_index = 11 if is_me_message else -1  # 11 = len(<str><strong>)
         assert (
             msg_box.message["content"].find(message["sender_full_name"]) == name_index
+        )
+
+    def test_main_view_renders_numbered_todo_tasks(self, mocker):
+        mocker.patch(MODULE + ".urwid.Text")
+        message = {
+            "id": 4,
+            "type": "stream",
+            "display_recipient": "Verona",
+            "stream_id": 5,
+            "subject": "Test topic",
+            "flags": [],
+            "is_me_message": False,
+            "content": "<p>/todo</p>",
+            "reactions": [],
+            "sender_full_name": "Alice",
+            "timestamp": 1532103879,
+            "submessages": [
+                {
+                    "msg_type": "widget",
+                    "sender_id": 1,
+                    "content": (
+                        '{"widget_type": "todo", "extra_data": {'
+                        '"task_list_title": "Chores", "tasks": ['
+                        '{"task": "Wash", "desc": "dishes"}, {"task": "Cook"}]}}'
+                    ),
+                },
+                {
+                    "msg_type": "widget",
+                    "sender_id": 1,
+                    "content": '{"type": "strike", "key": "1,canned"}',
+                },
+            ],
+        }
+        msg_box = MessageBox(message, self.model, message)
+
+        msg_box.main_view()
+
+        assert msg_box.message["content"] == (
+            "<strong>To-do</strong>\n<strong>Chores</strong>"
+            "\n1. [ ] <strong>Wash</strong>: dishes"
+            "\n2. [✔] <strong>Cook</strong>"
         )
 
     @pytest.mark.parametrize(
@@ -1922,3 +1988,160 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    @pytest.mark.parametrize(
+        "key, expected_task_id",
+        [
+            case("1", "0,canned", id="first_task"),
+            case("2", "1,canned", id="second_task"),
+        ],
+    )
+    def test_keypress_TODO_TOGGLE_TASK(
+        self, mocker, widget_size, key, expected_task_id
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        msg_box = MessageBox(todo_message(tasks=["A", "B"]), self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": expected_task_id}
+        )
+        self.model.controller.report_warning.assert_not_called()
+
+    def test_keypress_TODO_TOGGLE_TASK__no_such_task(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock()
+        msg_box = MessageBox(todo_message(tasks=["A"]), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "5")
+
+        self.model.send_widget_submessage.assert_not_called()
+        self.model.controller.report_error.assert_called_once_with(
+            [" No such to-do task."]
+        )
+
+    def test_keypress_TODO_TOGGLE_TASK__more_tasks_than_keys(self, mocker, widget_size):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        tasks = [chr(ord("A") + i) for i in range(10)]
+        msg_box = MessageBox(todo_message(tasks=tasks), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, "1")
+
+        self.model.controller.report_warning.assert_called_once_with(
+            [" This to-do list has 10 tasks, but only the first 9 can be toggled."]
+        )
+        self.model.send_widget_submessage.assert_called_once_with(
+            100, {"type": "strike", "key": "0,canned"}
+        )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_RENAME"))
+    @pytest.mark.parametrize(
+        "submitted_title, expected_submessages",
+        [
+            case(
+                "New",
+                [{"type": "new_task_list_title", "title": "New"}],
+                id="new_title",
+            ),
+            case("", [], id="empty_title_ignored"),
+        ],
+    )
+    def test_keypress_TODO_RENAME(
+        self, mocker, widget_size, key, submitted_title, expected_submessages
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 42
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        message = todo_message(tasks=["A"], sender_id=42, title="Old")
+        msg_box = MessageBox(message, self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        show_popup = self.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+        _, popup_kwargs = show_popup.call_args
+        assert popup_kwargs["initial_text"] == "Old"
+
+        popup_kwargs["on_submit"](submitted_title)
+
+        assert [
+            args[1] for args, _ in self.model.send_widget_submessage.call_args_list
+        ] == expected_submessages
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_RENAME"))
+    def test_keypress_TODO_RENAME__not_creator(self, mocker, widget_size, key):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.user_id = 1
+        msg_box = MessageBox(todo_message(tasks=["A"], sender_id=42), self.model, None)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+
+        self.model.controller.show_todo_text_input_popup.assert_not_called()
+        self.model.controller.report_error.assert_called_once_with(
+            [" Only the creator can rename this to-do list."]
+        )
+
+    @pytest.mark.parametrize("key", keys_for_command("TODO_ADD"))
+    @pytest.mark.parametrize(
+        "submitted_text, expected_submessages",
+        [
+            case(
+                "Task",
+                [
+                    {
+                        "type": "new_task",
+                        "task": "Task",
+                        "desc": "",
+                        "key": 2,
+                        "completed": False,
+                    }
+                ],
+                id="task_only",
+            ),
+            case(
+                " Task : Some: description ",
+                [
+                    {
+                        "type": "new_task",
+                        "task": "Task",
+                        "desc": "Some: description",
+                        "key": 2,
+                        "completed": False,
+                    }
+                ],
+                id="task_with_description",
+            ),
+            case("", [], id="empty_text_ignored"),
+            case(": description", [], id="empty_task_ignored"),
+        ],
+    )
+    def test_keypress_TODO_ADD(
+        self, mocker, widget_size, key, submitted_text, expected_submessages
+    ):
+        mocker.patch.object(MessageBox, "main_view")
+        self.model.send_widget_submessage = mocker.Mock(return_value=True)
+        msg_box = MessageBox(todo_message(tasks=["A", "B"]), self.model, None)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        show_popup = self.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+
+        _, popup_kwargs = show_popup.call_args
+        popup_kwargs["on_submit"](submitted_text)
+
+        assert [
+            args[1] for args, _ in self.model.send_widget_submessage.call_args_list
+        ] == expected_submessages

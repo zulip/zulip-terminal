@@ -10,6 +10,7 @@
 |Show/hide About Menu|<kbd>Meta</kbd> + <kbd>?</kbd>|
 |Copy information from About Menu to clipboard|<kbd>c</kbd>|
 |Copy traceback from Exception Popup to clipboard|<kbd>c</kbd>|
+|Submit text entered in a popup|<kbd>Enter</kbd>|
 |Redraw screen|<kbd>Ctrl</kbd> + <kbd>l</kbd>|
 |Quit|<kbd>Ctrl</kbd> + <kbd>c</kbd>|
 |New footer hotkey hint|<kbd>Tab</kbd>|
@@ -136,4 +137,11 @@
 |View current message in browser|<kbd>v</kbd>|
 |Show/hide full rendered message|<kbd>f</kbd>|
 |Show/hide full raw message|<kbd>r</kbd>|
+
+## To-do list actions
+|Command|Key Combination|
+| :--- | :---: |
+|Toggle a to-do task by its number|<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> / <kbd>5</kbd> / <kbd>6</kbd> / <kbd>7</kbd> / <kbd>8</kbd> / <kbd>9</kbd>|
+|Rename a to-do list (creator only)|<kbd>T</kbd>|
+|Add a task to a to-do list|<kbd>A</kbd>|
 

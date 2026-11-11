@@ -570,6 +570,20 @@ class Model:
             notify_if_message_sent_outside_narrow(composition, self.controller)
         return message_was_sent
 
+    def send_widget_submessage(
+        self, message_id: int, widget_content: Dict[str, Any]
+    ) -> bool:
+        request = {
+            "message_id": message_id,
+            "msg_type": "widget",
+            "content": json.dumps(widget_content),
+        }
+        response = self.client.call_endpoint(
+            "submessage", method="POST", request=request
+        )
+        display_error_if_present(response, self.controller)
+        return response["result"] == "success"
+
     def update_private_message(self, msg_id: int, content: str) -> bool:
         request: PrivateMessageUpdateRequest = {
             "message_id": msg_id,
@@ -857,6 +871,10 @@ class Model:
             ]
             if topic_links:
                 message["topic_links"] = topic_links
+
+        # (3) Ensure `submessages` is always present, so that submessage
+        # events can be applied to any indexed message
+        message.setdefault("submessages", [])
 
         return message
 
