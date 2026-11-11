@@ -33,6 +33,7 @@ from zulipterminal.config.ui_mappings import (
     STATE_ICON,
     STREAM_ACCESS_TYPE,
     STREAM_POST_POLICY,
+    get_stream_marker,
 )
 from zulipterminal.config.ui_sizes import LEFT_WIDTH
 from zulipterminal.helper import (
@@ -1421,7 +1422,10 @@ class StreamInfoView(PopUpView):
 
         stream_access_type = controller.model.stream_access_type(stream_id)
         type_of_stream = STREAM_ACCESS_TYPE[stream_access_type]["description"]
-        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+        stream_marker = get_stream_marker(
+            stream_access_type,
+            ascii_only=controller.ascii_channel_markers,
+        )
 
         availability_of_history = (
             "Public to Users"

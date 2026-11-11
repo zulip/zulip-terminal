@@ -28,7 +28,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
-from zulipterminal.config.ui_mappings import STATE_ICON, STREAM_ACCESS_TYPE
+from zulipterminal.config.ui_mappings import STATE_ICON, get_stream_marker
 from zulipterminal.helper import get_unused_fence
 from zulipterminal.server_url import near_message_url
 from zulipterminal.ui_tools.tables import render_table
@@ -163,7 +163,10 @@ class MessageBox(urwid.Pile):
         color = self.model.stream_dict[self.stream_id]["color"]
         bar_color = f"s{color}"
         stream_access_type = self.model.stream_access_type(self.stream_id)
-        stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+        stream_icon = get_stream_marker(
+            stream_access_type,
+            ascii_only=self.model.controller.ascii_channel_markers,
+        )
         stream_title_markup = (
             "bar",
             [
@@ -232,7 +235,10 @@ class MessageBox(urwid.Pile):
             bar_color = self.model.stream_dict[self.stream_id]["color"]
             bar_color = f"s{bar_color}"
             stream_access_type = self.model.stream_access_type(self.stream_id)
-            stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+            stream_icon = get_stream_marker(
+                stream_access_type,
+                ascii_only=self.model.controller.ascii_channel_markers,
+            )
             if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
                 text_to_fill = (
                     "bar",  # type: ignore[assignment]

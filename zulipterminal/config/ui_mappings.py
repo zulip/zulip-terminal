@@ -41,6 +41,11 @@ STREAM_ACCESS_TYPE: Dict[StreamAccessType, Dict[str, str]] = {
     "web-public": {"description": "Web public", "icon": STREAM_MARKER_WEB_PUBLIC},
 }
 
+def get_stream_marker(access_type: StreamAccessType, *, ascii_only: bool = False) -> str:
+    if ascii_only and access_type == "web-public":
+        return "W"
+    return STREAM_ACCESS_TYPE[access_type]["icon"]
+
 
 BOT_TYPE_BY_ID = {
     1: "Generic Bot",
