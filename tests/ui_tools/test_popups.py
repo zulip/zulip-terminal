@@ -100,6 +100,7 @@ class TestPopUpView:
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
         self.command = "COMMAND"
+        mocker.patch(MODULE + ".display_keys_for_command", return_value=[])
         self.title = "Generic title"
         self.width = 16
         self.body = mocker.Mock()
@@ -339,7 +340,7 @@ class TestUserInfoView:
         )
 
         self.user_info_view = UserInfoView(
-            self.controller, 10000, "User Info (up/down scrolls)", "USER_INFO"
+            self.controller, 10000, "User Info", "USER_INFO"
         )
 
     @pytest.mark.parametrize(
@@ -521,7 +522,10 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.message_links == OrderedDict()
         assert self.full_rendered_message.time_mentions == list()
         assert self.full_rendered_message.header.widget_list == msg_box.header
-        assert self.full_rendered_message.footer.widget_list == msg_box.footer
+        assert (
+            self.full_rendered_message.footer.widget_list[0].widget_list
+            == msg_box.footer
+        )
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
@@ -597,7 +601,7 @@ class TestFullRawMsgView:
         assert self.full_raw_message.message_links == OrderedDict()
         assert self.full_raw_message.time_mentions == list()
         assert self.full_raw_message.header.widget_list == msg_box.header
-        assert self.full_raw_message.footer.widget_list == msg_box.footer
+        assert self.full_raw_message.footer.widget_list[0].widget_list == msg_box.footer
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
@@ -1145,7 +1149,7 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 8
+        expected_height = 9
         # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (display group header)
         # +1 (whitespace column)
@@ -1232,7 +1236,7 @@ class TestMsgInfoView:
 
             # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
             # + 4 reactions (excluding 'Message Links').
-            expected_height = 14
+            expected_height = 15
             assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
@@ -1336,21 +1340,21 @@ class TestStreamInfoView:
                 {"date_created": None, "is_announcement_only": True},
                 "74 [Organization default]",
                 0,
-                17,
+                18,
                 id="ZFL=0_no_date_created__no_retention_days__admins_only",
             ),
             case(
                 {"date_created": None, "is_announcement_only": False},
                 "74 [Organization default]",
                 0,
-                16,
+                17,
                 id="ZFL=0_no_date_created__no_retention_days__anyone_can_type",
             ),
             case(
                 {"date_created": None, "stream_post_policy": 1},
                 "74 [Organization default]",
                 16,
-                16,
+                17,
                 id="ZFL<30_no_date_created__ZFL<17_no_retention_days",
             ),
             case(
@@ -1361,7 +1365,7 @@ class TestStreamInfoView:
                 },
                 "200",
                 17,
-                17,
+                18,
                 id="ZFL<30_no_date_created__ZFL=17_custom_finite_retention_days",
             ),
             case(
@@ -1372,7 +1376,7 @@ class TestStreamInfoView:
                 },
                 "Indefinite [Organization default]",
                 29,
-                18,
+                19,
                 id="ZFL<30_no_date_created__ZFL>17_default_indefinite_retention_days",
             ),
             case(
@@ -1383,7 +1387,7 @@ class TestStreamInfoView:
                 },
                 "31",
                 30,
-                18,
+                19,
                 id="ZFL=30_with_date_created__ZFL>17_custom_finite_retention_days",
             ),
             case(
@@ -1394,7 +1398,7 @@ class TestStreamInfoView:
                 },
                 "72 [Organization default]",
                 40,
-                18,
+                19,
                 id="ZFL>30_with_date_created__ZFL>17_default_finite_retention_days",
             ),
             case(
@@ -1406,7 +1410,7 @@ class TestStreamInfoView:
                 },
                 "60",
                 50,
-                17,
+                18,
                 id="ZFL>30_new_stream_with_date_created__ZFL>17_finite_retention_days",
             ),
         ],
@@ -1758,3 +1762,31 @@ class TestEmojiPickerView:
         self.emoji_picker_view.keypress(size, key)
 
         assert self.controller.exit_popup.called
+
+
+@pytest.mark.parametrize(
+    "command, return_to, scrollable, expected",
+    [
+        ("HELP", None, True, "Scroll [up/down]  Exit [?, Esc]"),
+        (
+            "MSG_INFO",
+            ("Message Info", "FULL_RENDERED_MESSAGE"),
+            True,
+            "Scroll [up/down]  Return to Message Info [f, Esc]  Exit [i]",
+        ),
+        (
+            "STREAM_INFO",
+            ("Stream Info", "STREAM_MEMBERS"),
+            True,
+            "Scroll [up/down]  Return to Stream Info [m, Esc]  Exit [i]",
+        ),
+        ("EXIT_POPUP", None, False, "Exit [Esc]"),
+    ],
+)
+def test_build_footer_text(
+    command: str,
+    return_to: Optional[Tuple[str, str]],
+    scrollable: bool,
+    expected: str,
+) -> None:
+    assert PopUpView.build_footer_text(command, return_to, scrollable) == expected

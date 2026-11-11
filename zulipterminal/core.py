@@ -53,8 +53,6 @@ from zulipterminal.version import ZT_VERSION
 
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
-SCROLL_PROMPT = "(up/down scrolls)"
-
 
 class Controller:
     """
@@ -254,11 +252,11 @@ class Controller:
         self.loop.widget = self.view
 
     def show_help(self) -> None:
-        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}")
+        help_view = HelpView(self, "Help Menu")
         self.show_pop_up(help_view, "area:help")
 
     def show_markdown_help(self) -> None:
-        markdown_view = MarkdownHelpView(self, f"Markdown Help Menu {SCROLL_PROMPT}")
+        markdown_view = MarkdownHelpView(self, "Markdown Help Menu")
         self.show_pop_up(markdown_view, "area:help")
 
     def show_topic_edit_mode(self, button: Any) -> None:
@@ -274,7 +272,7 @@ class Controller:
         msg_info_view = MsgInfoView(
             self,
             msg,
-            f"Message Information {SCROLL_PROMPT}",
+            "Message Information",
             topic_links,
             message_links,
             time_mentions,
@@ -334,7 +332,7 @@ class Controller:
             UserInfoView(
                 self,
                 user_id,
-                f"User Information {SCROLL_PROMPT}",
+                "User Information",
                 "USER_INFO",
             ),
             "area:user",
@@ -345,7 +343,7 @@ class Controller:
             UserInfoView(
                 self,
                 user_id,
-                f"Message Sender Information {SCROLL_PROMPT}",
+                "Message Sender Information",
                 "MSG_SENDER_INFO",
             ),
             "area:user",
@@ -365,7 +363,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Full rendered message {SCROLL_PROMPT}",
+                "Full rendered message",
             ),
             "area:msg",
         )
@@ -384,7 +382,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Full raw message {SCROLL_PROMPT}",
+                "Full raw message",
             ),
             "area:msg",
         )
@@ -403,7 +401,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Edit History {SCROLL_PROMPT}",
+                "Edit History",
             ),
             "area:msg",
         )
