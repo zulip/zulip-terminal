@@ -25,7 +25,7 @@ from zulipterminal.config.symbols import (
     MUTE_MARKER,
     STARRED_MESSAGES_MARKER,
 )
-from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, STREAM_ACCESS_TYPE
+from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS, get_stream_marker
 from zulipterminal.helper import StreamData, hash_util_decode, process_media
 from zulipterminal.urwid_types import urwid_MarkupTuple, urwid_Size
 
@@ -232,7 +232,10 @@ class StreamButton(TopButton):
             (f"s{self.color}", "", "", "standout", inverse_text, self.color)
         )
 
-        stream_marker = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+        stream_marker = get_stream_marker(
+            stream_access_type,
+            ascii_only=controller.ascii_channel_markers,
+        )
 
         narrow_function = partial(
             controller.narrow_to_stream,
