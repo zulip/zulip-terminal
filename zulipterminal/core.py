@@ -233,16 +233,31 @@ class Controller:
         title = urwid.Pile([title_top, title_box_adapter])
 
         content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
-
+        footer = None
+        footer_height = 0
+        if to_show.footer_parts:
+            footer_columns = urwid.Columns(
+                [
+                    ("weight", len(part) + 2, urwid.Text(part, align="center"))
+                    for part in to_show.footer_parts
+                ]
+            )
+            footer_map = urwid.AttrMap(urwid.Filler(footer_columns), style)
+            footer_box_adapter = urwid.BoxAdapter(footer_map, height=1)
+            footer_bottom = urwid.AttrMap(urwid.Divider("▀"), "popup_border")
+            footer = urwid.Pile([footer_box_adapter, footer_bottom])
+            footer_height = 2
         self.loop.widget = urwid.Overlay(
-            urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
+            urwid.AttrMap(
+                urwid.Frame(header=title, body=content, footer=footer), "popup_border"
+            ),
             self.view,
             align="center",
             valign="middle",
-            # +2 to both of the following, due to LineBox
-            # +2 to height, due to title enhancement
+            # +2 to width, due to LineBox
+            # +4 for the LineBox and title; add footer_height when a hint appears.
             width=to_show.width + 2,
-            height=to_show.height + 4,
+            height=to_show.height + 4 + footer_height,
         )
 
     def is_any_popup_open(self) -> bool:

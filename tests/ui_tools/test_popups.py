@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
 from zulipterminal.ui_tools.messages import MessageBox
@@ -99,8 +99,7 @@ class TestPopUpView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        self.command = "COMMAND"
-        mocker.patch(MODULE + ".display_keys_for_command", return_value=[])
+        self.command = "HELP"
         self.title = "Generic title"
         self.width = 16
         self.body = mocker.Mock()
@@ -160,23 +159,10 @@ class TestPopUpView:
 
     def test_keypress_navigation(
         self,
-        mocker: MockerFixture,
         navigation_key: str,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
         size = widget_size(self.pop_up_view)
-        # Patch `is_command_key` to not raise an 'Invalid Command' exception
-        # when its parameters are (self.command, key) as there is no
-        # self.command='COMMAND' command in keys.py.
-        mocker.patch(
-            MODULE + ".is_command_key",
-            side_effect=(
-                lambda command, key: False
-                if command == self.command
-                else is_command_key(command, key)
-            ),
-        )
-
         self.pop_up_view.keypress(size, navigation_key)
 
         self.super_keypress.assert_called_once_with(size, navigation_key)
@@ -522,10 +508,7 @@ class TestFullRenderedMsgView:
         assert self.full_rendered_message.message_links == OrderedDict()
         assert self.full_rendered_message.time_mentions == list()
         assert self.full_rendered_message.header.widget_list == msg_box.header
-        assert (
-            self.full_rendered_message.footer.widget_list[0].widget_list
-            == msg_box.footer
-        )
+        assert self.full_rendered_message.footer.widget_list == msg_box.footer
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
@@ -601,7 +584,7 @@ class TestFullRawMsgView:
         assert self.full_raw_message.message_links == OrderedDict()
         assert self.full_raw_message.time_mentions == list()
         assert self.full_raw_message.header.widget_list == msg_box.header
-        assert self.full_raw_message.footer.widget_list[0].widget_list == msg_box.footer
+        assert self.full_raw_message.footer.widget_list == msg_box.footer
 
     @pytest.mark.parametrize("key", keys_for_command("MSG_INFO"))
     def test_keypress_exit_popup(
@@ -1149,7 +1132,7 @@ class TestMsgInfoView:
         assert self.controller.open_in_browser.called
 
     def test_height_noreactions(self) -> None:
-        expected_height = 9
+        expected_height = 8
         # 6 = 1 (date & time) +1 (sender's name) +1 (sender's email)
         # +1 (display group header)
         # +1 (whitespace column)
@@ -1236,7 +1219,7 @@ class TestMsgInfoView:
 
             # 12 = 7 labels + 2 blank lines + 1 'Reactions' (category)
             # + 4 reactions (excluding 'Message Links').
-            expected_height = 15
+            expected_height = 14
             assert self.msg_info_view.height == expected_height
 
     @pytest.mark.parametrize(
@@ -1340,21 +1323,21 @@ class TestStreamInfoView:
                 {"date_created": None, "is_announcement_only": True},
                 "74 [Organization default]",
                 0,
-                18,
+                17,
                 id="ZFL=0_no_date_created__no_retention_days__admins_only",
             ),
             case(
                 {"date_created": None, "is_announcement_only": False},
                 "74 [Organization default]",
                 0,
-                17,
+                16,
                 id="ZFL=0_no_date_created__no_retention_days__anyone_can_type",
             ),
             case(
                 {"date_created": None, "stream_post_policy": 1},
                 "74 [Organization default]",
                 16,
-                17,
+                16,
                 id="ZFL<30_no_date_created__ZFL<17_no_retention_days",
             ),
             case(
@@ -1365,7 +1348,7 @@ class TestStreamInfoView:
                 },
                 "200",
                 17,
-                18,
+                17,
                 id="ZFL<30_no_date_created__ZFL=17_custom_finite_retention_days",
             ),
             case(
@@ -1376,7 +1359,7 @@ class TestStreamInfoView:
                 },
                 "Indefinite [Organization default]",
                 29,
-                19,
+                18,
                 id="ZFL<30_no_date_created__ZFL>17_default_indefinite_retention_days",
             ),
             case(
@@ -1387,7 +1370,7 @@ class TestStreamInfoView:
                 },
                 "31",
                 30,
-                19,
+                18,
                 id="ZFL=30_with_date_created__ZFL>17_custom_finite_retention_days",
             ),
             case(
@@ -1398,7 +1381,7 @@ class TestStreamInfoView:
                 },
                 "72 [Organization default]",
                 40,
-                19,
+                18,
                 id="ZFL>30_with_date_created__ZFL>17_default_finite_retention_days",
             ),
             case(
@@ -1410,7 +1393,7 @@ class TestStreamInfoView:
                 },
                 "60",
                 50,
-                18,
+                17,
                 id="ZFL>30_new_stream_with_date_created__ZFL>17_finite_retention_days",
             ),
         ],
@@ -1767,26 +1750,26 @@ class TestEmojiPickerView:
 @pytest.mark.parametrize(
     "command, return_to, scrollable, expected",
     [
-        ("HELP", None, True, "Scroll [up/down]  Exit [?, Esc]"),
+        ("HELP", None, True, ["Scroll [up/down]", "Exit [?, Esc]"]),
         (
             "MSG_INFO",
             ("Message Info", "FULL_RENDERED_MESSAGE"),
             True,
-            "Scroll [up/down]  Return to Message Info [f, Esc]  Exit [i]",
+            ["Scroll [up/down]", "Return to Message Info [f, Esc]", "Exit [i]"],
         ),
         (
             "STREAM_INFO",
             ("Stream Info", "STREAM_MEMBERS"),
             True,
-            "Scroll [up/down]  Return to Stream Info [m, Esc]  Exit [i]",
+            ["Scroll [up/down]", "Return to Stream Info [m, Esc]", "Exit [i]"],
         ),
-        ("EXIT_POPUP", None, False, "Exit [Esc]"),
+        ("EXIT_POPUP", None, False, ["Exit [Esc]"]),
     ],
 )
-def test_build_footer_text(
+def test_build_footer_parts(
     command: str,
     return_to: Optional[Tuple[str, str]],
     scrollable: bool,
-    expected: str,
+    expected: List[str],
 ) -> None:
-    assert PopUpView.build_footer_text(command, return_to, scrollable) == expected
+    assert PopUpView.build_footer_parts(command, return_to, scrollable) == expected

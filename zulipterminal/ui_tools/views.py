@@ -971,21 +971,15 @@ class PopUpView(urwid.Frame):
         header_rows = header.rows((prelim_width,)) if header else 0
         needs_scroll = (body_rows + header_rows) > max_rows
 
-        footer_text = self.build_footer_text(command, return_to, needs_scroll)
-        hint_footer = urwid.Text(footer_text, align="center") if footer_text else None
-        combined_footer = (
-            urwid.Pile([footer, hint_footer])
-            if (footer and hint_footer)
-            else (footer or hint_footer)
-        )
+        self.footer_parts = self.build_footer_parts(command, return_to, needs_scroll)
 
-        min_width = len(footer_text) + 4 if footer_text else 0
+        min_width = sum(len(part) + 2 for part in self.footer_parts)
         self.width = min(max_cols, max(requested_width, min_width))
 
-        height = self.calculate_popup_height(body, header, combined_footer, self.width)
+        height = self.calculate_popup_height(body, header, footer, self.width)
         self.height = min(max_rows, height)
 
-        super().__init__(self.body, header=header, footer=combined_footer)
+        super().__init__(self.body, header=header, footer=footer)
 
     @staticmethod
     def calculate_popup_height(
@@ -1005,11 +999,11 @@ class PopUpView(urwid.Frame):
         return height
 
     @staticmethod
-    def build_footer_text(
+    def build_footer_parts(
         command: str,
         return_to: Optional[Tuple[str, str]] = None,
         scrollable: bool = False,
-    ) -> str:
+    ) -> List[str]:
         parts: List[str] = []
         if scrollable:
             parts.append("Scroll [up/down]")
@@ -1034,7 +1028,7 @@ class PopUpView(urwid.Frame):
             if exit_keys:
                 parts.append(f"Exit [{', '.join(exit_keys)}]")
 
-        return "  ".join(parts)
+        return parts
 
     @staticmethod
     def calculate_table_widths(
