@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 from urwid import Columns, Pile, Text, Widget
 
 from zulipterminal.api_types import Message
-from zulipterminal.config.keys import is_command_key, keys_for_command
+from zulipterminal.config.keys import keys_for_command
 from zulipterminal.config.ui_mappings import EDIT_MODE_CAPTIONS
 from zulipterminal.helper import CustomProfileData, TidiedUserInfo
 from zulipterminal.ui_tools.messages import MessageBox
@@ -99,7 +99,7 @@ class TestPopUpView:
         mocker.patch.object(
             self.controller, "maximum_popup_dimensions", return_value=(64, 64)
         )
-        self.command = "COMMAND"
+        self.command = "HELP"
         self.title = "Generic title"
         self.width = 16
         self.body = mocker.Mock()
@@ -159,23 +159,10 @@ class TestPopUpView:
 
     def test_keypress_navigation(
         self,
-        mocker: MockerFixture,
         navigation_key: str,
         widget_size: Callable[[Widget], urwid_Size],
     ) -> None:
         size = widget_size(self.pop_up_view)
-        # Patch `is_command_key` to not raise an 'Invalid Command' exception
-        # when its parameters are (self.command, key) as there is no
-        # self.command='COMMAND' command in keys.py.
-        mocker.patch(
-            MODULE + ".is_command_key",
-            side_effect=(
-                lambda command, key: False
-                if command == self.command
-                else is_command_key(command, key)
-            ),
-        )
-
         self.pop_up_view.keypress(size, navigation_key)
 
         self.super_keypress.assert_called_once_with(size, navigation_key)
@@ -339,7 +326,7 @@ class TestUserInfoView:
         )
 
         self.user_info_view = UserInfoView(
-            self.controller, 10000, "User Info (up/down scrolls)", "USER_INFO"
+            self.controller, 10000, "User Info", "USER_INFO"
         )
 
     @pytest.mark.parametrize(
@@ -1758,3 +1745,31 @@ class TestEmojiPickerView:
         self.emoji_picker_view.keypress(size, key)
 
         assert self.controller.exit_popup.called
+
+
+@pytest.mark.parametrize(
+    "command, return_to, scrollable, expected",
+    [
+        ("HELP", None, True, ["Scroll [up/down]", "Exit [?, Esc]"]),
+        (
+            "MSG_INFO",
+            ("Message Info", "FULL_RENDERED_MESSAGE"),
+            True,
+            ["Scroll [up/down]", "Return to Message Info [f, Esc]", "Exit [i]"],
+        ),
+        (
+            "STREAM_INFO",
+            ("Stream Info", "STREAM_MEMBERS"),
+            True,
+            ["Scroll [up/down]", "Return to Stream Info [m, Esc]", "Exit [i]"],
+        ),
+        ("EXIT_POPUP", None, False, ["Exit [Esc]"]),
+    ],
+)
+def test_build_footer_parts(
+    command: str,
+    return_to: Optional[Tuple[str, str]],
+    scrollable: bool,
+    expected: List[str],
+) -> None:
+    assert PopUpView.build_footer_parts(command, return_to, scrollable) == expected

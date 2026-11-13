@@ -958,16 +958,23 @@ class PopUpView(urwid.Frame):
         title: str,
         header: Optional[Any] = None,
         footer: Optional[Any] = None,
+        return_to: Optional[Tuple[str, str]] = None,
     ) -> None:
         self.controller = controller
         self.command = command
         self.title = title
         self.log = urwid.SimpleFocusListWalker(body)
         self.body = urwid.ListBox(self.log)
-
         max_cols, max_rows = controller.maximum_popup_dimensions()
+        prelim_width = min(max_cols, requested_width)
+        body_rows = sum(widget.rows((prelim_width,)) for widget in body)
+        header_rows = header.rows((prelim_width,)) if header else 0
+        needs_scroll = (body_rows + header_rows) > max_rows
 
-        self.width = min(max_cols, requested_width)
+        self.footer_parts = self.build_footer_parts(command, return_to, needs_scroll)
+
+        min_width = sum(len(part) + 2 for part in self.footer_parts)
+        self.width = min(max_cols, max(requested_width, min_width))
 
         height = self.calculate_popup_height(body, header, footer, self.width)
         self.height = min(max_rows, height)
@@ -990,6 +997,38 @@ class PopUpView(urwid.Frame):
         height += footer.rows((popup_width,)) if footer else 0
 
         return height
+
+    @staticmethod
+    def build_footer_parts(
+        command: str,
+        return_to: Optional[Tuple[str, str]] = None,
+        scrollable: bool = False,
+    ) -> List[str]:
+        parts: List[str] = []
+        if scrollable:
+            parts.append("Scroll [up/down]")
+
+        if return_to:
+            parent_title, own_cmd = return_to
+            ret_keys = list(
+                dict.fromkeys(
+                    display_keys_for_command(own_cmd)
+                    + display_keys_for_command("EXIT_POPUP")
+                )
+            )
+            parts.append(f"Return to {parent_title} [{', '.join(ret_keys)}]")
+            exit_keys = list(dict.fromkeys(display_keys_for_command(command)))
+            if exit_keys:
+                parts.append(f"Exit [{', '.join(exit_keys)}]")
+        else:
+            raw_keys = display_keys_for_command(command)
+            if command != "EXIT_POPUP":
+                raw_keys += display_keys_for_command("EXIT_POPUP")
+            exit_keys = list(dict.fromkeys(raw_keys))
+            if exit_keys:
+                parts.append(f"Exit [{', '.join(exit_keys)}]")
+
+        return parts
 
     @staticmethod
     def calculate_table_widths(
@@ -1575,7 +1614,7 @@ class StreamMembersView(PopUpView):
         user_names = [model.user_name_from_id(id) for id in user_ids]
         sorted_user_names = sorted(user_names)
         sorted_user_names.insert(0, model.user_full_name)
-        title = "Stream Members (up/down scrolls)"
+        title = "Stream Members"
 
         stream_users_content = [("", [(name, "") for name in sorted_user_names])]
         popup_width, column_width = self.calculate_table_widths(
@@ -1583,7 +1622,14 @@ class StreamMembersView(PopUpView):
         )
         widgets = self.make_table_with_categories(stream_users_content, column_width)
 
-        super().__init__(controller, widgets, "STREAM_INFO", popup_width, title)
+        super().__init__(
+            controller,
+            widgets,
+            "STREAM_INFO",
+            popup_width,
+            title,
+            return_to=("Stream Info", "STREAM_MEMBERS"),
+        )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
         if is_command_key("EXIT_POPUP", key) or is_command_key("STREAM_MEMBERS", key):
@@ -1859,7 +1905,14 @@ class EditHistoryView(PopUpView):
             ]
             widgets.append(urwid.Text(feedback, align="center"))
 
-        super().__init__(controller, widgets, "MSG_INFO", width, title)
+        super().__init__(
+            controller,
+            widgets,
+            "MSG_INFO",
+            width,
+            title,
+            return_to=("Message Info", "EDIT_HISTORY"),
+        )
 
     def _make_edit_block(self, snapshot: Dict[str, Any], tag: EditHistoryTag) -> Any:
         content = snapshot["content"]
@@ -1964,6 +2017,7 @@ class FullRenderedMsgView(PopUpView):
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            return_to=("Message Info", "FULL_RENDERED_MESSAGE"),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:
@@ -2016,6 +2070,7 @@ class FullRawMsgView(PopUpView):
             title,
             urwid.Pile(msg_box.header),
             urwid.Pile(msg_box.footer),
+            return_to=("Message Info", "FULL_RAW_MESSAGE"),
         )
 
     def keypress(self, size: urwid_Size, key: str) -> str:

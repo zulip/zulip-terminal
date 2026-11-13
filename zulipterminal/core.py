@@ -53,8 +53,6 @@ from zulipterminal.version import ZT_VERSION
 
 ExceptionInfo = Tuple[Type[BaseException], BaseException, TracebackType]
 
-SCROLL_PROMPT = "(up/down scrolls)"
-
 
 class Controller:
     """
@@ -235,16 +233,31 @@ class Controller:
         title = urwid.Pile([title_top, title_box_adapter])
 
         content = urwid.LineBox(to_show, **POPUP_CONTENT_BORDER)
-
+        footer = None
+        footer_height = 0
+        if to_show.footer_parts:
+            footer_columns = urwid.Columns(
+                [
+                    ("weight", len(part) + 2, urwid.Text(part, align="center"))
+                    for part in to_show.footer_parts
+                ]
+            )
+            footer_map = urwid.AttrMap(urwid.Filler(footer_columns), style)
+            footer_box_adapter = urwid.BoxAdapter(footer_map, height=1)
+            footer_bottom = urwid.AttrMap(urwid.Divider("▀"), "popup_border")
+            footer = urwid.Pile([footer_box_adapter, footer_bottom])
+            footer_height = 2
         self.loop.widget = urwid.Overlay(
-            urwid.AttrMap(urwid.Frame(header=title, body=content), "popup_border"),
+            urwid.AttrMap(
+                urwid.Frame(header=title, body=content, footer=footer), "popup_border"
+            ),
             self.view,
             align="center",
             valign="middle",
-            # +2 to both of the following, due to LineBox
-            # +2 to height, due to title enhancement
+            # +2 to width, due to LineBox
+            # +4 for the LineBox and title; add footer_height when a hint appears.
             width=to_show.width + 2,
-            height=to_show.height + 4,
+            height=to_show.height + 4 + footer_height,
         )
 
     def is_any_popup_open(self) -> bool:
@@ -254,11 +267,11 @@ class Controller:
         self.loop.widget = self.view
 
     def show_help(self) -> None:
-        help_view = HelpView(self, f"Help Menu {SCROLL_PROMPT}")
+        help_view = HelpView(self, "Help Menu")
         self.show_pop_up(help_view, "area:help")
 
     def show_markdown_help(self) -> None:
-        markdown_view = MarkdownHelpView(self, f"Markdown Help Menu {SCROLL_PROMPT}")
+        markdown_view = MarkdownHelpView(self, "Markdown Help Menu")
         self.show_pop_up(markdown_view, "area:help")
 
     def show_topic_edit_mode(self, button: Any) -> None:
@@ -274,7 +287,7 @@ class Controller:
         msg_info_view = MsgInfoView(
             self,
             msg,
-            f"Message Information {SCROLL_PROMPT}",
+            "Message Information",
             topic_links,
             message_links,
             time_mentions,
@@ -334,7 +347,7 @@ class Controller:
             UserInfoView(
                 self,
                 user_id,
-                f"User Information {SCROLL_PROMPT}",
+                "User Information",
                 "USER_INFO",
             ),
             "area:user",
@@ -345,7 +358,7 @@ class Controller:
             UserInfoView(
                 self,
                 user_id,
-                f"Message Sender Information {SCROLL_PROMPT}",
+                "Message Sender Information",
                 "MSG_SENDER_INFO",
             ),
             "area:user",
@@ -365,7 +378,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Full rendered message {SCROLL_PROMPT}",
+                "Full rendered message",
             ),
             "area:msg",
         )
@@ -384,7 +397,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Full raw message {SCROLL_PROMPT}",
+                "Full raw message",
             ),
             "area:msg",
         )
@@ -403,7 +416,7 @@ class Controller:
                 topic_links,
                 message_links,
                 time_mentions,
-                f"Edit History {SCROLL_PROMPT}",
+                "Edit History",
             ),
             "area:msg",
         )
