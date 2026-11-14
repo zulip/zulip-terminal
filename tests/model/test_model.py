@@ -1469,6 +1469,41 @@ class TestModel:
         model.get_messages(num_after=0, num_before=0, anchor=0)
         assert model._have_last_message[repr(model.narrow)] is False
 
+    @pytest.mark.parametrize(
+        "anchor, expected_pointer",
+        [
+            (537287, 1),  # a message in the narrow: store its position, not its id
+            (15490883, None),  # not a message in the narrow: store nothing
+        ],
+    )
+    def test_get_messages_first_anchor_pointer_is_position(
+        self,
+        mocker,
+        messages_successful_response,
+        index_all_messages,
+        initial_data,
+        anchor,
+        expected_pointer,
+    ):
+        self.client.register.return_value = initial_data
+        mocker.patch(MODEL + "._update_users_data_from_initial_data")
+        mocker.patch(MODEL + "._subscribe_to_streams")
+        self.classify_unread_counts = mocker.patch(
+            MODULE + ".classify_unread_counts", return_value=[]
+        )
+        index_all_messages["messages"] = {
+            537286: {"timestamp": 1},
+            537287: {"timestamp": 2},
+            537288: {"timestamp": 3},
+        }
+        messages_successful_response["anchor"] = anchor
+        self.client.get_messages.return_value = messages_successful_response
+        mocker.patch(MODULE + ".index_messages", return_value=index_all_messages)
+
+        model = Model(self.controller)
+
+        assert model.index["pointer"].get(repr(model.narrow)) == expected_pointer
+
     # FIXME This only tests the case where the get_messages is in __init__
     def test_fail_get_messages(
         self, mocker, error_response, initial_data, num_before=30, num_after=10
