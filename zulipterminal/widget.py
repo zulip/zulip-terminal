@@ -3,33 +3,51 @@ Process widgets (submessages) like polls, todo lists, etc.
 """
 
 import json
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
+
+from typing_extensions import TypedDict
+
+from zulipterminal.api_types import Submessage
 
 
-Submessage = Dict[str, Union[int, str]]
+__all__ = [
+    "Submessage",
+    "TodoTask",
+    "PollOption",
+    "find_widget_type",
+    "process_todo_widget",
+    "process_poll_widget",
+]
+
+
+class TodoTask(TypedDict):
+    task: str
+    desc: str
+    completed: bool
+
+
+class PollOption(TypedDict):
+    option: str
+    votes: List[int]
 
 
 def find_widget_type(submessages: List[Submessage]) -> str:
     if submessages and "content" in submessages[0]:
         content = submessages[0]["content"]
-
         if isinstance(content, str):
             try:
                 loaded_content = json.loads(content)
                 return loaded_content.get("widget_type", "unknown")
             except json.JSONDecodeError:
                 return "unknown"
-        else:
-            return "unknown"
-    else:
-        return "unknown"
+    return "unknown"
 
 
 def process_todo_widget(
     todo_list: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, bool]]]]:
+) -> Tuple[str, Dict[str, TodoTask]]:
     title = ""
-    tasks = {}
+    tasks: Dict[str, TodoTask] = {}
 
     for entry in todo_list:
         content = entry.get("content")
@@ -47,7 +65,7 @@ def process_todo_widget(
                         title = "Task list"
                     # Process initial tasks
                     for i, task in enumerate(widget["extra_data"].get("tasks", [])):
-                        # Initial tasks get  ID as "index,canned"
+                        # Initial tasks get ID as "index,canned"
                         task_id = f"{i},canned"
                         tasks[task_id] = {
                             "task": task["task"],
@@ -78,9 +96,9 @@ def process_todo_widget(
 
 def process_poll_widget(
     poll_content: List[Submessage],
-) -> Tuple[str, Dict[str, Dict[str, Union[str, List[str]]]]]:
+) -> Tuple[str, Dict[str, PollOption]]:
     poll_question = ""
-    options = {}
+    options: Dict[str, PollOption] = {}
 
     for entry in poll_content:
         content = entry["content"]
