@@ -27,6 +27,7 @@ from zulipterminal.ui_tools.views import (
     PopUpView,
     StreamInfoView,
     StreamMembersView,
+    TodoTextInputPopup,
     UserInfoView,
 )
 from zulipterminal.urwid_types import urwid_Size
@@ -1758,3 +1759,82 @@ class TestEmojiPickerView:
         self.emoji_picker_view.keypress(size, key)
 
         assert self.controller.exit_popup.called
+
+
+class TestTodoTextInputPopup:
+    @pytest.fixture(autouse=True)
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
+        self.controller = mocker.Mock()
+        self.controller.maximum_popup_dimensions.return_value = (64, 64)
+        self.on_submit = mocker.Mock()
+
+    def popup(
+        self, fields: List[Tuple[str, str]], footer_text: Optional[str] = None
+    ) -> TodoTextInputPopup:
+        return TodoTextInputPopup(
+            self.controller,
+            title="TITLE",
+            fields=fields,
+            on_submit=self.on_submit,
+            footer_text=footer_text,
+        )
+
+    @pytest.mark.parametrize(
+        "fields, footer_text, expected_height",
+        [
+            case([("A:", "")], None, 3, id="one_field"),
+            case([("A:", ""), ("B:", "")], None, 4, id="two_fields"),
+            case([("A:", ""), ("B:", "")], "FOOTER", 6, id="two_fields_and_footer"),
+        ],
+    )
+    def test_init(
+        self,
+        fields: List[Tuple[str, str]],
+        footer_text: Optional[str],
+        expected_height: int,
+    ) -> None:
+        popup = self.popup(fields, footer_text)
+
+        assert popup.title == "TITLE"
+        assert popup.height == expected_height
+        assert [edit.caption for edit in popup._edits] == [
+            f"{prompt} " for prompt, _ in fields
+        ]
+        assert [edit.edit_text for edit in popup._edits] == [
+            initial_text for _, initial_text in fields
+        ]
+
+    @pytest.mark.parametrize("key", keys_for_command("SUBMIT_POPUP"))
+    def test_keypress_SUBMIT_POPUP(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        popup = self.popup([("A:", "  first  "), ("B:", " second ")])
+        size = widget_size(popup)
+
+        popup.keypress(size, key)
+
+        self.controller.exit_popup.assert_called_once_with()
+        self.on_submit.assert_called_once_with(["first", "second"])
+
+    def test_keypress__move_between_fields(
+        self, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        popup = self.popup([("A:", ""), ("B:", "")])
+        size = widget_size(popup)
+
+        popup.keypress(size, "down")
+        popup.keypress(size, "x")
+
+        assert [edit.edit_text for edit in popup._edits] == ["", "x"]
+
+    @pytest.mark.parametrize("key", keys_for_command("EXIT_POPUP"))
+    def test_keypress_EXIT_POPUP(
+        self, key: str, widget_size: Callable[[Widget], urwid_Size]
+    ) -> None:
+        popup = self.popup([("A:", "")])
+        size = widget_size(popup)
+
+        popup.keypress(size, key)
+
+        self.controller.exit_popup.assert_called_once_with()
+        self.on_submit.assert_not_called()
