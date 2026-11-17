@@ -29,6 +29,17 @@ MODULE = "zulipterminal.ui_tools.messages"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
+def todo_tasks(*tasks):
+    """
+    Generates to-do tasks in the processed form returned by process_todo_widget,
+    from (task, description, completed) tuples
+    """
+    return {
+        f"{index},canned": {"task": task, "desc": desc, "completed": completed}
+        for index, (task, desc, completed) in enumerate(tasks)
+    }
+
+
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
@@ -798,6 +809,58 @@ class TestMessageBox:
         name_index = 11 if is_me_message else -1  # 11 = len(<str><strong>)
         assert (
             msg_box.message["content"].find(message["sender_full_name"]) == name_index
+        )
+
+    @pytest.mark.parametrize(
+        "tasks, expected_task_lines",
+        [
+            case({}, [], id="no_tasks"),
+            case(
+                todo_tasks(("Wash", "", False)),
+                ["[ ] <strong>Wash</strong>"],
+                id="incomplete_task",
+            ),
+            case(
+                todo_tasks(("Wash", "", True)),
+                ["[✔] <strong>Wash</strong>"],
+                id="completed_task",
+            ),
+            case(
+                todo_tasks(("Wash", "the dishes", False)),
+                ["[ ] <strong>Wash</strong>: the dishes"],
+                id="task_with_description",
+            ),
+            case(
+                todo_tasks(("Wash", "", True), ("Cook", "dinner", False)),
+                ["[✔] <strong>Wash</strong>", "[ ] <strong>Cook</strong>: dinner"],
+                id="multiple_tasks",
+            ),
+        ],
+    )
+    def test_main_view_renders_todo_widget(self, mocker, tasks, expected_task_lines):
+        mocker.patch(MODULE + ".urwid.Text")
+        mocker.patch(MODULE + ".find_widget_type", return_value="todo")
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Chores", tasks))
+        message = {
+            "id": 4,
+            "type": "stream",
+            "display_recipient": "Verona",
+            "stream_id": 5,
+            "subject": "Test topic",
+            "flags": [],
+            "is_me_message": False,
+            "content": "<p>/todo</p>",
+            "reactions": [],
+            "sender_full_name": "Alice",
+            "timestamp": 1532103879,
+            "submessages": [{"msg_type": "widget"}],
+        }
+        msg_box = MessageBox(message, self.model, message)
+
+        msg_box.main_view()
+
+        assert msg_box.message["content"] == "\n".join(
+            ["<strong>To-do</strong>", "<strong>Chores</strong>", *expected_task_lines]
         )
 
     @pytest.mark.parametrize(
