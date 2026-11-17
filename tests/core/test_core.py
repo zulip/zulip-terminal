@@ -513,18 +513,16 @@ class TestController:
 
         controller.show_todo_text_input_popup(
             title="TITLE",
-            prompt="PROMPT",
+            fields=[("PROMPT", "TEXT")],
             on_submit=on_submit,
-            initial_text="TEXT",
             footer_text="FOOTER",
         )
 
         popup.assert_called_once_with(
             controller,
             title="TITLE",
-            prompt="PROMPT",
+            fields=[("PROMPT", "TEXT")],
             on_submit=on_submit,
-            initial_text="TEXT",
             footer_text="FOOTER",
         )
         show_pop_up.assert_called_once_with(popup(), "area:msg")

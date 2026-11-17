@@ -269,17 +269,15 @@ class Controller:
         self,
         *,
         title: str,
-        prompt: str,
-        on_submit: Callable[[str], None],
-        initial_text: str = "",
+        fields: List[Tuple[str, str]],
+        on_submit: Callable[[List[str]], None],
         footer_text: Optional[str] = None,
     ) -> None:
         popup = TodoTextInputPopup(
             self,
             title=title,
-            prompt=prompt,
+            fields=fields,
             on_submit=on_submit,
-            initial_text=initial_text,
             footer_text=footer_text,
         )
         self.show_pop_up(popup, "area:msg")

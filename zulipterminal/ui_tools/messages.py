@@ -1001,7 +1001,8 @@ class MessageBox(urwid.Pile):
 
         current_title, _ = process_todo_widget(self.message["submessages"])
 
-        def on_title_submit(new_title: str) -> None:
+        def on_title_submit(values: List[str]) -> None:
+            (new_title,) = values
             if not new_title:
                 return
             self.model.send_widget_submessage(
@@ -1011,8 +1012,7 @@ class MessageBox(urwid.Pile):
 
         self.model.controller.show_todo_text_input_popup(
             title="Rename to-do list",
-            prompt="Title:",
-            initial_text=current_title,
+            fields=[("Title:", current_title)],
             on_submit=on_title_submit,
             footer_text="Enter to save • Esc to cancel",
         )

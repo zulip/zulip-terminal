@@ -2113,7 +2113,7 @@ class TestMessageBox:
         if expect_popup:
             controller.show_todo_text_input_popup.assert_called_once()
             _, popup_kwargs = controller.show_todo_text_input_popup.call_args
-            assert popup_kwargs["initial_text"] == "Old title"
+            assert popup_kwargs["fields"] == [("Title:", "Old title")]
             controller.report_error.assert_not_called()
         else:
             controller.show_todo_text_input_popup.assert_not_called()
@@ -2141,7 +2141,7 @@ class TestMessageBox:
         msg_box._rename_todo_list()
         _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
 
-        popup_kwargs["on_submit"](submitted_title)
+        popup_kwargs["on_submit"]([submitted_title])
 
         if expected_submessage:
             msg_box.model.send_widget_submessage.assert_called_once_with(
