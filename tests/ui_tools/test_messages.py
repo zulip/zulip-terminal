@@ -817,22 +817,25 @@ class TestMessageBox:
             case({}, [], id="no_tasks"),
             case(
                 todo_tasks(("Wash", "", False)),
-                ["[ ] <strong>Wash</strong>"],
+                ["1. [ ] <strong>Wash</strong>"],
                 id="incomplete_task",
             ),
             case(
                 todo_tasks(("Wash", "", True)),
-                ["[✔] <strong>Wash</strong>"],
+                ["1. [✔] <strong>Wash</strong>"],
                 id="completed_task",
             ),
             case(
                 todo_tasks(("Wash", "the dishes", False)),
-                ["[ ] <strong>Wash</strong>: the dishes"],
+                ["1. [ ] <strong>Wash</strong>: the dishes"],
                 id="task_with_description",
             ),
             case(
                 todo_tasks(("Wash", "", True), ("Cook", "dinner", False)),
-                ["[✔] <strong>Wash</strong>", "[ ] <strong>Cook</strong>: dinner"],
+                [
+                    "1. [✔] <strong>Wash</strong>",
+                    "2. [ ] <strong>Cook</strong>: dinner",
+                ],
                 id="multiple_tasks",
             ),
         ],

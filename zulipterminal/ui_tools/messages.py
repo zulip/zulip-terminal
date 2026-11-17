@@ -741,12 +741,15 @@ class MessageBox(urwid.Pile):
                 todo_widget = "<strong>To-do</strong>\n" + f"<strong>{title}</strong>"
 
                 if tasks:
-                    for task_id, task_info in tasks.items():
+                    for task_number, task_info in enumerate(tasks.values(), start=1):
                         task_status = "[✔]" if task_info["completed"] else "[ ]"
                         task_name = task_info["task"]
                         task_description = task_info["desc"]
 
-                        todo_widget += f"\n{task_status} <strong>{task_name}</strong>"
+                        todo_widget += (
+                            f"\n{task_number}. {task_status} "
+                            f"<strong>{task_name}</strong>"
+                        )
 
                         if task_description:
                             todo_widget += f": {task_description}"
