@@ -2007,6 +2007,10 @@ class TestMessageBox:
                 case(key, "_rename_todo_list", (), id=f"TODO_RENAME_{key}")
                 for key in keys_for_command("TODO_RENAME")
             ],
+            *[
+                case(key, "_add_todo_task", (), id=f"TODO_ADD_{key}")
+                for key in keys_for_command("TODO_ADD")
+            ],
         ],
     )
     def test_keypress__todo_widget(
@@ -2031,6 +2035,10 @@ class TestMessageBox:
             *[
                 case(key, "_rename_todo_list", id=f"TODO_RENAME_{key}")
                 for key in keys_for_command("TODO_RENAME")
+            ],
+            *[
+                case(key, "_add_todo_task", id=f"TODO_ADD_{key}")
+                for key in keys_for_command("TODO_ADD")
             ],
         ],
     )
@@ -2142,6 +2150,78 @@ class TestMessageBox:
         _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
 
         popup_kwargs["on_submit"]([submitted_title])
+
+        if expected_submessage:
+            msg_box.model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], expected_submessage
+            )
+        else:
+            msg_box.model.send_widget_submessage.assert_not_called()
+
+    def test__add_todo_task(self, msg_box):
+        msg_box._add_todo_task()
+
+        show_popup = msg_box.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+        _, popup_kwargs = show_popup.call_args
+        assert popup_kwargs["fields"] == [
+            ("Task:", ""),
+            ("Description (optional):", ""),
+        ]
+
+    @pytest.mark.parametrize(
+        "existing_tasks, submitted_values, expected_submessage",
+        [
+            case(
+                {},
+                ["Wash", ""],
+                {
+                    "type": "new_task",
+                    "task": "Wash",
+                    "desc": "",
+                    "key": 0,
+                    "completed": False,
+                },
+                id="first_task_without_description",
+            ),
+            case(
+                {},
+                ["Wash", "the dishes"],
+                {
+                    "type": "new_task",
+                    "task": "Wash",
+                    "desc": "the dishes",
+                    "key": 0,
+                    "completed": False,
+                },
+                id="first_task_with_description",
+            ),
+            case(
+                {"0,canned": {}, "1,canned": {}, "4,42": {}},
+                ["Cook", ""],
+                {
+                    "type": "new_task",
+                    "task": "Cook",
+                    "desc": "",
+                    "key": 5,
+                    "completed": False,
+                },
+                id="key_after_largest_existing_key",
+            ),
+            case({}, ["", "the dishes"], None, id="no_task_name_not_sent"),
+        ],
+    )
+    def test__add_todo_task__on_submit(
+        self, mocker, msg_box, existing_tasks, submitted_values, expected_submessage
+    ):
+        mocker.patch(
+            MODULE + ".process_todo_widget", return_value=("Title", existing_tasks)
+        )
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box._add_todo_task()
+        _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
+
+        popup_kwargs["on_submit"](submitted_values)
 
         if expected_submessage:
             msg_box.model.send_widget_submessage.assert_called_once_with(

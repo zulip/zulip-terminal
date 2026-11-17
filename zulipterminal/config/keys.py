@@ -481,6 +481,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Rename list (creator only)',
         'key_category': 'todo',
     },
+    'TODO_ADD': {
+        'keys': ['A'],
+        'help_text': 'Add task',
+        'key_category': 'todo',
+    },
 }
 # fmt: on
 

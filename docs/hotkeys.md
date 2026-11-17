@@ -143,4 +143,5 @@
 | :--- | :---: |
 |Toggle task by number|<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> / <kbd>5</kbd> / <kbd>6</kbd> / <kbd>7</kbd> / <kbd>8</kbd> / <kbd>9</kbd>|
 |Rename list (creator only)|<kbd>T</kbd>|
+|Add task|<kbd>A</kbd>|
 
