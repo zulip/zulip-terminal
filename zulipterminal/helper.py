@@ -32,7 +32,13 @@ from urllib.parse import unquote
 import requests
 from typing_extensions import Literal, ParamSpec, TypedDict
 
-from zulipterminal.api_types import Composition, EmojiType, Message
+from zulipterminal.api_types import (
+    MAX_TOPIC_NAME_LENGTH,
+    RESOLVED_TOPIC_PREFIX,
+    Composition,
+    EmojiType,
+    Message,
+)
 from zulipterminal.config.keys import primary_display_key_for_command
 from zulipterminal.config.regexes import (
     REGEX_COLOR_3_DIGIT,
@@ -489,6 +495,34 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             topics_in_stream[msg["subject"]].add(msg["id"])
 
     return index
+
+
+TOPIC_TRUNCATION_SUFFIX = "..."
+
+
+def topic_resolve_toggled(topic: str, prev_topic: str) -> bool:
+    """
+    Returns whether changing a topic from prev_topic to topic only resolved
+    or unresolved it, which the server does not consider to be a move.
+
+    Mirrors topic_resolve_toggled in zerver/lib/message.py on the server,
+    including when the resolved prefix caused the topic to be truncated.
+    """
+    prefix_length = len(RESOLVED_TOPIC_PREFIX)
+    topic_is_resolved = topic.startswith(RESOLVED_TOPIC_PREFIX)
+    prev_topic_was_resolved = prev_topic.startswith(RESOLVED_TOPIC_PREFIX)
+
+    if prev_topic_was_resolved and not topic_is_resolved:
+        return prev_topic[prefix_length:] == topic
+
+    if topic_is_resolved and not prev_topic_was_resolved:
+        if len(prev_topic) <= MAX_TOPIC_NAME_LENGTH - prefix_length:
+            return topic[prefix_length:] == prev_topic
+        if topic.endswith(TOPIC_TRUNCATION_SUFFIX):
+            truncated_topic = topic[prefix_length : -len(TOPIC_TRUNCATION_SUFFIX)]
+            return prev_topic.startswith(truncated_topic)
+
+    return False
 
 
 def classify_unread_counts(model: Any) -> UnreadCounts:

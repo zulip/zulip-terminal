@@ -4,7 +4,11 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
-from zulipterminal.api_types import Composition
+from zulipterminal.api_types import (
+    MAX_TOPIC_NAME_LENGTH,
+    RESOLVED_TOPIC_PREFIX,
+    Composition,
+)
 from zulipterminal.config.keys import primary_display_key_for_command
 from zulipterminal.helper import (
     Index,
@@ -20,6 +24,7 @@ from zulipterminal.helper import (
     powerset,
     process_media,
     sort_unread_topics,
+    topic_resolve_toggled,
 )
 
 
@@ -156,6 +161,39 @@ def test_index_edited_and_moved_messages(
         add_edit_and_move_timestamps(msg)
 
     assert index_messages(messages, model, model.index) == expected_index
+
+
+long_topic = "x" * MAX_TOPIC_NAME_LENGTH
+truncated_resolved_long_topic = (
+    RESOLVED_TOPIC_PREFIX
+    + long_topic[: MAX_TOPIC_NAME_LENGTH - len(RESOLVED_TOPIC_PREFIX) - 3]
+    + "..."
+)
+
+
+@pytest.mark.parametrize(
+    "topic, prev_topic, expected_toggled",
+    [
+        case("✔ topic", "topic", True, id="resolved"),
+        case("topic", "✔ topic", True, id="unresolved"),
+        case("new topic", "topic", False, id="renamed"),
+        case("✔ new topic", "topic", False, id="resolved_and_renamed"),
+        case("new topic", "✔ topic", False, id="unresolved_and_renamed"),
+        case("✔ topic", "✔ topic", False, id="still_resolved"),
+        case("topic", "topic", False, id="unchanged"),
+        case(truncated_resolved_long_topic, long_topic, True, id="resolved_truncated"),
+        case(
+            truncated_resolved_long_topic,
+            "y" + long_topic,
+            False,
+            id="resolved_truncated_and_renamed",
+        ),
+    ],
+)
+def test_topic_resolve_toggled(
+    topic: str, prev_topic: str, expected_toggled: bool
+) -> None:
+    assert topic_resolve_toggled(topic, prev_topic) == expected_toggled
 
 
 @pytest.mark.parametrize(

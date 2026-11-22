@@ -406,7 +406,7 @@ class UpdateMessagesLocationEvent(BaseUpdateMessageEvent):
     # topic_links: NotRequired[List[Any]]
 
     # Only present if messages are moved to a different stream
-    # new_stream_id: NotRequired[int]
+    new_stream_id: NotRequired[int]
 
 
 # -----------------------------------------------------------------------------
