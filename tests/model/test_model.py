@@ -4690,6 +4690,7 @@ class TestModel:
         model.unread_counts = {
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
+        mocker.patch.object(model, "topics_in_stream", return_value=[])
 
         current_message_id = 10  # Arbitrary value due to mock below
         model.stream_topic_from_message_id = mocker.Mock(return_value=current_topic)
@@ -4752,6 +4753,7 @@ class TestModel:
         model.unread_counts = {
             "unread_topics": {stream_topic: 1 for stream_topic in unread_topics}
         }
+        mocker.patch.object(model, "topics_in_stream", return_value=[])
         model.pinned_streams = [
             {"name": "Stream 1", "id": 1},
             {"name": "Stream 2", "id": 2},
@@ -4767,6 +4769,30 @@ class TestModel:
         unread_topic = model.next_unread_topic_from_message_id(None)
 
         assert unread_topic == next_unread_topic
+
+    def test_next_unread_topic_uses_topic_recency(self, mocker, model):
+        model.unread_counts = {
+            "unread_topics": {
+                (1, "Alpha old"): 1,
+                (1, "Zeta recent"): 1,
+            }
+        }
+        model.pinned_streams = [{"name": "Stream 1", "id": 1}]
+        model.unpinned_streams = []
+        mocker.patch.object(
+            model, "stream_topic_from_message_id", return_value=(1, "Middle current")
+        )
+        mocker.patch.object(
+            model,
+            "topics_in_stream",
+            return_value=["Zeta recent", "Middle current", "Alpha old"],
+        )
+        mocker.patch.object(model, "is_muted_topic", return_value=False)
+        mocker.patch.object(model, "is_muted_stream", return_value=False)
+
+        next_topic = model.next_unread_topic_from_message_id(10)
+
+        assert next_topic == (1, "Alpha old")
 
     def test_get_next_unread_pm(self, model):
         model.unread_counts = {"unread_pms": {1: 1, 2: 1}}
