@@ -971,7 +971,10 @@ class TestMsgInfoView:
         mocker.patch(LISTWALKER, return_value=[])
         # The subsequent patches (index and initial_data) set
         # show_edit_history_label to False for this autoused fixture.
-        self.controller.model.index = {"edited_messages": set()}
+        self.controller.model.index = {
+            "edited_messages": set(),
+            "moved_messages": set(),
+        }
         self.controller.model.initial_data = {
             "realm_allow_edit_history": False,
         }
@@ -1018,6 +1021,7 @@ class TestMsgInfoView:
 
     @pytest.mark.parametrize("key", keys_for_command("EDIT_HISTORY"))
     @pytest.mark.parametrize("realm_allow_edit_history", [True, False])
+    @pytest.mark.parametrize("index_set", ["edited_messages", "moved_messages"])
     @pytest.mark.parametrize(
         "edited_message_id",
         [
@@ -1037,11 +1041,14 @@ class TestMsgInfoView:
         key: str,
         widget_size: Callable[[Widget], urwid_Size],
         realm_allow_edit_history: bool,
+        index_set: str,
         edited_message_id: int,
     ) -> None:
         self.controller.model.index = {
-            "edited_messages": {edited_message_id},
+            "edited_messages": set(),
+            "moved_messages": set(),
         }
+        self.controller.model.index[index_set].add(edited_message_id)
         self.controller.model.initial_data = {
             "realm_allow_edit_history": realm_allow_edit_history,
         }

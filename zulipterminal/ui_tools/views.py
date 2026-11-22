@@ -1641,12 +1641,12 @@ class MsgInfoView(PopUpView):
             ],
         )
         msg_info.append(viewing_actions)
-        # Only show the 'Edit History' label for edited messages.
-
+        # Only show the 'Edit History' label for edited or moved messages.
+        index = controller.model.index
+        msg_id = self.msg["id"]
         self.show_edit_history_label = (
-            self.msg["id"] in controller.model.index["edited_messages"]
-            and controller.model.initial_data["realm_allow_edit_history"]
-        )
+            msg_id in index["edited_messages"] or msg_id in index["moved_messages"]
+        ) and controller.model.initial_data["realm_allow_edit_history"]
         if self.show_edit_history_label:
             msg_info[0][1][0] = ("Date & Time (Original)", date_and_time)
 

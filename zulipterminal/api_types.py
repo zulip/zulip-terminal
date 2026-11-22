@@ -207,6 +207,12 @@ class Message(TypedDict, total=False):
     content_type: str
     match_content: str  # If keyword search specified in narrow params.
     match_subject: str  # If keyword search specified in narrow params.
+    # NOTE: Present if content was edited, or before Zulip 10.0 / ZFL 365,
+    #       if the message was also moved to a different stream or topic
+    last_edit_timestamp: int
+    # NOTE: New in Zulip 10.0 / ZFL 365; present if moved to a different
+    #       stream or topic, excluding only resolving/unresolving a topic
+    last_moved_timestamp: int
 
     # Unused/Unsupported fields
     # NOTE: Deprecated; a server implementation detail not useful in a client.

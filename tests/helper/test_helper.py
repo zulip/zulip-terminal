@@ -113,38 +113,47 @@ def test_index_messages_narrow_user_multiple(
 
 
 @pytest.mark.parametrize(
-    "edited_msgs",
+    "edited_msgs, moved_msgs",
     [
-        {537286, 537287, 537288},
-        {537286},
-        {537287},
-        {537288},
-        {537286, 537287},
-        {537286, 537288},
-        {537287, 537288},
+        case(set(), set(), id="none_edited_or_moved"),
+        case({537286, 537287, 537288}, set(), id="all_edited"),
+        case({537286}, set(), id="one_edited"),
+        case({537287, 537288}, set(), id="two_edited"),
+        case(set(), {537286, 537287, 537288}, id="all_moved"),
+        case(set(), {537287}, id="one_moved"),
+        case({537286}, {537286}, id="one_edited_and_moved"),
+        case({537286, 537287}, {537287, 537288}, id="some_edited_some_moved"),
     ],
 )
-def test_index_edited_message(
+def test_index_edited_and_moved_messages(
     mocker: MockerFixture,
     messages_successful_response: Dict[str, Any],
     empty_index: Index,
     edited_msgs: Set[int],
+    moved_msgs: Set[int],
     initial_index: Index,
 ) -> None:
+    def add_edit_and_move_timestamps(msg: Dict[str, Any]) -> None:
+        if msg["id"] in edited_msgs:
+            msg["last_edit_timestamp"] = 1700000000
+        if msg["id"] in moved_msgs:
+            msg["last_moved_timestamp"] = 1700000100
+
     messages = messages_successful_response["messages"]
     for msg in messages:
-        if msg["id"] in edited_msgs:
-            msg["edit_history"] = []
+        add_edit_and_move_timestamps(msg)
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
 
     expected_index: Dict[str, Any] = dict(
-        empty_index, edited_messages=edited_msgs, all_msg_ids={537286, 537287, 537288}
+        empty_index,
+        edited_messages=edited_msgs,
+        moved_messages=moved_msgs,
+        all_msg_ids={537286, 537287, 537288},
     )
-    for msg_id, msg in expected_index["messages"].items():
-        if msg_id in edited_msgs:
-            msg["edit_history"] = []
+    for msg in expected_index["messages"].values():
+        add_edit_and_move_timestamps(msg)
 
     assert index_messages(messages, model, model.index) == expected_index
 

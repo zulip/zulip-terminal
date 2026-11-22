@@ -796,7 +796,8 @@ class MessageBox(urwid.Pile):
         )
         self.content.set_text(content)
 
-        if self.message["id"] in self.model.index["edited_messages"]:
+        index = self.model.index
+        if self.message["id"] in index["edited_messages"] | index["moved_messages"]:
             edited_label_size = 7
             left_padding = 1
         else:

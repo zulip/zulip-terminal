@@ -110,6 +110,7 @@ class Index(TypedDict):
     topic_msg_ids: Dict[int, Dict[str, Set[int]]]
     # Extra cached information
     edited_messages: Set[int]  # {message_id, ...}
+    moved_messages: Set[int]  # {message_id, ...}
     topics: Dict[int, List[str]]  # {topic names, ...}
     search: Set[int]  # {message_id, ...}
     # Downloaded message data by message id
@@ -126,6 +127,7 @@ initial_index = Index(
     stream_msg_ids_by_stream_id=defaultdict(set),
     topic_msg_ids=defaultdict(dict),
     edited_messages=set(),
+    moved_messages=set(),
     topics=defaultdict(list),
     search=set(),
     # mypy bug: https://github.com/python/mypy/issues/7217
@@ -372,6 +374,10 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
             23423,
             ...
         },
+        'moved_messages':{
+            23423,
+            ...
+        },
         'search': {
             13242,
             23423,
@@ -432,8 +438,12 @@ def index_messages(messages: List[Message], model: Any, index: Index) -> Index:
     """
     narrow = model.narrow
     for msg in messages:
-        if "edit_history" in msg:
+        # Before ZFL 365, last_edit_timestamp is also set by moves, so those
+        # messages are marked as edited; last_moved_timestamp is then absent
+        if "last_edit_timestamp" in msg:
             index["edited_messages"].add(msg["id"])
+        if "last_moved_timestamp" in msg:
+            index["moved_messages"].add(msg["id"])
 
         index["messages"][msg["id"]] = msg
         if not narrow:
