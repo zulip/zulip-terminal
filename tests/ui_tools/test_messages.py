@@ -1157,18 +1157,39 @@ class TestMessageBox:
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
 
-    def test_main_view_generates_EDITED_label(
-        self, mocker, messages_successful_response
+    @pytest.mark.parametrize(
+        "is_edited, is_moved, expected_label, expected_label_size, "
+        "expected_left_padding",
+        [
+            case(False, False, "", 0, 8, id="neither_edited_nor_moved"),
+            case(True, False, "EDITED", 7, 1, id="edited"),
+            case(False, True, "MOVED", 7, 1, id="moved"),
+            case(True, True, "EDITED", 7, 1, id="edited_and_moved"),
+        ],
+    )
+    def test_main_view_generates_edit_label(
+        self,
+        mocker,
+        messages_successful_response,
+        is_edited,
+        is_moved,
+        expected_label,
+        expected_label_size,
+        expected_left_padding,
     ):
         messages = messages_successful_response["messages"]
         for message in messages:
-            self.model.index["edited_messages"].add(message["id"])
+            message_ids = {message["id"]}
+            self.model.index["edited_messages"] = message_ids if is_edited else set()
+            self.model.index["moved_messages"] = message_ids if is_moved else set()
             msg_box = MessageBox(message, self.model, message)
             view_components = msg_box.main_view()
 
-            label = view_components[0].original_widget.contents[0]
-            assert label[0].text == "EDITED"
-            assert label[1][1] == 7
+            content_padding = view_components[0]
+            assert content_padding.left == expected_left_padding
+            label = content_padding.original_widget.contents[0]
+            assert label[0].text == expected_label
+            assert label[1][1] == expected_label_size
 
     @pytest.mark.parametrize(
         "to_vary_in_last_message, update_required",

@@ -24,7 +24,7 @@ STREAM_TOPIC_SEPARATOR = "▶"  # BLACK RIGHT-POINTING TRIANGLE, U+25B6 (Geometr
 # Range of block options for consideration: '█', '▓', '▒', '░'
 # FULL BLOCK U+2588, DARK SHADE U+2593, MEDIUM SHADE U+2592, LIGHT SHADE U+2591
 
-# Separator between messages and 'EDITED'
+# Separator between messages and 'EDITED' or 'MOVED'
 MESSAGE_CONTENT_MARKER = "▒"  # MEDIUM SHADE, U+2592 (Block elements)
 
 QUOTED_TEXT_MARKER = "░"  # LIGHT SHADE, U+2591 (Block elements)

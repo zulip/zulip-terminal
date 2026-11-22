@@ -796,18 +796,22 @@ class MessageBox(urwid.Pile):
         )
         self.content.set_text(content)
 
-        index = self.model.index
-        if self.message["id"] in index["edited_messages"] | index["moved_messages"]:
-            edited_label_size = 7
-            left_padding = 1
+        # EDITED takes priority, since content changes are more significant
+        if self.message["id"] in self.model.index["edited_messages"]:
+            edit_label = "EDITED"
+        elif self.message["id"] in self.model.index["moved_messages"]:
+            edit_label = "MOVED"
         else:
-            edited_label_size = 0
-            left_padding = 8
+            edit_label = ""
+
+        # Content is aligned at the same offset, whether or not there is a label
+        edit_label_size = len("EDITED") + 1 if edit_label else 0
+        left_padding = 8 - edit_label_size
 
         wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
-                    (edited_label_size, urwid.Text("EDITED")),
+                    (edit_label_size, urwid.Text(edit_label)),
                     urwid.LineBox(
                         urwid.Columns(
                             [
