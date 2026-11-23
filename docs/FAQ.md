@@ -37,19 +37,14 @@ Feedback on using these or any other implementations are welcome, such as those
 
 ## What Python versions are supported?
 
-Current practice is to pin minimum and maximum python version support.
-
-As a result:
-- the current `main` branch in git supports Python 3.7 to 3.11
+Supported python versions depend on the release:
+- the current `main` branch in git is tested in CI on Python 3.7 to 3.11, but no upper limit is imposed
 - Release 0.7.0 was the last release to support Python 3.6 (maximum 3.10)
 - Release 0.6.0 was the last release to support Python 3.5 (maximum 3.9)
 
-Note the minimum versions of Python are close to or in the unsupported range at
-this time.
+Next releases will shift to supported Python versions.
 
-The next release will include support for Python 3.11; before then we suggest
-installing the
-[latest (git) version](https://github.com/zulip/zulip-terminal/blob/main/README.md#installation).
+Later python releases may have problems, so please report these!
 
 > Until Mid-April 2023 it is possible that installing with a very recent
 > version of Python could lead to an apparently broken installation with a very
@@ -84,6 +79,8 @@ documentation](https://github.com/zulip/zulip-terminal/blob/main/docker/).
 
 For the features that we support, we expect Zulip server versions as far
 back as 2.1.0 to be usable.
+
+This will be boosted substantially in upcoming releases.
 
 > NOTE: You can check your server version by pressing
 > <kbd>meta</kbd><kbd>?</kbd> in the application.
