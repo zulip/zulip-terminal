@@ -1,3 +1,119 @@
+[build-system]
+requires = [
+    "setuptools>=68",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zulip-term"
+dynamic = ["version"]
+description = "Zulip's official terminal client"
+readme = "README.md"
+requires-python = ">=3.7, <3.12"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Zulip Open Source Project", email = "zulip-devel@googlegroups.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Communications :: Chat",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "urwid~=2.1.2",
+    "zulip>=0.8.2,<0.9.0",
+    "urwid_readline>=0.15.1",
+    "beautifulsoup4>=4.13.4",
+    "lxml==4.9.4",
+    "pygments>=2.17.2,<2.18.0",
+    "typing_extensions~=4.5.0",
+    "python-dateutil>=2.8.2",
+    "pytz>=2025",
+    "tzlocal>=5.0,<5.1",
+    "pyperclip>=1.9.0",
+]
+
+[project.scripts]
+zulip-term = "zulipterminal.cli.run:main"
+zulip-term-check-symbols = "zulipterminal.scripts.render_symbols:main"
+
+[project.urls]
+Changelog = "https://github.com/zulip/zulip-terminal/blob/main/CHANGELOG.md"
+FAQs = "https://github.com/zulip/zulip-terminal/blob/main/docs/FAQ.md"
+Issues = "https://github.com/zulip/zulip-terminal/issues"
+"Hot Keys" = "https://github.com/zulip/zulip-terminal/blob/main/docs/hotkeys.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0,<8.0.0",
+    "pytest-mock>=3.10.0,<3.12.0",
+    "pytest-cov>=4.0.0,<5.0.0",
+    "isort~=5.11.0,<5.12.0",
+    "black==23.3.0",
+    "ruff==0.0.267",
+    "codespell[toml]==2.2.5,<2.2.6",
+    "typos>=1.32.0",
+    "lxml-stubs; python_version >= '3.8'",
+    "mypy~=1.8.0; python_version >= '3.8'",
+    "types-beautifulsoup4; python_version >= '3.8'",
+    "types-pygments; python_version >= '3.8'",
+    "types-python-dateutil; python_version >= '3.8'",
+    "types-tzlocal; python_version >= '3.8'",
+    "types-pytz; python_version >= '3.8'",
+    "types-requests; python_version >= '3.8'",
+    "pudb==2022.1.1",
+    "snakeviz>=2.1.1",
+    "gitlint~=0.18.0",
+]
+testing = [
+    "pytest>=7.4.0,<8.0.0",
+    "pytest-mock>=3.10.0,<3.12.0",
+    "pytest-cov>=4.0.0,<5.0.0",
+]
+testing-minimal = [
+    "pytest>=7.4.0,<8.0.0",
+    "pytest-mock>=3.10.0,<3.12.0",
+]
+linting = [
+    "isort~=5.11.0,<5.12.0",
+    "black==23.3.0",
+    "ruff==0.0.267",
+    "codespell[toml]==2.2.5,<2.2.6",
+    "typos>=1.32.0",
+]
+gitlint = [
+    "gitlint~=0.18.0",
+]
+typing = [
+    "lxml-stubs; python_version >= '3.8'",
+    "mypy~=1.8.0; python_version >= '3.8'",
+    "types-beautifulsoup4; python_version >= '3.8'",
+    "types-pygments; python_version >= '3.8'",
+    "types-python-dateutil; python_version >= '3.8'",
+    "types-tzlocal; python_version >= '3.8'",
+    "types-pytz; python_version >= '3.8'",
+    "types-requests; python_version >= '3.8'",
+]
+
+[tool.setuptools]
+zip-safe = true
+
+[tool.setuptools.dynamic]
+version = { attr = "zulipterminal.version.ZT_VERSION" }
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
+
 [tool.black]
 # Default line-length, but use explicit value here since used for isort & ruff
 line-length = 88
@@ -124,6 +240,16 @@ module = [
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+# Dependencies that may include Python 3.8+ syntax in transitive modules
+module = [
+    "packaging.*",
+    "requests.*",
+    "urllib3.*",
+]
+follow_imports = "skip"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 # Tests remaining to be typed
 module = [
     "tests.model.test_model",
@@ -155,6 +281,7 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
+    ".venv",
     "zt_venv",
 ]
 ignore = [
@@ -191,8 +318,6 @@ select = [
     "YTT", # Year TwentyTwenty (flake8-2020), sys.version checks
 ]
 [tool.ruff.per-file-ignores]
-# ANN: We don't consider this worth typing
-"setup.py" = ["ANN"]
 # ANN: These test files are not yet typed
 "tests/model/test_model.py" = ["ANN"]
 "tests/ui/test_ui_tools.py" = ["ANN"]
