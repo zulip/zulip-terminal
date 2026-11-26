@@ -1,3 +1,6 @@
+**NOTE: This has been out of date for some time, particularly now since we have
+transitioned completely from setup.py to pyproject.toml.**
+
 The thrilling process of making a new release has (sadly) been automated. Worry not, we still have a few things to check and a few steps to follow!
 To install the required dependencies for making a release, in the venv activated zulip-terminal directory, run:
 ```
