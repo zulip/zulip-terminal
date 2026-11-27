@@ -1133,7 +1133,10 @@ class PanelSearchBox(ReadlineEdit):
                 self.panel_view.keypress(size, primary_key_for_command("CLEAR_SEARCH"))
         elif is_command_key("EXECUTE_SEARCH", key) and not self.panel_view.empty_search:
             self.panel_view.view.controller.exit_editor_mode()
-            self.set_caption([("filter_results", " Search Results "), " "])
+            search_keys = ", ".join(display_keys_for_command(self.search_command))
+            self.set_caption(
+                [("filter_results", " Search Results "), f" [{search_keys}] "]
+            )
             self.panel_view.set_focus("body")
             if hasattr(self.panel_view, "log"):
                 self.panel_view.body.set_focus(0)
