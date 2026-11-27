@@ -318,6 +318,11 @@ KEY_BINDINGS: Dict[str, KeyBinding] = {
         'help_text': 'Show/hide stream information & modify settings',
         'key_category': 'stream_list',
     },
+    'TOPIC_INFO': {
+        'keys': ['i'],
+        'help_text': 'Show/hide topic information & (un)resolve topic',
+        'key_category': 'topic_list',
+    },
     'STREAM_MEMBERS': {
         'keys': ['m'],
         'help_text': 'Show/hide stream members',
@@ -473,6 +478,7 @@ HELP_CATEGORIES = {
     "msg_actions": "Message actions",
     "stream_list": "Stream list actions",
     "user_list": "User list actions",
+    "topic_list": "Topic list actions",
     "open_compose": "Begin composing a message",
     "compose_box": "Writing a message",
     "editor_navigation": "Editor: Navigation",
