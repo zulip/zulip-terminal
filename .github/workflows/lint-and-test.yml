@@ -200,7 +200,7 @@ jobs:
   isolated-commits:
     runs-on: ubuntu-24.04
     name: Ensure isolated PR commits
-    needs:
+    needs: &lint_and_base_jobs
       - mypy
       - ruff
       - isort
@@ -231,7 +231,7 @@ jobs:
           CHECK="pip install .[linting,testing,typing] && ./tools/lint-all && pytest" ./tools/check-branch FETCH_HEAD
 
   pytest-on-other-platforms:
-    needs: isolated-commits
+    needs: *lint_and_base_jobs
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
       fail-fast: false
