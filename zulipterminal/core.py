@@ -453,8 +453,15 @@ class Controller:
         dots = itertools.cycle(["", ".", "..", "..."])
 
         # Until conversation becomes "inactive" like when a `stop` event is sent
-        while self.active_conversation_info:
-            sender_name = self.active_conversation_info["sender_name"]
+        while True:
+            # The model thread replaces active_conversation_info with {} on a
+            # `stop` event, so test and use the same snapshot: testing the
+            # attribute and then subscripting it again can race a concurrent
+            # reset and crash the loop with a KeyError.
+            conversation_info = self.active_conversation_info
+            if not conversation_info:
+                break
+            sender_name = conversation_info["sender_name"]
             self.view.set_footer_text(
                 [
                     ("footer_contrast", " " + sender_name + " "),
