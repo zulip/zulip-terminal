@@ -75,6 +75,7 @@ STYLES = {
     'task:error'       : (Color.DARK0_HARD,            Color.BRIGHT_RED),
     'task:warning'     : (Color.DARK0_HARD,            Color.NEUTRAL_PURPLE),
     'ui_code'          : (Color.DARK0_HARD,            Color.LIGHT2),
+    'guest_suffix'    : (Color.LIGHT2,               Color.DARK0_HARD),
 }
 
 META = {
