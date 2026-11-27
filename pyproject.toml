@@ -128,7 +128,6 @@ ignore_missing_imports = true
 module = [
     "tests.model.test_model",
     "tests.ui.test_ui_tools",
-    "tests.ui_tools.test_messages",
 ]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
@@ -196,7 +195,6 @@ select = [
 # ANN: These test files are not yet typed
 "tests/model/test_model.py" = ["ANN"]
 "tests/ui/test_ui_tools.py" = ["ANN"]
-"tests/ui_tools/test_messages.py" = ["ANN"]
 # E501: Ignore length in tools for now (and otherwise where noqa specified)
 # T20: Expect print output from CLI from tools
 "tools/*" = ["E501", "T20"]
