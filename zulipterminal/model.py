@@ -1044,7 +1044,7 @@ class Model:
     def _fetch_initial_data(self) -> None:
         # Thread Processes to reduce start time.
         # NOTE: Exceptions do not work well with threads
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures: Dict[str, Future[str]] = {
                 "get_messages": executor.submit(
                     self.get_messages, num_after=10, num_before=30, anchor=None
