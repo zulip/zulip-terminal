@@ -280,6 +280,24 @@ def test_sort_unread_topics(
     assert sort_unread_topics(unread_topics, stream_list) == expected_value
 
 
+def test_sort_unread_topics_by_recency() -> None:
+    unread_topics = {
+        (10, "Old topic"): 1,
+        (10, "Recent topic"): 1,
+        (10, "Middle topic"): 1,
+    }
+    stream_list = [10]
+    topics_by_stream = {
+        10: ["Recent topic", "Middle topic", "Old topic"],
+    }
+
+    assert sort_unread_topics(unread_topics, stream_list, topics_by_stream) == [
+        (10, "Recent topic"),
+        (10, "Middle topic"),
+        (10, "Old topic"),
+    ]
+
+
 @pytest.mark.parametrize(
     "muted_streams, muted_topics, vary_in_unreads",
     [

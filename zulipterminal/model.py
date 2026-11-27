@@ -981,9 +981,26 @@ class Model:
         left_panel_stream_list = [
             stream["id"] for stream in (self.pinned_streams + self.unpinned_streams)
         ]
+        unread_stream_ids = {
+            stream_id for stream_id, _ in self.unread_counts["unread_topics"]
+        }
+        topic_stream_ids = [
+            stream_id
+            for stream_id in left_panel_stream_list
+            if stream_id in unread_stream_ids
+        ]
+        if current_topic is not None and current_topic[0] not in topic_stream_ids:
+            topic_stream_ids.append(current_topic[0])
+
+        topics_by_stream = {
+            stream_id: self.topics_in_stream(stream_id)
+            for stream_id in topic_stream_ids
+        }
+
         unread_topics = sort_unread_topics(
             self.unread_counts["unread_topics"],
             left_panel_stream_list,
+            topics_by_stream,
         )
         next_topic = False
         stream_start: Optional[Tuple[int, str]] = None
@@ -997,6 +1014,7 @@ class Model:
             unread_topics = sort_unread_topics(
                 {**self.unread_counts["unread_topics"], current_topic: 0},
                 left_panel_stream_list,
+                topics_by_stream,
             )
         # loop over unread_topics list twice for the case that last_unread_topic was
         # the last valid unread_topic in unread_topics list.
