@@ -1,13 +1,16 @@
 from collections import OrderedDict, defaultdict
 from datetime import date
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 from unittest.mock import patch
 
 import pytest
 import pytz
 from bs4 import BeautifulSoup
 from pytest import param as case
-from urwid import Columns, Divider, Padding, Text
+from pytest_mock import MockerFixture
+from urwid import Columns, Divider, Padding, Text, Widget
 
+from zulipterminal.api_types import Message, MessageType
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
 from zulipterminal.config.symbols import (
     ALL_MESSAGES_MARKER,
@@ -20,7 +23,9 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
+from zulipterminal.helper import Index
 from zulipterminal.ui_tools.messages import MessageBox
+from zulipterminal.urwid_types import urwid_Size
 
 
 MODULE = "zulipterminal.ui_tools.messages"
@@ -31,7 +36,9 @@ SERVER_URL = "https://chat.zulip.zulip"
 
 class TestMessageBox:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker, initial_index):
+    def mock_external_classes(
+        self, mocker: MockerFixture, initial_index: Index
+    ) -> None:
         self.model = mocker.MagicMock()
         self.model.index = initial_index
         self.model.stream_access_type.return_value = "public"
@@ -43,9 +50,14 @@ class TestMessageBox:
             ("private", [("email", ""), ("user_id", None)]),
         ],
     )
-    def test_init(self, mocker, message_type, set_fields):
+    def test_init(
+        self,
+        mocker: MockerFixture,
+        message_type: MessageType,
+        set_fields: List[Tuple[str, Optional[Union[str, int]]]],
+    ) -> None:
         mocker.patch.object(MessageBox, "main_view")
-        message = dict(
+        message: Message = dict(
             display_recipient=[
                 {"id": 7, "email": "boo@zulip.com", "full_name": "Boo is awesome"}
             ],
@@ -66,14 +78,14 @@ class TestMessageBox:
         assert msg_box.message_links == OrderedDict()
         assert msg_box.time_mentions == list()
 
-    def test_init_fails_with_bad_message_type(self):
-        message = dict(type="BLAH")
+    def test_init_fails_with_bad_message_type(self) -> None:
+        message: Any = dict(type="BLAH")
 
         with pytest.raises(RuntimeError):
             MessageBox(message, self.model, None)
 
-    def test_private_message_to_self(self, mocker):
-        message = dict(
+    def test_private_message_to_self(self, mocker: MockerFixture) -> None:
+        message: Message = dict(
             type="private",
             display_recipient=[
                 {"full_name": "Foo Foo", "email": "foo@zulip.com", "id": None}
@@ -85,14 +97,14 @@ class TestMessageBox:
             timestamp=150989984,
         )
         self.model.user_email = "foo@zulip.com"
-        mocker.patch(
+        is_self_pm = mocker.patch(
             MODULE + ".MessageBox._is_private_message_to_self", return_value=True
         )
         mocker.patch.object(MessageBox, "main_view")
         msg_box = MessageBox(message, self.model, None)
 
         assert msg_box.recipient_emails == ["foo@zulip.com"]
-        msg_box._is_private_message_to_self.assert_called_once_with()
+        is_self_pm.assert_called_once_with()
 
     @pytest.mark.parametrize(
         "content, expected_markup",
@@ -672,7 +684,12 @@ class TestMessageBox:
             ),
         ],
     )
-    def test_soup2markup(self, content, expected_markup, mocker):
+    def test_soup2markup(
+        self,
+        content: str,
+        expected_markup: List[Any],
+        mocker: MockerFixture,
+    ) -> None:
         mocker.patch(
             MODULE + ".get_localzone", return_value=pytz.timezone("Asia/Kolkata")
         )
@@ -754,7 +771,12 @@ class TestMessageBox:
             ),
         ],
     )
-    def test_main_view(self, mocker, message, last_message):
+    def test_main_view(
+        self,
+        mocker: MockerFixture,
+        message: Message,
+        last_message: Optional[Message],
+    ) -> None:
         self.model.stream_dict = {
             5: {
                 "color": "#bd6",
@@ -789,7 +811,13 @@ class TestMessageBox:
             ("<p>/me is excited!</p>", False),
         ],
     )
-    def test_main_view_renders_slash_me(self, mocker, message, content, is_me_message):
+    def test_main_view_renders_slash_me(
+        self,
+        mocker: MockerFixture,
+        message: Message,
+        content: str,
+        is_me_message: bool,
+    ) -> None:
         mocker.patch(MODULE + ".urwid.Text")
         message["content"] = content
         message["is_me_message"] = is_me_message
@@ -832,14 +860,17 @@ class TestMessageBox:
         ],
     )
     def test_main_view_generates_stream_header(
-        self, mocker, message, to_vary_in_last_message
-    ):
+        self,
+        mocker: MockerFixture,
+        message: Message,
+        to_vary_in_last_message: Dict[str, Any],
+    ) -> None:
         self.model.stream_dict = {
             5: {
                 "color": "#bd6",
             },
         }
-        last_message = dict(message, **to_vary_in_last_message)
+        last_message = cast(Message, dict(message, **to_vary_in_last_message))
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 3
@@ -889,9 +920,12 @@ class TestMessageBox:
         ],
     )
     def test_main_view_generates_PM_header(
-        self, mocker, message, to_vary_in_last_message
-    ):
-        last_message = dict(message, **to_vary_in_last_message)
+        self,
+        mocker: MockerFixture,
+        message: Message,
+        to_vary_in_last_message: Dict[str, Any],
+    ) -> None:
+        last_message = cast(Message, dict(message, **to_vary_in_last_message))
         msg_box = MessageBox(message, self.model, last_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 3
@@ -1020,13 +1054,13 @@ class TestMessageBox:
     )
     def test_msg_generates_search_and_header_bar(
         self,
-        mocker,
-        messages_successful_response,
-        msg_type,
-        msg_narrow,
-        assert_header_bar,
-        assert_search_bar,
-    ):
+        mocker: MockerFixture,
+        messages_successful_response: Dict[str, Any],
+        msg_type: int,
+        msg_narrow: List[List[str]],
+        assert_header_bar: str,
+        assert_search_bar: Union[str, Tuple[str, Tuple[str, str]]],
+    ) -> None:
         self.model.stream_dict = {
             205: {
                 "color": "#bd6",
@@ -1087,13 +1121,13 @@ class TestMessageBox:
     )
     def test_main_view_content_header_without_header(
         self,
-        mocker,
-        message,
-        expected_header,
-        current_year,
-        starred_msg,
-        to_vary_in_last_message,
-    ):
+        mocker: MockerFixture,
+        message: Message,
+        expected_header: List[str],
+        current_year: int,
+        starred_msg: str,
+        to_vary_in_last_message: Dict[str, Any],
+    ) -> None:
         mocked_date = mocker.patch(MODULE + ".date")
         mocked_date.today.return_value = date(current_year, 1, 1)
         mocked_date.side_effect = lambda *args, **kw: date(*args, **kw)
@@ -1112,9 +1146,9 @@ class TestMessageBox:
             msg: ({"flags": ["starred"]} if msg == starred_msg else {})
             for msg in ("this", "last")
         }
-        this_msg = dict(message, **stars["this"])
+        this_msg = cast(Message, dict(message, **stars["this"]))
         all_to_vary = dict(to_vary_in_last_message, **stars["last"])
-        last_msg = dict(message, **all_to_vary)
+        last_msg = cast(Message, dict(message, **all_to_vary))
 
         msg_box = MessageBox(this_msg, self.model, last_msg)
 
@@ -1148,18 +1182,21 @@ class TestMessageBox:
         ],
     )
     def test_main_view_compact_output(
-        self, mocker, message_fixture, to_vary_in_each_message
-    ):
+        self,
+        mocker: MockerFixture,
+        message_fixture: Message,
+        to_vary_in_each_message: Dict[str, Any],
+    ) -> None:
         message_fixture.update({"id": 4})
-        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        varied_message = cast(Message, dict(message_fixture, **to_vary_in_each_message))
         msg_box = MessageBox(varied_message, self.model, varied_message)
         view_components = msg_box.main_view()
         assert len(view_components) == 1
         assert isinstance(view_components[0], Padding)
 
     def test_main_view_generates_EDITED_label(
-        self, mocker, messages_successful_response
-    ):
+        self, mocker: MockerFixture, messages_successful_response: Dict[str, Any]
+    ) -> None:
         messages = messages_successful_response["messages"]
         for message in messages:
             self.model.index["edited_messages"].add(message["id"])
@@ -1183,12 +1220,12 @@ class TestMessageBox:
     )
     def test_update_message_author_status(
         self,
-        message_fixture,
-        update_required,
-        to_vary_in_last_message,
-    ):
+        message_fixture: Message,
+        update_required: bool,
+        to_vary_in_last_message: Dict[str, Any],
+    ) -> None:
         message = message_fixture
-        last_msg = dict(message, **to_vary_in_last_message)
+        last_msg = cast(Message, dict(message, **to_vary_in_last_message))
 
         msg_box = MessageBox(message, self.model, last_msg)
 
@@ -1217,8 +1254,14 @@ class TestMessageBox:
         ],
     )
     def test_keypress_STREAM_MESSAGE(
-        self, mocker, msg_box, widget_size, narrow, expect_to_prefill, key
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_box: MessageBox,
+        widget_size: Callable[[Widget], urwid_Size],
+        narrow: List[List[str]],
+        expect_to_prefill: bool,
+        key: str,
+    ) -> None:
         write_box = msg_box.model.controller.view.write_box
         msg_box.model.narrow = narrow
         size = widget_size(msg_box)
@@ -1377,20 +1420,20 @@ class TestMessageBox:
     )
     def test_keypress_EDIT_MESSAGE(
         self,
-        mocker,
-        message_fixture,
-        widget_size,
-        to_vary_in_each_message,
-        realm_editing_allowed,
-        msg_body_edit_limit,
-        expect_msg_body_edit_enabled,
-        expect_editing_to_succeed,
-        expect_footer_text,
-        key,
-    ):
+        mocker: MockerFixture,
+        message_fixture: Message,
+        widget_size: Callable[[Widget], urwid_Size],
+        to_vary_in_each_message: Dict[str, Any],
+        realm_editing_allowed: bool,
+        msg_body_edit_limit: Optional[int],
+        expect_msg_body_edit_enabled: Dict[str, Optional[bool]],
+        expect_editing_to_succeed: Dict[str, bool],
+        expect_footer_text: Dict[str, Optional[str]],
+        key: str,
+    ) -> None:
         if message_fixture["type"] == "private":
             to_vary_in_each_message["subject"] = ""
-        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        varied_message = cast(Message, dict(message_fixture, **to_vary_in_each_message))
         message_type = varied_message["type"]
         msg_box = MessageBox(varied_message, self.model, message_fixture)
         size = widget_size(msg_box)
@@ -1399,8 +1442,9 @@ class TestMessageBox:
             "realm_allow_message_editing": realm_editing_allowed,
             "realm_message_content_edit_limit_seconds": msg_body_edit_limit,
         }
-        msg_box.model.fetch_raw_message_content.return_value = "Edit this message"
-        write_box = msg_box.model.controller.view.write_box
+        model: Any = msg_box.model
+        model.fetch_raw_message_content.return_value = "Edit this message"
+        write_box: Any = model.controller.view.write_box
         write_box.msg_edit_state = None
         write_box.msg_body_edit_enabled = None
         report_error = msg_box.model.controller.report_error
@@ -1410,8 +1454,9 @@ class TestMessageBox:
         msg_box.keypress(size, key)
 
         if expect_editing_to_succeed[message_type]:
-            assert write_box.msg_edit_state.message_id == varied_message["id"]
-            assert write_box.msg_edit_state.old_topic == varied_message["subject"]
+            edit_state: Any = write_box.msg_edit_state
+            assert edit_state.message_id == varied_message["id"]
+            assert edit_state.old_topic == varied_message["subject"]
             write_box.msg_write_box.set_edit_text.assert_called_once_with(
                 "Edit this message"
             )
@@ -1586,7 +1631,9 @@ class TestMessageBox:
             # fmt: on
         ],
     )
-    def test_transform_content(self, mocker, raw_html, expected_content):
+    def test_transform_content(
+        self, mocker: MockerFixture, raw_html: str, expected_content: str
+    ) -> None:
         expected_content = expected_content.replace("{}", QUOTED_TEXT_MARKER)
 
         content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
@@ -1734,13 +1781,13 @@ class TestMessageBox:
     )
     def test_reactions_view(
         self,
-        message_fixture,
-        to_vary_in_each_message,
-        expected_text,
-        expected_attributes,
-    ):
+        message_fixture: Message,
+        to_vary_in_each_message: Dict[str, Any],
+        expected_text: str,
+        expected_attributes: List[Tuple[str, int]],
+    ) -> None:
         self.model.user_id = 1
-        varied_message = dict(message_fixture, **to_vary_in_each_message)
+        varied_message = cast(Message, dict(message_fixture, **to_vary_in_each_message))
         msg_box = MessageBox(varied_message, self.model, None)
         reactions = to_vary_in_each_message["reactions"]
 
@@ -1750,7 +1797,7 @@ class TestMessageBox:
             6: {"full_name": "Shivam"},
         }
 
-        def mock_get_user_id(reaction):
+        def mock_get_user_id(reaction: Dict[str, Any]) -> int:
             if "user_id" in reaction:
                 return reaction["user_id"]
             return reaction["user"]["id"]
@@ -1762,6 +1809,7 @@ class TestMessageBox:
         ), patch.object(self.model, "_all_users_by_id", mock_all_users_by_id):
             reactions_view = msg_box.reactions_view(reactions)
 
+            assert reactions_view is not None
             assert reactions_view.original_widget.text == expected_text
             assert reactions_view.original_widget.attrib == expected_attributes
 
@@ -1858,8 +1906,12 @@ class TestMessageBox:
         ],
     )
     def test_footlinks_view(
-        self, message_links, expected_text, expected_attrib, expected_footlinks_width
-    ):
+        self,
+        message_links: "OrderedDict[str, Tuple[str, int, bool]]",
+        expected_text: Optional[str],
+        expected_attrib: Optional[List[Tuple[Optional[str], int]]],
+        expected_footlinks_width: Optional[int],
+    ) -> None:
         footlinks, footlinks_width = MessageBox.footlinks_view(
             message_links,
             maximum_footlinks=3,
@@ -1868,6 +1920,7 @@ class TestMessageBox:
         )
 
         if expected_text:
+            assert footlinks is not None
             assert footlinks.original_widget.text == expected_text
             assert footlinks.original_widget.attrib == expected_attrib
             assert footlinks_width == expected_footlinks_width
@@ -1883,7 +1936,9 @@ class TestMessageBox:
             (3, Padding),
         ],
     )
-    def test_footlinks_limit(self, maximum_footlinks, expected_instance):
+    def test_footlinks_limit(
+        self, maximum_footlinks: int, expected_instance: Any
+    ) -> None:
         message_links = OrderedDict(
             [
                 ("https://github.com/zulip/zulip-terminal", ("ZT", 1, True)),
@@ -1905,20 +1960,25 @@ class TestMessageBox:
         ids=lambda param: f"left_click-key:{param}",
     )
     def test_mouse_event_left_click(
-        self, mocker, msg_box, key, widget_size, compose_box_is_open
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_box: MessageBox,
+        key: str,
+        widget_size: Callable[[Widget], urwid_Size],
+        compose_box_is_open: bool,
+    ) -> None:
         expected_keypress = primary_key_for_command("ACTIVATE_BUTTON")
         size = widget_size(msg_box)
         col = 1
         row = 1
         focus = mocker.Mock()
-        mocker.patch.object(msg_box, "keypress")
+        mock_keypress = mocker.patch.object(msg_box, "keypress")
         msg_box.model = mocker.Mock()
         msg_box.model.controller.is_in_editor_mode.return_value = compose_box_is_open
 
         msg_box.mouse_event(size, "mouse press", 1, col, row, focus)
 
         if compose_box_is_open:
-            msg_box.keypress.assert_not_called()
+            mock_keypress.assert_not_called()
         else:
-            msg_box.keypress.assert_called_once_with(size, expected_keypress)
+            mock_keypress.assert_called_once_with(size, expected_keypress)
