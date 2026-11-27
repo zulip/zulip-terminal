@@ -27,6 +27,7 @@ from zulipterminal.config.ui_mappings import StreamAccessType
 from zulipterminal.helper import Index, MinimalUserData
 from zulipterminal.ui_tools.boxes import (
     MAX_MESSAGE_LENGTH_CONFIRMATION_POPUP,
+    MessageSearchBox,
     PanelSearchBox,
     WriteBox,
     _MessageEditState,
@@ -1834,6 +1835,21 @@ class TestWriteBox:
             write_box.private_box_view(recipient_user_ids=[1])
 
         assert len(write_box.header_write_box.widget_list) == expected_box_size
+
+
+class TestMessageSearchBox:
+    def test_recipient_bar_visibility(self, mocker: MockerFixture) -> None:
+        search_box = MessageSearchBox(mocker.Mock())
+        original_recipient_item = search_box.contents[1]
+
+        search_box.set_recipient_bar_visible(False)
+        search_box.set_recipient_bar_visible(False)
+        assert len(search_box.contents) == 1
+
+        search_box.set_recipient_bar_visible(True)
+        search_box.set_recipient_bar_visible(True)
+        assert len(search_box.contents) == 2
+        assert search_box.contents[1] == original_recipient_item
 
 
 class TestPanelSearchBox:

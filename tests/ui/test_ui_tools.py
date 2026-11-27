@@ -387,12 +387,51 @@ class TestMessageView:
         assert msg_view.model.index["messages"][1]["flags"] == ["read"]
         self.model.mark_message_ids_as_read.assert_called_once_with([1])
 
-    def test_message_calls_search_and_header_bar(self, mocker, msg_view):
+    @pytest.mark.parametrize("has_fixed_recipients", [False, True])
+    def test_message_calls_search_and_header_bar(
+        self, mocker, msg_view, has_fixed_recipients
+    ):
         msg_w = mocker.MagicMock()
         msg_w.original_widget.message = {"id": 1}
+        msg_w.original_widget.has_fixed_recipients.return_value = has_fixed_recipients
         msg_view.update_search_box_narrow(msg_w.original_widget)
         msg_w.original_widget.recipient_header.assert_called_once_with()
         msg_w.original_widget.top_search_bar.assert_called_once_with()
+        self.model.controller.view.search_box.set_recipient_bar_visible.assert_called_once_with(
+            not has_fixed_recipients
+        )
+
+    def test_recipient_bar_restored_across_narrows(self, mocker, msg_view, msg_box):
+        from zulipterminal.ui_tools.boxes import MessageSearchBox
+
+        search_box = MessageSearchBox(mocker.Mock())
+        model = msg_view.model
+        model.controller.view.search_box = search_box
+        model.stream_dict = {msg_box.stream_id: {"color": "#bd6"}}
+        model.stream_access_type.return_value = "public"
+        model.is_search_narrow.return_value = False
+        msg_box.model = model
+
+        topic = [
+            ["stream", msg_box.stream_name],
+            ["topic", msg_box.topic_name],
+        ]
+        channel = [["stream", msg_box.stream_name]]
+        group_dm = [["pm-with", "boo@zulip.com, bar@zulip.com"]]
+
+        for narrow, visible in [
+            (topic, False),
+            (channel, True),
+            (topic, False),
+            (channel, True),
+            (group_dm, False),
+            (channel, True),
+        ]:
+            model.narrow = narrow
+            msg_view.update_search_box_narrow(msg_box)
+            assert len(search_box.contents) == (2 if visible else 1)
+            if visible:
+                assert search_box.contents[1][0] is search_box.recipient_bar
 
     def test_read_message_no_msgw(self, mocker, msg_view):
         # MSG_W is NONE CASE
