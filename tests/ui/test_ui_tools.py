@@ -1,8 +1,10 @@
 from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
 import urwid
 from pytest import param as case
+from pytest_mock import MockerFixture
 from urwid import Divider
 
 from zulipterminal.config.keys import keys_for_command, primary_key_for_command
@@ -21,6 +23,7 @@ from zulipterminal.ui_tools.views import (
     TopicsView,
     UsersView,
 )
+from zulipterminal.urwid_types import urwid_Size
 
 
 SUBDIR = "zulipterminal.ui_tools"
@@ -31,7 +34,7 @@ MIDCOLVIEW = VIEWS + ".MiddleColumnView"
 
 class TestModListWalker:
     @pytest.fixture
-    def mod_walker(self, mocker):
+    def mod_walker(self, mocker: MockerFixture) -> ModListWalker:
         read_message = mocker.Mock(spec=lambda: None)
         return ModListWalker(contents=[list(range(1))], action=read_message)
 
@@ -42,32 +45,38 @@ class TestModListWalker:
             (0, 0),
         ],
     )
-    def test_extend(self, num_items, focus_position, mod_walker, mocker):
+    def test_extend(
+        self,
+        num_items: int,
+        focus_position: int,
+        mod_walker: ModListWalker,
+        mocker: MockerFixture,
+    ) -> None:
         items = list(range(num_items))
         mocker.patch.object(mod_walker, "_set_focus")
         mod_walker.extend(items)
-        mod_walker._set_focus.assert_called_once_with(focus_position)
+        mod_walker._set_focus.assert_called_once_with(focus_position)  # type: ignore[attr-defined]
 
-    def test__set_focus(self, mod_walker, mocker):
-        mod_walker._action.assert_not_called()
+    def test__set_focus(self, mod_walker: ModListWalker, mocker: MockerFixture) -> None:
+        mod_walker._action.assert_not_called()  # type: ignore[attr-defined]
         mod_walker._set_focus(0)
-        mod_walker._action.assert_called_once_with()
+        mod_walker._action.assert_called_once_with()  # type: ignore[attr-defined]
 
-    def test_set_focus(self, mod_walker, mocker):
-        mod_walker._action.assert_not_called()
+    def test_set_focus(self, mod_walker: ModListWalker, mocker: MockerFixture) -> None:
+        mod_walker._action.assert_not_called()  # type: ignore[attr-defined]
         mod_walker.set_focus(0)
-        mod_walker._action.assert_called_once_with()
+        mod_walker._action.assert_called_once_with()  # type: ignore[attr-defined]
 
 
 class TestMessageView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.model = mocker.MagicMock()
         self.view = mocker.Mock()
         self.urwid = mocker.patch(VIEWS + ".urwid")
 
     @pytest.fixture
-    def msg_view(self, mocker, msg_box):
+    def msg_view(self, mocker: MockerFixture, msg_box: Any) -> MessageView:
         mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         mocker.patch(MESSAGEVIEW + ".read_message")
         mocker.patch(MESSAGEVIEW + ".set_focus")
@@ -76,7 +85,9 @@ class TestMessageView:
         msg_view.body = mocker.Mock()
         return msg_view
 
-    def test_init(self, mocker, msg_view, msg_box):
+    def test_init(
+        self, mocker: MockerFixture, msg_view: MessageView, msg_box: Any
+    ) -> None:
         assert msg_view.model == self.model
         msg_view.set_focus.assert_called_once_with(0)
         assert msg_view.old_loading is False
@@ -85,7 +96,12 @@ class TestMessageView:
     @pytest.mark.parametrize(
         "narrow_focus_pos, expected_focus_msg", [(None, 1), (0, 0)]
     )
-    def test_main_view(self, mocker, narrow_focus_pos, expected_focus_msg):
+    def test_main_view(
+        self,
+        mocker: MockerFixture,
+        narrow_focus_pos: Any,
+        expected_focus_msg: int,
+    ) -> None:
         mocker.patch(MESSAGEVIEW + ".read_message")
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(MESSAGEVIEW + ".set_focus")
@@ -113,8 +129,12 @@ class TestMessageView:
         ],
     )
     def test_load_old_messages_empty_log(
-        self, mocker, msg_view, ids_in_narrow, messages_fetched
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        ids_in_narrow: Any,
+        messages_fetched: Any,
+    ) -> None:
         # Expand parameters to use in test
         new_msg_ids = set(messages_fetched.keys())
         new_msg_widgets = list(messages_fetched.values())
@@ -129,7 +149,7 @@ class TestMessageView:
             VIEWS + ".create_msg_box_list", return_value=new_msg_widgets
         )
         # Specific to this version of the test
-        msg_view.log = []
+        msg_view.log = []  # type: ignore[assignment]
 
         msg_view.load_old_messages(0)
 
@@ -162,8 +182,13 @@ class TestMessageView:
         ],
     )
     def test_load_old_messages_mocked_log(
-        self, mocker, msg_view, top_id_in_narrow, other_ids_in_narrow, messages_fetched
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        top_id_in_narrow: int,
+        other_ids_in_narrow: Any,
+        messages_fetched: Any,
+    ) -> None:
         # Expand parameters to use in test
         new_msg_ids = set(messages_fetched.keys())
         new_msg_widgets = list(messages_fetched.values())
@@ -187,7 +212,7 @@ class TestMessageView:
             return_value=(new_msg_widgets + [top_widget]),
         )
         initial_log = [top_widget] + len(other_ids_in_narrow) * ["existing"]
-        msg_view.log = initial_log[:]
+        msg_view.log = initial_log[:]  # type: ignore[assignment]
 
         msg_view.load_old_messages(0)
 
@@ -212,7 +237,9 @@ class TestMessageView:
             ({0}),
         ],
     )
-    def test_load_new_messages_empty_log(self, mocker, msg_view, ids_in_narrow):
+    def test_load_new_messages_empty_log(
+        self, mocker: MockerFixture, msg_view: MessageView, ids_in_narrow: Any
+    ) -> None:
         mocker.patch.object(
             msg_view.model,
             "get_message_ids_in_current_narrow",
@@ -221,7 +248,7 @@ class TestMessageView:
         create_msg_box_list = mocker.patch(
             VIEWS + ".create_msg_box_list", return_value=["M1", "M2"]
         )
-        msg_view.log = []
+        msg_view.log = []  # type: ignore[assignment]
 
         msg_view.load_new_messages(0)
 
@@ -242,7 +269,9 @@ class TestMessageView:
             ({0}),
         ],
     )
-    def test_load_new_messages_mocked_log(self, mocker, msg_view, ids_in_narrow):
+    def test_load_new_messages_mocked_log(
+        self, mocker: MockerFixture, msg_view: MessageView, ids_in_narrow: Any
+    ) -> None:
         mocker.patch.object(
             msg_view.model,
             "get_message_ids_in_current_narrow",
@@ -251,7 +280,7 @@ class TestMessageView:
         create_msg_box_list = mocker.patch(
             VIEWS + ".create_msg_box_list", return_value=["M1", "M2"]
         )
-        msg_view.log = [mocker.Mock()]
+        msg_view.log = [mocker.Mock()]  # type: ignore[assignment]
 
         msg_view.load_new_messages(0)
 
@@ -266,15 +295,27 @@ class TestMessageView:
             num_before=0, num_after=30, anchor=0
         )
 
-    def test_mouse_event(self, mocker, msg_view, mouse_scroll_event, widget_size):
+    def test_mouse_event(
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        mouse_scroll_event: Tuple[Any, ...],
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         event, button, keypress = mouse_scroll_event
         mocker.patch.object(msg_view, "keypress")
         size = widget_size(msg_view)
         msg_view.mouse_event(size, event, button, 0, 0, mocker.Mock())
-        msg_view.keypress.assert_called_once_with(size, keypress)
+        msg_view.keypress.assert_called_once_with(size, keypress)  # type: ignore[attr-defined]
 
     @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
-    def test_keypress_GO_DOWN(self, mocker, msg_view, key, widget_size):
+    def test_keypress_GO_DOWN(
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(msg_view)
         msg_view.new_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
@@ -288,8 +329,13 @@ class TestMessageView:
     @pytest.mark.parametrize("view_is_focused", [True, False])
     @pytest.mark.parametrize("key", keys_for_command("GO_DOWN"))
     def test_keypress_GO_DOWN_exception(
-        self, mocker, msg_view, key, widget_size, view_is_focused
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        view_is_focused: bool,
+    ) -> None:
         size = widget_size(msg_view)
         msg_view.new_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
@@ -305,15 +351,21 @@ class TestMessageView:
         return_value = msg_view.keypress(size, key)
 
         if view_is_focused:
-            msg_view.load_new_messages.assert_called_once_with(
+            msg_view.load_new_messages.assert_called_once_with(  # type: ignore[attr-defined]
                 msg_view.focus.original_widget.message["id"],
             )
         else:
-            msg_view.load_new_messages.assert_not_called()
+            msg_view.load_new_messages.assert_not_called()  # type: ignore[attr-defined]
         assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
-    def test_keypress_GO_UP(self, mocker, msg_view, key, widget_size):
+    def test_keypress_GO_UP(
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(msg_view)
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
         mocker.patch(MESSAGEVIEW + ".set_focus_valign")
@@ -327,8 +379,13 @@ class TestMessageView:
     @pytest.mark.parametrize("view_is_focused", [True, False])
     @pytest.mark.parametrize("key", keys_for_command("GO_UP"))
     def test_keypress_GO_UP_exception(
-        self, mocker, msg_view, key, widget_size, view_is_focused
-    ):
+        self,
+        mocker: MockerFixture,
+        msg_view: MessageView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        view_is_focused: bool,
+    ) -> None:
         size = widget_size(msg_view)
         msg_view.old_loading = False
         mocker.patch(MESSAGEVIEW + ".focus_position", return_value=0)
@@ -344,14 +401,14 @@ class TestMessageView:
         return_value = msg_view.keypress(size, key)
 
         if view_is_focused:
-            msg_view.load_old_messages.assert_called_once_with(
+            msg_view.load_old_messages.assert_called_once_with(  # type: ignore[attr-defined]
                 msg_view.focus.original_widget.message["id"],
             )
         else:
-            msg_view.load_old_messages.assert_not_called()
+            msg_view.load_old_messages.assert_not_called()  # type: ignore[attr-defined]
         assert return_value == key
 
-    def test_read_message(self, mocker, msg_box):
+    def test_read_message(self, mocker: MockerFixture, msg_box: Any) -> None:
         mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         self.urwid.SimpleFocusListWalker.return_value = mocker.Mock()
         mocker.patch(MESSAGEVIEW + ".set_focus")
@@ -381,20 +438,24 @@ class TestMessageView:
         mocker.patch(MESSAGEVIEW + ".focus_position")
         msg_view.focus_position = 1
         msg_view.model.controller.view.body.focus_col = 1
-        msg_view.log = list(msg_view.model.index["messages"])
+        msg_view.log = list(msg_view.model.index["messages"])  # type: ignore[assignment]
         msg_view.read_message()
-        assert msg_view.update_search_box_narrow.called
+        assert msg_view.update_search_box_narrow.called  # type: ignore[attr-defined]
         assert msg_view.model.index["messages"][1]["flags"] == ["read"]
         self.model.mark_message_ids_as_read.assert_called_once_with([1])
 
-    def test_message_calls_search_and_header_bar(self, mocker, msg_view):
+    def test_message_calls_search_and_header_bar(
+        self, mocker: MockerFixture, msg_view: MessageView
+    ) -> None:
         msg_w = mocker.MagicMock()
         msg_w.original_widget.message = {"id": 1}
         msg_view.update_search_box_narrow(msg_w.original_widget)
         msg_w.original_widget.recipient_header.assert_called_once_with()
         msg_w.original_widget.top_search_bar.assert_called_once_with()
 
-    def test_read_message_no_msgw(self, mocker, msg_view):
+    def test_read_message_no_msgw(
+        self, mocker: MockerFixture, msg_view: MessageView
+    ) -> None:
         # MSG_W is NONE CASE
         msg_view.body.get_focus.return_value = (None, 0)
 
@@ -402,7 +463,9 @@ class TestMessageView:
 
         self.model.mark_message_ids_as_read.assert_not_called()
 
-    def test_read_message_in_explore_mode(self, mocker, msg_box):
+    def test_read_message_in_explore_mode(
+        self, mocker: MockerFixture, msg_box: Any
+    ) -> None:
         mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         mocker.patch(MESSAGEVIEW + ".set_focus")
         mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
@@ -415,10 +478,12 @@ class TestMessageView:
 
         msg_view.read_message()
 
-        assert msg_view.update_search_box_narrow.called
+        assert msg_view.update_search_box_narrow.called  # type: ignore[attr-defined]
         assert not self.model.mark_message_ids_as_read.called
 
-    def test_read_message_search_narrow(self, mocker, msg_box):
+    def test_read_message_search_narrow(
+        self, mocker: MockerFixture, msg_box: Any
+    ) -> None:
         mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         mocker.patch(MESSAGEVIEW + ".set_focus")
         mocker.patch(MESSAGEVIEW + ".update_search_box_narrow")
@@ -432,20 +497,24 @@ class TestMessageView:
 
         msg_view.read_message()
 
-        assert msg_view.update_search_box_narrow.called
+        assert msg_view.update_search_box_narrow.called  # type: ignore[attr-defined]
         assert not self.model.mark_message_ids_as_read.called
 
     def test_read_message_last_unread_message_focused(
-        self, mocker, message_fixture, empty_index, msg_box
-    ):
+        self,
+        mocker: MockerFixture,
+        message_fixture: Any,
+        empty_index: Any,
+        msg_box: Any,
+    ) -> None:
         mocker.patch(MESSAGEVIEW + ".main_view", return_value=[msg_box])
         mocker.patch(MESSAGEVIEW + ".set_focus")
         msg_view = MessageView(self.model, self.view)
         msg_view.model.is_search_narrow = lambda: False
         msg_view.model.controller.in_explore_mode = False
-        msg_view.log = [0, 1]
+        msg_view.log = [0, 1]  # type: ignore[assignment]
         msg_view.body = mocker.Mock()
-        msg_view.update_search_box_narrow = mocker.Mock()
+        msg_view.update_search_box_narrow = mocker.Mock()  # type: ignore[method-assign]
 
         self.model.controller.view = mocker.Mock()
         self.model.controller.view.body.focus_col = 0
@@ -464,7 +533,7 @@ class TestMessageView:
 
 
 class TestStreamsViewDivider:
-    def test_init(self):
+    def test_init(self) -> None:
         streams_view_divider = StreamsViewDivider()
 
         assert isinstance(streams_view_divider, Divider)
@@ -474,7 +543,7 @@ class TestStreamsViewDivider:
 
 class TestStreamsView:
     @pytest.fixture
-    def stream_view(self, mocker):
+    def stream_view(self, mocker: MockerFixture) -> StreamsView:
         mocker.patch(VIEWS + ".threading.Lock")
         self.view = mocker.Mock()
         self.stream_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
@@ -483,10 +552,10 @@ class TestStreamsView:
         self.streams_btn_list = [stream_btn]
         return StreamsView(self.streams_btn_list, view=self.view)
 
-    def test_init(self, mocker, stream_view):
+    def test_init(self, mocker: MockerFixture, stream_view: StreamsView) -> None:
         assert stream_view.view == self.view
         assert stream_view.streams_btn_list == self.streams_btn_list
-        assert stream_view.stream_search_box
+        assert stream_view.stream_search_box is not None
         self.stream_search_box.assert_called_once_with(
             stream_view, "SEARCH_STREAMS", stream_view.update_streams
         )
@@ -510,7 +579,14 @@ class TestStreamsView:
             ("baar", "search error", []),
         ],
     )
-    def test_update_streams(self, mocker, stream_view, new_text, expected_log, to_pin):
+    def test_update_streams(
+        self,
+        mocker: MockerFixture,
+        stream_view: StreamsView,
+        new_text: str,
+        expected_log: Any,
+        to_pin: List[str],
+    ) -> None:
         stream_names = ["FOO", "FOOBAR", "foo", "fan", "boo", "BOO", "bar", "test here"]
         stream_names.sort(key=lambda stream_name: stream_name.lower())
         self.view.pinned_streams = [{"name": name} for name in to_pin]
@@ -530,20 +606,32 @@ class TestStreamsView:
             assert hasattr(stream_view.log[0].original_widget, "text")
         self.view.controller.update_screen.assert_called_once_with()
 
-    def test_mouse_event(self, mocker, stream_view, mouse_scroll_event, widget_size):
+    def test_mouse_event(
+        self,
+        mocker: MockerFixture,
+        stream_view: StreamsView,
+        mouse_scroll_event: Tuple[Any, ...],
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         event, button, key = mouse_scroll_event
         stream_view_keypress = mocker.patch.object(stream_view, "keypress")
         size = widget_size(stream_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        stream_view.mouse_event(size, event, button, col, row, focus)
+        stream_view.mouse_event(size, event, button, col, row, focus)  # type: ignore[arg-type]
         stream_view_keypress.assert_has_calls(
             [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
         )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_STREAMS"))
-    def test_keypress_SEARCH_STREAMS(self, mocker, stream_view, key, widget_size):
+    def test_keypress_SEARCH_STREAMS(
+        self,
+        mocker: MockerFixture,
+        stream_view: StreamsView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
         mocker.patch.object(stream_view.stream_search_box, "set_caption")
@@ -560,7 +648,13 @@ class TestStreamsView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
-    def test_keypress_CLEAR_SEARCH(self, mocker, stream_view, key, widget_size):
+    def test_keypress_CLEAR_SEARCH(
+        self,
+        mocker: MockerFixture,
+        stream_view: StreamsView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(stream_view)
         mocker.patch.object(stream_view, "set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
@@ -580,14 +674,14 @@ class TestStreamsView:
 
         # Check state reset after search
         stream_view.set_focus.assert_called_once_with("body")
-        assert stream_view.stream_search_box.reset_search_text.called
+        assert stream_view.stream_search_box.reset_search_text.called  # type: ignore[attr-defined]
         assert stream_view.log == stream_view.streams_btn_list
         assert stream_view.log.get_focus()[1] == stream_view.focus_index_before_search
 
 
 class TestTopicsView:
     @pytest.fixture
-    def topic_view(self, mocker, stream_button):
+    def topic_view(self, mocker: MockerFixture, stream_button: Any) -> TopicsView:
         self.stream_button = stream_button
         mocker.patch(VIEWS + ".threading.Lock")
         self.topic_search_box = mocker.patch(VIEWS + ".PanelSearchBox")
@@ -600,10 +694,10 @@ class TestTopicsView:
         self.divider = mocker.patch(VIEWS + ".urwid.Divider")
         return TopicsView(self.topics_btn_list, self.view, self.stream_button)
 
-    def test_init(self, mocker, topic_view):
+    def test_init(self, mocker: MockerFixture, topic_view: TopicsView) -> None:
         assert topic_view.stream_button == self.stream_button
         assert topic_view.view == self.view
-        assert topic_view.topic_search_box
+        assert topic_view.topic_search_box is not None
         self.topic_search_box.assert_called_once_with(
             topic_view, "SEARCH_TOPICS", topic_view.update_topics
         )
@@ -625,8 +719,13 @@ class TestTopicsView:
         ],
     )
     def test__focus_position_for_topic_name(
-        self, mocker, stream_id, saved_topic_state, topic_view, expected_focus_index
-    ):
+        self,
+        mocker: MockerFixture,
+        stream_id: int,
+        saved_topic_state: Any,
+        topic_view: TopicsView,
+        expected_focus_index: int,
+    ) -> None:
         topic_view.stream_button.stream_id = stream_id
         topic_view.list_box = mocker.MagicMock(spec=urwid.ListBox)
         topic_view.list_box.body = [
@@ -656,10 +755,15 @@ class TestTopicsView:
             ("cc", "search error"),
         ],
     )
-    def test_update_topics(self, mocker, topic_view, new_text, expected_log):
+    def test_update_topics(
+        self,
+        mocker: MockerFixture,
+        topic_view: TopicsView,
+        new_text: str,
+        expected_log: Any,
+    ) -> None:
         topic_names = ["FOO", "FOOBAR", "foo", "fan", "boo", "BOO", "bar", "(no topic)"]
         self.view.controller.is_in_editor_mode = lambda: True
-        new_text = new_text
         search_box = topic_view.topic_search_box
         topic_view.topics_btn_list = [
             mocker.Mock(topic_name=topic_name) for topic_name in topic_names
@@ -691,8 +795,13 @@ class TestTopicsView:
         ],
     )
     def test_update_topics_list(
-        self, mocker, topic_view, topic_name, topic_initial_log, topic_final_log
-    ):
+        self,
+        mocker: MockerFixture,
+        topic_view: TopicsView,
+        topic_name: str,
+        topic_initial_log: List[str],
+        topic_final_log: List[str],
+    ) -> None:
         mocker.patch(SUBDIR + ".buttons.TopButton.__init__", return_value=None)
         set_focus_valign = mocker.patch(VIEWS + ".urwid.ListBox.set_focus_valign")
         topic_view.view.controller.model.stream_dict = {86: {"name": "PTEST"}}
@@ -708,7 +817,13 @@ class TestTopicsView:
         set_focus_valign.assert_called_once_with("bottom")
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_TOPICS"))
-    def test_keypress_SEARCH_TOPICS(self, mocker, topic_view, key, widget_size):
+    def test_keypress_SEARCH_TOPICS(
+        self,
+        mocker: MockerFixture,
+        topic_view: TopicsView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
         mocker.patch.object(topic_view.topic_search_box, "set_caption")
@@ -726,7 +841,13 @@ class TestTopicsView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
-    def test_keypress_CLEAR_SEARCH(self, mocker, topic_view, key, widget_size):
+    def test_keypress_CLEAR_SEARCH(
+        self,
+        mocker: MockerFixture,
+        topic_view: TopicsView,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(topic_view)
         mocker.patch(VIEWS + ".TopicsView.set_focus")
         mocker.patch(VIEWS + ".urwid.Frame.keypress")
@@ -746,18 +867,24 @@ class TestTopicsView:
 
         # Check state reset after search
         topic_view.set_focus.assert_called_once_with("body")
-        assert topic_view.topic_search_box.reset_search_text.called
+        assert topic_view.topic_search_box.reset_search_text.called  # type: ignore[attr-defined]
         assert topic_view.log == topic_view.topics_btn_list
         assert topic_view.log.get_focus()[1] == topic_view.focus_index_before_search
 
-    def test_mouse_event(self, mocker, topic_view, mouse_scroll_event, widget_size):
+    def test_mouse_event(
+        self,
+        mocker: MockerFixture,
+        topic_view: TopicsView,
+        mouse_scroll_event: Tuple[Any, ...],
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         event, button, key = mouse_scroll_event
         topic_view_keypress = mocker.patch.object(topic_view, "keypress")
         size = widget_size(topic_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        topic_view.mouse_event(size, event, button, col, row, focus)
+        topic_view.mouse_event(size, event, button, col, row, focus)  # type: ignore[arg-type]
         topic_view_keypress.assert_has_calls(
             [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
         )
@@ -765,26 +892,36 @@ class TestTopicsView:
 
 class TestUsersView:
     @pytest.fixture
-    def user_view(self, mocker):
+    def user_view(self, mocker: MockerFixture) -> UsersView:
         mocker.patch(VIEWS + ".urwid.SimpleFocusListWalker", return_value=[])
         controller = mocker.Mock()
-        return UsersView(controller, "USER_BTN_LIST")
+        return UsersView(controller, "USER_BTN_LIST")  # type: ignore[arg-type]
 
-    def test_mouse_event(self, mocker, user_view, mouse_scroll_event, widget_size):
+    def test_mouse_event(
+        self,
+        mocker: MockerFixture,
+        user_view: UsersView,
+        mouse_scroll_event: Tuple[Any, ...],
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         event, button, key = mouse_scroll_event
         user_view_keypress = mocker.patch.object(user_view, "keypress")
         size = widget_size(user_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        user_view.mouse_event(size, event, button, col, row, focus)
+        user_view.mouse_event(size, event, button, col, row, focus)  # type: ignore[arg-type]
         user_view_keypress.assert_has_calls(
             [mocker.call(size, key)] * SIDE_PANELS_MOUSE_SCROLL_LINES
         )
 
     def test_mouse_event_left_click(
-        self, mocker, user_view, widget_size, compose_box_is_open
-    ):
+        self,
+        mocker: MockerFixture,
+        user_view: UsersView,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        compose_box_is_open: bool,
+    ) -> None:
         super_mouse_event = mocker.patch(VIEWS + ".urwid.ListBox.mouse_event")
         user_view.controller.is_in_editor_mode.return_value = compose_box_is_open
         size = widget_size(user_view)
@@ -812,18 +949,24 @@ class TestUsersView:
             "invalid_event_button_combination",
         ],
     )
-    def test_mouse_event_invalid(self, user_view, event, button, widget_size):
+    def test_mouse_event_invalid(
+        self,
+        user_view: UsersView,
+        event: str,
+        button: int,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(user_view)
         col = 1
         row = 1
         focus = "WIDGET"
-        return_value = user_view.mouse_event(size, event, button, col, row, focus)
+        return_value = user_view.mouse_event(size, event, button, col, row, focus)  # type: ignore[arg-type]
         assert return_value is False
 
 
 class TestMiddleColumnView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         mocker.patch(MESSAGEVIEW + "", return_value="MSG_LIST")
         self.model = mocker.Mock()
         self.view = mocker.Mock()
@@ -834,10 +977,10 @@ class TestMiddleColumnView:
         self.model.controller = mocker.Mock()
 
     @pytest.fixture
-    def mid_col_view(self):
+    def mid_col_view(self) -> MiddleColumnView:
         return MiddleColumnView(self.view, self.model, self.write_box, self.search_box)
 
-    def test_init(self, mid_col_view):
+    def test_init(self, mid_col_view: MiddleColumnView) -> None:
         assert mid_col_view.model == self.model
         assert mid_col_view.controller == self.model.controller
         assert mid_col_view.search_box == self.search_box
@@ -847,14 +990,26 @@ class TestMiddleColumnView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
-    def test_keypress_focus_header(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_focus_header(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mid_col_view.focus_part = "header"
         mid_col_view.keypress(size, key)
         self.super_keypress.assert_called_once_with(size, key)
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_MESSAGES"))
-    def test_keypress_SEARCH_MESSAGES(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_SEARCH_MESSAGES(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch(MIDCOLVIEW + ".set_focus")
@@ -868,8 +1023,12 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize("reply_message_key", keys_for_command("REPLY_MESSAGE"))
     def test_keypress_REPLY_MESSAGE(
-        self, mid_col_view, mocker, widget_size, reply_message_key
-    ):
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        reply_message_key: str,
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
         mocker.patch(MIDCOLVIEW + ".footer")
@@ -883,7 +1042,13 @@ class TestMiddleColumnView:
         assert mid_col_view.footer.focus_position == 1
 
     @pytest.mark.parametrize("key", keys_for_command("STREAM_MESSAGE"))
-    def test_keypress_STREAM_MESSAGE(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_STREAM_MESSAGE(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
         mocker.patch(MIDCOLVIEW + ".footer")
@@ -897,7 +1062,13 @@ class TestMiddleColumnView:
         assert mid_col_view.footer.focus_position == 0
 
     @pytest.mark.parametrize("key", keys_for_command("REPLY_AUTHOR"))
-    def test_keypress_REPLY_AUTHOR(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_REPLY_AUTHOR(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".body")
         mocker.patch(MIDCOLVIEW + ".footer")
@@ -912,8 +1083,12 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
     def test_keypress_NEXT_UNREAD_TOPIC_stream(
-        self, mid_col_view, mocker, widget_size, key
-    ):
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        key: str,
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch.object(self.view, "message_view")
@@ -930,8 +1105,12 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_TOPIC"))
     def test_keypress_NEXT_UNREAD_TOPIC_no_stream(
-        self, mid_col_view, mocker, widget_size, key
-    ):
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+        key: str,
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mocker.patch.object(self.view, "message_view")
@@ -944,8 +1123,12 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_stream(
-        self, mid_col_view, mocker, key, widget_size
-    ):
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
 
@@ -961,8 +1144,12 @@ class TestMiddleColumnView:
 
     @pytest.mark.parametrize("key", keys_for_command("NEXT_UNREAD_PM"))
     def test_keypress_NEXT_UNREAD_PM_no_pm(
-        self, mid_col_view, mocker, key, widget_size
-    ):
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mid_col_view.model.get_next_unread_pm.return_value = None
@@ -972,7 +1159,13 @@ class TestMiddleColumnView:
         assert return_value == key
 
     @pytest.mark.parametrize("key", keys_for_command("PRIVATE_MESSAGE"))
-    def test_keypress_PRIVATE_MESSAGE(self, mid_col_view, mocker, key, widget_size):
+    def test_keypress_PRIVATE_MESSAGE(
+        self,
+        mid_col_view: MiddleColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(mid_col_view)
         mocker.patch(MIDCOLVIEW + ".focus_position")
         mid_col_view.model.get_next_unread_pm.return_value = None
@@ -985,7 +1178,7 @@ class TestMiddleColumnView:
 
 class TestRightColumnView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.view = mocker.Mock()
         self.user_search = mocker.patch(VIEWS + ".PanelSearchBox")
         self.connect_signal = mocker.patch(VIEWS + ".urwid.connect_signal")
@@ -1000,11 +1193,11 @@ class TestRightColumnView:
         }
 
     @pytest.fixture
-    def right_col_view(self, mocker):
+    def right_col_view(self, mocker: MockerFixture) -> RightColumnView:
         mocker.patch(VIEWS + ".RightColumnView.users_view")
         return RightColumnView(self.view)
 
-    def test_init(self, right_col_view):
+    def test_init(self, right_col_view: RightColumnView) -> None:
         assert right_col_view.view == self.view
         assert right_col_view.user_search == self.user_search(right_col_view)
         assert right_col_view.view.user_search == right_col_view.user_search
@@ -1015,7 +1208,9 @@ class TestRightColumnView:
             header=self.pile(right_col_view.user_search),
         )
 
-    def test_update_user_list_editor_mode(self, mocker, right_col_view):
+    def test_update_user_list_editor_mode(
+        self, mocker: MockerFixture, right_col_view: RightColumnView
+    ) -> None:
         right_col_view.view.controller.update_screen = mocker.Mock()
         right_col_view.view.controller.is_in_editor_mode = lambda: False
 
@@ -1032,8 +1227,13 @@ class TestRightColumnView:
         ],
     )
     def test_update_user_list(
-        self, right_col_view, mocker, search_string, assert_list, match_return_value
-    ):
+        self,
+        right_col_view: RightColumnView,
+        mocker: MockerFixture,
+        search_string: str,
+        assert_list: List[str],
+        match_return_value: bool,
+    ) -> None:
         right_col_view.view.controller.is_in_editor_mode = lambda: True
         self.view.users = ["USER1", "USER2"]
         mocker.patch(VIEWS + ".match_user", return_value=match_return_value)
@@ -1043,15 +1243,20 @@ class TestRightColumnView:
 
         right_col_view.update_user_list("SEARCH_BOX", search_string)
         if assert_list:
-            right_col_view.users_view.assert_called_with(assert_list)
+            right_col_view.users_view.assert_called_with(assert_list)  # type: ignore[attr-defined]
         set_body.assert_called_once_with(right_col_view.body)
 
-    def test_update_user_presence(self, right_col_view, mocker, user_list):
+    def test_update_user_presence(
+        self,
+        right_col_view: RightColumnView,
+        mocker: MockerFixture,
+        user_list: List[Dict[str, Any]],
+    ) -> None:
         set_body = mocker.patch(VIEWS + ".urwid.Frame.set_body")
 
         right_col_view.update_user_list(user_list=user_list)
 
-        right_col_view.users_view.assert_called_with(user_list)
+        right_col_view.users_view.assert_called_with(user_list)  # type: ignore[attr-defined]
         set_body.assert_called_once_with(right_col_view.body)
 
     @pytest.mark.parametrize(
@@ -1072,7 +1277,14 @@ class TestRightColumnView:
             (None, 0, False, "inactive"),
         ],
     )
-    def test_users_view(self, users, users_btn_len, editor_mode, status, mocker):
+    def test_users_view(
+        self,
+        users: Any,
+        users_btn_len: int,
+        editor_mode: bool,
+        status: str,
+        mocker: MockerFixture,
+    ) -> None:
         self.view.users = [{"user_id": 1, "status": status}]
         self.view.controller.is_in_editor_mode = lambda: editor_mode
         user_btn = mocker.patch(VIEWS + ".UserButton")
@@ -1094,7 +1306,13 @@ class TestRightColumnView:
         assert len(right_col_view.users_btn_list) == users_btn_len
 
     @pytest.mark.parametrize("key", keys_for_command("SEARCH_PEOPLE"))
-    def test_keypress_SEARCH_PEOPLE(self, right_col_view, mocker, key, widget_size):
+    def test_keypress_SEARCH_PEOPLE(
+        self,
+        right_col_view: RightColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
         mocker.patch.object(right_col_view.user_search, "set_caption")
@@ -1106,7 +1324,13 @@ class TestRightColumnView:
         )
 
     @pytest.mark.parametrize("key", keys_for_command("CLEAR_SEARCH"))
-    def test_keypress_CLEAR_SEARCH(self, right_col_view, mocker, key, widget_size):
+    def test_keypress_CLEAR_SEARCH(
+        self,
+        right_col_view: RightColumnView,
+        mocker: MockerFixture,
+        key: str,
+        widget_size: Callable[[urwid.Widget], urwid_Size],
+    ) -> None:
         size = widget_size(right_col_view)
         mocker.patch(VIEWS + ".UsersView")
         mocker.patch(VIEWS + ".RightColumnView.set_focus")
@@ -1118,12 +1342,12 @@ class TestRightColumnView:
 
         right_col_view.set_body.assert_called_once_with(right_col_view.body)
         right_col_view.set_focus.assert_called_once_with("body")
-        assert right_col_view.user_search.reset_search_text.called
+        assert right_col_view.user_search.reset_search_text.called  # type: ignore[attr-defined]
 
 
 class TestLeftColumnView:
     @pytest.fixture(autouse=True)
-    def mock_external_classes(self, mocker):
+    def mock_external_classes(self, mocker: MockerFixture) -> None:
         self.view = mocker.Mock()
         self.view.model = mocker.Mock()
         self.view.model.unread_counts = {  # Minimal, though an UnreadCounts
@@ -1149,7 +1373,7 @@ class TestLeftColumnView:
         self.view.controller = mocker.Mock()
         self.super_mock = mocker.patch(VIEWS + ".urwid.Pile.__init__")
 
-    def test_menu_view(self, mocker):
+    def test_menu_view(self, mocker: MockerFixture) -> None:
         self.streams_view = mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         home_button = mocker.patch(VIEWS + ".HomeButton")
         pm_button = mocker.patch(VIEWS + ".PMButton")
@@ -1167,7 +1391,12 @@ class TestLeftColumnView:
         )
 
     @pytest.mark.parametrize("pinned", powerset([1, 2, 99, 999, 1000]))
-    def test_streams_view(self, mocker, streams, pinned):
+    def test_streams_view(
+        self,
+        mocker: MockerFixture,
+        streams: List[Dict[str, Any]],
+        pinned: Any,
+    ) -> None:
         self.view.unpinned_streams = [s for s in streams if s["id"] not in pinned]
         self.view.pinned_streams = [s for s in streams if s["id"] in pinned]
         stream_button = mocker.patch(VIEWS + ".StreamButton")
@@ -1194,7 +1423,7 @@ class TestLeftColumnView:
             ]
         )
 
-    def test_topics_view(self, mocker, stream_button):
+    def test_topics_view(self, mocker: MockerFixture, stream_button: Any) -> None:
         mocker.patch(VIEWS + ".LeftColumnView.streams_view")
         mocker.patch(VIEWS + ".LeftColumnView.menu_view")
         topic_button = mocker.patch(VIEWS + ".TopicButton")
@@ -1224,7 +1453,7 @@ class TestLeftColumnView:
 
 class TestTabView:
     @pytest.fixture
-    def tab_view(self):
+    def tab_view(self) -> TabView:
         return TabView("❰ TEST ❱")
 
     @pytest.mark.parametrize(
@@ -1245,6 +1474,12 @@ class TestTabView:
         ],
     )
     @pytest.mark.parametrize("tab_width, tab_height", [(3, 10)])
-    def test_tab_render(self, tab_view, tab_width, tab_height, expected_output):
+    def test_tab_render(
+        self,
+        tab_view: TabView,
+        tab_width: int,
+        tab_height: int,
+        expected_output: List[bytes],
+    ) -> None:
         render_output = tab_view._w.render((tab_width, tab_height)).text
         assert render_output == expected_output
