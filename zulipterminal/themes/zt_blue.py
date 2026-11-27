@@ -4,6 +4,7 @@ ZT BLUE
 This theme uses the default color scheme.
 For further details on themefiles look at the theme contribution guide
 """
+
 from pygments.styles.zenburn import ZenburnStyle
 
 from zulipterminal.config.color import Background

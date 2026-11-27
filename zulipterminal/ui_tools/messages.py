@@ -289,12 +289,16 @@ class MessageBox(urwid.Pile):
 
             reaction_texts = [
                 (
-                    "reaction_mine"
-                    if my_user_id in [id[0] for id in ids]
-                    else "reaction",
-                    f" :{reaction}: {len(ids)} "
-                    if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
-                    else f" :{reaction}: {', '.join([id[1] for id in ids])} ",
+                    (
+                        "reaction_mine"
+                        if my_user_id in [id[0] for id in ids]
+                        else "reaction"
+                    ),
+                    (
+                        f" :{reaction}: {len(ids)} "
+                        if len(reactions) > MAXIMUM_USERNAMES_VISIBLE
+                        else f" :{reaction}: {', '.join([id[1] for id in ids])} "
+                    ),
                 )
                 for reaction, ids in reaction_stats.items()
             ]
@@ -687,7 +691,7 @@ class MessageBox(urwid.Pile):
 
         if any_differences:  # Construct content_header, if needed
             text_keys = ("author", "star", "time", "status")
-            text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
+            text: Dict[str, urwid_MarkupTuple] = dict.fromkeys(text_keys, (None, " "))
 
             if any(different[key] for key in ("recipients", "author", "24h")):
                 text["author"] = ("msg_sender", message["this"]["author"])
@@ -796,17 +800,33 @@ class MessageBox(urwid.Pile):
         )
         self.content.set_text(content)
 
-        if self.message["id"] in self.model.index["edited_messages"]:
+        # Determine label based on server-provided timestamps if present.
+        # Priority: content edit > moved > fallback to legacy index.
+        label_text = None
+        # Server-provided field for content edits (new semantics).
+        if self.message.get("last_edit_timestamp"):
+            label_text = "EDITED"
+        # Server-provided field for moves.
+        elif self.message.get("last_moved_timestamp"):
+            label_text = "MOVED"
+        # Backwards compatibility: old behavior checks model.index for edited messages.
+        elif self.message["id"] in self.model.index.get("edited_messages", set()):
+            label_text = "EDITED"
+
+        # We keep the same size/padding variables to preserve the layout.
+        if label_text:
             edited_label_size = 7
             left_padding = 1
         else:
             edited_label_size = 0
             left_padding = 8
 
+        # Build the wrapped content, using the chosen label text (if any).
         wrapped_content = urwid.Padding(
             urwid.Columns(
                 [
-                    (edited_label_size, urwid.Text("EDITED")),
+                    # If no label, edited_label_size will be 0 so this cell collapses.
+                    (edited_label_size, urwid.Text(label_text or "")),
                     urwid.LineBox(
                         urwid.Columns(
                             [
@@ -874,9 +894,7 @@ class MessageBox(urwid.Pile):
         return author_is_present
 
     @classmethod
-    def transform_content(
-        cls, content: Any, server_url: str
-    ) -> Tuple[
+    def transform_content(cls, content: Any, server_url: str) -> Tuple[
         Tuple[None, Any],
         Dict[str, Tuple[str, int, bool]],
         List[Tuple[str, str]],

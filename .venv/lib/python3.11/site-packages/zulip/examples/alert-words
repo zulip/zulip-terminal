@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import argparse
+
+import zulip
+
+usage = """alert-words (get | add | remove) [words] [options]
+
+
+Example: alert-words get
+Example: alert-words add foo bar
+Example: alert-words remove banana
+"""
+
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("operation", choices=["get", "add", "remove"], type=str)
+parser.add_argument("words", type=str, nargs="*")
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+if options.operation == "get":
+    result = client.get_alert_words()
+elif options.operation == "add":
+    result = client.add_alert_words(options.words)
+elif options.operation == "remove":
+    result = client.remove_alert_words(options.words)
+
+print(result)

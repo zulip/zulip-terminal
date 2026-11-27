@@ -81,7 +81,7 @@ def notify(title: str, text: str) -> str:
     if command_list is not None:
         try:
             subprocess.run(
-                command_list, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                command_list, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
         except FileNotFoundError:
             # This likely means the notification command could not be found

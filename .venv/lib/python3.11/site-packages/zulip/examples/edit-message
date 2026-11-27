@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+import argparse
+
+usage = """edit-message [options] --message-id=<msg_id> --subject=<new subject> --content=<new content>
+
+Edits a message that you sent. At least one of --subject or --content must be
+specified.
+
+Example: edit-message --message-id="348135" --subject="my subject" --content="test message"
+
+Specify your Zulip API credentials and server in a ~/.zuliprc file or using the options.
+"""
+
+import zulip
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("--message-id", type=int, required=True)
+parser.add_argument("--subject", default="")
+parser.add_argument("--content", default="")
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+message_data = {
+    "message_id": options.message_id,
+}
+if options.subject != "":
+    message_data["subject"] = options.subject
+if options.content != "":
+    message_data["content"] = options.content
+print(client.update_message(message_data))

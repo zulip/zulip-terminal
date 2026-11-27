@@ -1408,7 +1408,7 @@ class Model:
             SubscriptionSettingChange(
                 stream_id=stream_id,
                 property="is_muted",
-                value=not self.is_muted_stream(stream_id)
+                value=not self.is_muted_stream(stream_id),
                 # True for muting and False for unmuting.
             )
         ]

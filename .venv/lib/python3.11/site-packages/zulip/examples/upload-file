@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import argparse
+from io import StringIO as _StringIO
+from typing import IO, Any
+
+import zulip
+
+
+class StringIO(_StringIO):
+    name = ""  # https://github.com/python/typeshed/issues/598
+
+
+usage = """upload-file [options]
+
+Upload a file, and print the corresponding URI.
+
+Example: upload-file --file-path=cat.png
+
+Specify your Zulip API credentials and server in a ~/.zuliprc file or using the options.
+If no --file-path is specified, a placeholder text file will be used instead.
+"""
+
+parser = zulip.add_default_arguments(argparse.ArgumentParser(usage=usage))
+parser.add_argument("--file-path", required=True)
+options = parser.parse_args()
+
+client = zulip.init_from_options(options)
+
+if options.file_path:
+    file = open(options.file_path, "rb")  # type: IO[Any]
+else:
+    file = StringIO("This is a test file.")
+    file.name = "test.txt"
+
+response = client.upload_file(file)
+
+try:
+    print("File URI: {}".format(response["uri"]))
+except KeyError:
+    print(f"Error! API response was: {response}")
