@@ -4,7 +4,11 @@ import pytest
 from pytest import param as case
 from pytest_mock import MockerFixture
 
-from zulipterminal.api_types import Composition
+from zulipterminal.api_types import (
+    MAX_TOPIC_NAME_LENGTH,
+    RESOLVED_TOPIC_PREFIX,
+    Composition,
+)
 from zulipterminal.config.keys import primary_display_key_for_command
 from zulipterminal.helper import (
     Index,
@@ -20,6 +24,7 @@ from zulipterminal.helper import (
     powerset,
     process_media,
     sort_unread_topics,
+    topic_resolve_toggled,
 )
 
 
@@ -113,40 +118,82 @@ def test_index_messages_narrow_user_multiple(
 
 
 @pytest.mark.parametrize(
-    "edited_msgs",
+    "edited_msgs, moved_msgs",
     [
-        {537286, 537287, 537288},
-        {537286},
-        {537287},
-        {537288},
-        {537286, 537287},
-        {537286, 537288},
-        {537287, 537288},
+        case(set(), set(), id="none_edited_or_moved"),
+        case({537286, 537287, 537288}, set(), id="all_edited"),
+        case({537286}, set(), id="one_edited"),
+        case({537287, 537288}, set(), id="two_edited"),
+        case(set(), {537286, 537287, 537288}, id="all_moved"),
+        case(set(), {537287}, id="one_moved"),
+        case({537286}, {537286}, id="one_edited_and_moved"),
+        case({537286, 537287}, {537287, 537288}, id="some_edited_some_moved"),
     ],
 )
-def test_index_edited_message(
+def test_index_edited_and_moved_messages(
     mocker: MockerFixture,
     messages_successful_response: Dict[str, Any],
     empty_index: Index,
     edited_msgs: Set[int],
+    moved_msgs: Set[int],
     initial_index: Index,
 ) -> None:
+    def add_edit_and_move_timestamps(msg: Dict[str, Any]) -> None:
+        if msg["id"] in edited_msgs:
+            msg["last_edit_timestamp"] = 1700000000
+        if msg["id"] in moved_msgs:
+            msg["last_moved_timestamp"] = 1700000100
+
     messages = messages_successful_response["messages"]
     for msg in messages:
-        if msg["id"] in edited_msgs:
-            msg["edit_history"] = []
+        add_edit_and_move_timestamps(msg)
     model = mocker.patch(MODEL + ".__init__", return_value=None)
     model.index = initial_index
     model.narrow = []
 
     expected_index: Dict[str, Any] = dict(
-        empty_index, edited_messages=edited_msgs, all_msg_ids={537286, 537287, 537288}
+        empty_index,
+        edited_messages=edited_msgs,
+        moved_messages=moved_msgs,
+        all_msg_ids={537286, 537287, 537288},
     )
-    for msg_id, msg in expected_index["messages"].items():
-        if msg_id in edited_msgs:
-            msg["edit_history"] = []
+    for msg in expected_index["messages"].values():
+        add_edit_and_move_timestamps(msg)
 
     assert index_messages(messages, model, model.index) == expected_index
+
+
+long_topic = "x" * MAX_TOPIC_NAME_LENGTH
+truncated_resolved_long_topic = (
+    RESOLVED_TOPIC_PREFIX
+    + long_topic[: MAX_TOPIC_NAME_LENGTH - len(RESOLVED_TOPIC_PREFIX) - 3]
+    + "..."
+)
+
+
+@pytest.mark.parametrize(
+    "topic, prev_topic, expected_toggled",
+    [
+        case("✔ topic", "topic", True, id="resolved"),
+        case("topic", "✔ topic", True, id="unresolved"),
+        case("new topic", "topic", False, id="renamed"),
+        case("✔ new topic", "topic", False, id="resolved_and_renamed"),
+        case("new topic", "✔ topic", False, id="unresolved_and_renamed"),
+        case("✔ topic", "✔ topic", False, id="still_resolved"),
+        case("topic", "topic", False, id="unchanged"),
+        case(truncated_resolved_long_topic, long_topic, True, id="resolved_truncated"),
+        case(
+            truncated_resolved_long_topic,
+            "y" + long_topic,
+            False,
+            id="resolved_truncated_and_renamed",
+        ),
+    ],
+)
+def test_topic_resolve_toggled(
+    topic: str, prev_topic: str, expected_toggled: bool
+) -> None:
+    assert topic_resolve_toggled(topic, prev_topic) == expected_toggled
 
 
 @pytest.mark.parametrize(

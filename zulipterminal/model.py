@@ -79,6 +79,7 @@ from zulipterminal.helper import (
     notify_if_message_sent_outside_narrow,
     set_count,
     sort_unread_topics,
+    topic_resolve_toggled,
 )
 from zulipterminal.platform_code import notify
 from zulipterminal.ui_tools.utils import create_msg_box_list
@@ -1779,17 +1780,28 @@ class Model:
         """
         assert event["type"] == "update_message"
 
-        # Update edited message status from single message id
-        # NOTE: If all messages in topic have topic edited,
-        #       they are not all marked as edited, as per server optimization
         message_id = event["message_id"]
         indexed_message = self.index["messages"].get(message_id, None)
 
-        if indexed_message:
-            self.index["edited_messages"].add(message_id)
+        # Moves apply to all message_ids, unless they only (un)resolve a topic
+        # NOTE: Done before re-rendering below, so the label is up to date
+        if "subject" in event or "new_stream_id" in event:
+            location_event = cast(UpdateMessagesLocationEvent, event)
+            stream_changed = "new_stream_id" in location_event
+            topic_moved = "subject" in location_event and not topic_resolve_toggled(
+                location_event["subject"], location_event["orig_subject"]
+            )
+            if stream_changed or topic_moved:
+                self.index["moved_messages"].update(
+                    msg_id
+                    for msg_id in location_event["message_ids"]
+                    if msg_id in self.index["messages"]
+                )
 
         # Update the rendered content, if the message is indexed
+        # Content edits only apply to the single message_id
         if "rendered_content" in event and indexed_message:
+            self.index["edited_messages"].add(message_id)
             content_event = cast(UpdateMessageContentEvent, event)
             indexed_message["content"] = content_event["rendered_content"]
             indexed_message["is_me_message"] = content_event["is_me_message"]
