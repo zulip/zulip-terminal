@@ -10,7 +10,7 @@ from pytest import param as case
 from pytest_mock import MockerFixture
 
 from zulipterminal.config.themes import generate_theme
-from zulipterminal.core import Controller
+from zulipterminal.core import Controller, Layout
 from zulipterminal.helper import Index
 from zulipterminal.version import ZT_VERSION
 
@@ -48,7 +48,7 @@ class TestController:
             "zt_dark", color_depth=256, transparent_background=False
         )
         self.in_explore_mode = False
-        self.autohide = True  # FIXME Add tests for no-autohide
+        self.layout: Layout = "autohide"  # FIXME Add tests for other layouts.
         self.notify_enabled = False
         self.exit_confirmation = True
         self.transparency_enabled = False
@@ -63,7 +63,7 @@ class TestController:
             debug_path=None,
             editor_command="",
             **dict(
-                autohide=self.autohide,
+                layout=self.layout,
                 notify=self.notify_enabled,
                 exit_confirmation=self.exit_confirmation,
                 transparency=self.transparency_enabled,

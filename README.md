@@ -229,8 +229,13 @@ site=https://example.zulipchat.com
 ## Theme: available themes can be found by running `zulip-term --list-themes`, or in docs/FAQ.md
 theme=zt_dark
 
-## Autohide: set to 'autohide' to hide the left & right panels except when they're focused
-autohide=no_autohide
+## Layout: defaults to 'dynamic', in which the panels adapt to variable terminal widths
+# Other options include:
+#    'autohide_fluid' which hide the panels except when focused and with better wide terminal support
+#    Backwards compatible 'autohide' and 'no_autohide', hiding left & right panels except when focused
+layout=dynamic
+# Backwards compatible autohide config; prefer *layout* instead
+#autohide=autohide
 
 ## Exit Confirmation: set to 'disabled' to exit directly with no warning popup first
 exit_confirmation=enabled

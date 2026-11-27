@@ -64,6 +64,8 @@ from zulipterminal.urwid_types import urwid_Size
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
+Layout = Literal["autohide", "no_autohide", "dynamic", "autohide_fluid"]
+
 
 class ModListWalker(urwid.SimpleFocusListWalker):
     def __init__(self, *, contents: List[Any], action: Callable[[], None]) -> None:
@@ -645,9 +647,9 @@ class MiddleColumnView(urwid.Frame):
             self.footer.focus_position = 0
             return key
         elif is_command_key("GO_LEFT", key):
-            self.view.show_left_panel(visible=True)
+            self.view.focus_panel = 0
         elif is_command_key("GO_RIGHT", key):
-            self.view.show_right_panel(visible=True)
+            self.view.focus_panel = 2
         return super().keypress(size, key)
 
 
@@ -767,7 +769,7 @@ class RightColumnView(urwid.Frame):
             self.view.controller.update_screen()
             return key
         elif is_command_key("GO_LEFT", key):
-            self.view.show_right_panel(visible=False)
+            self.view.focus_panel = 1
         return super().keypress(size, key)
 
 
@@ -924,7 +926,7 @@ class LeftColumnView(urwid.Pile):
                 self.view.stream_w.keypress(size, key)
             return key
         elif is_command_key("GO_RIGHT", key):
-            self.view.show_left_panel(visible=False)
+            self.view.focus_panel = 1
         return super().keypress(size, key)
 
 
@@ -1104,7 +1106,7 @@ class AboutView(PopUpView):
         server_feature_level: int,
         theme_name: str,
         color_depth: int,
-        autohide_enabled: bool,
+        layout: Layout,
         maximum_footlinks: int,
         notify_enabled: bool,
         exit_confirmation_enabled: bool,
@@ -1125,7 +1127,7 @@ class AboutView(PopUpView):
                 "Application Configuration",
                 [
                     ("Theme", theme_name),
-                    ("Autohide", "enabled" if autohide_enabled else "disabled"),
+                    ("Layout", layout),
                     ("Maximum footlinks", str(maximum_footlinks)),
                     ("Color depth", str(color_depth)),
                     ("Notifications", "enabled" if notify_enabled else "disabled"),

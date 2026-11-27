@@ -189,6 +189,14 @@ class TestPMButton:
         title_text = pm_button.label_text[:-3].strip()
         assert title_text == "Direct messages"
 
+    def test_activate(self, mocker: MockerFixture, top_button: TopButton) -> None:
+        show_function = mocker.patch.object(top_button, "show_function")
+
+        top_button.activate("key")
+
+        assert top_button.controller.view.focus_panel == 1
+        show_function.assert_called_once_with()
+
 
 class TestStarredButton:
     def test_count_style_init_argument_value(
