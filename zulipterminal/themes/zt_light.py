@@ -77,13 +77,6 @@ META = {
         'styles'    : PerldocStyle().styles,
         'background': PerldocStyle().background_color,
         'overrides' : {
-            'cs'  : '#8B008B, bold',
-            'sh'  : '#1c7e71, italics',
-            'k'   : '#8B008B, bold',
-            'nc'  : '#008b45, bold',
-            'ne'  : '#008b45, bold',
-            'nn'  : '#008b45, underline',
-            'nt'  : '#8B008B, bold',
             'gh'  : '#000080, bold',
             'gu'  : '#800080, bold',
             'ge'  : 'default, italics',

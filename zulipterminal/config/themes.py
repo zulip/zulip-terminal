@@ -354,3 +354,33 @@ def generate_pygments_styles(pygments: Dict[str, Any]) -> ThemeSpec:
         )
         theme_styles_from_pygments.append(new_style)
     return theme_styles_from_pygments
+
+
+def redundant_pygments_overrides(theme_name: str) -> List[str]:
+    """
+    Returns the css classes of any pygments overrides in the theme which are
+    the same as the urwid-compatible style translated from the pygments style,
+    and so could be removed from the theme.
+    """
+    theme_meta = getattr(THEMES[theme_name], "META", None)
+    if theme_meta is None:
+        return []
+    pygments_data = theme_meta.get("pygments") or {}
+    pygments_styles = pygments_data.get("styles")
+    pygments_overrides = pygments_data.get("overrides")
+    if not pygments_styles or not pygments_overrides:
+        # Any missing data is reported when the theme is generated
+        return []
+
+    def style_parts(style: str) -> List[str]:
+        # urwid ignores whitespace around the parts of a style
+        return [part.strip() for part in style.split(",")]
+
+    urwid_compatible_styles = generate_urwid_compatible_pygments_styles(pygments_styles)
+    return [
+        css_class
+        for token, css_class in STANDARD_TYPES.items()
+        if css_class in pygments_overrides
+        and style_parts(pygments_overrides[css_class])
+        == style_parts(urwid_compatible_styles[token])
+    ]

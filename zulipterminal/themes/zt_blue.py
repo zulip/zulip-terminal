@@ -77,22 +77,9 @@ META = {
         'styles'    : ZenburnStyle().styles,
         'background': 'h25',
         'overrides' : {
-            'err' : '#e37170, bold',
-            'kt'  : '#dfdfbf, bold',
-            'nt'  : '#e89393, bold',
-            'ne'  : '#c3bf9f, bold',
-            'si'  : '#dca3a3, bold',
-            'c'   : '#7f9f7f, italics',
-            'cp'  : '#dfaf8f, bold',
-            'cs'  : '#dfdfdf, bold',
-            'g'   : '#ecbcbc, bold',
-            'ge'  : '#ffffff, bold',
-            'go'  : '#5b605e, bold',
-            'gh'  : '#efefef, bold',
             'gd'  : '#c3bf9f',
             'gi'  : '#709080, bold',
             'gt'  : '#80d4aa, bold',
-            'gu'  : '#efefef, bold',
             'w'   : '#dcdccc',  # inline/plain-codeblock
         }
     }

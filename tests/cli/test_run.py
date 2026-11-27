@@ -246,6 +246,7 @@ def test_warning_regarding_incomplete_theme(
         MODULE + ".complete_and_incomplete_themes",
         return_value=expected_complete_incomplete_themes,
     )
+    mocker.patch(MODULE + ".redundant_pygments_overrides", return_value=[])
     mocker.patch(MODULE + ".generate_theme")
 
     expected_platform_output = platform_mocker(platform, python)
@@ -263,6 +264,58 @@ def test_warning_regarding_incomplete_theme(
         f"   theme '{bad_theme}' specified on command line.",
         "\x1b[93m   WARNING: Incomplete theme; results may vary!",
         f"      {expected_warning}\x1b[0m",
+        "   autohide setting 'no_autohide' specified from default config.",
+        "   exit confirmation setting 'enabled' specified from default config.",
+        "   maximum footlinks value '3' specified from default config.",
+        "   color depth setting '256' specified from default config.",
+        "   notify setting 'disabled' specified from default config.",
+        "   transparency setting 'disabled' specified from default config.",
+        "   external editor command '' specified from environment.",
+        "\x1b[91m",
+        f"Error connecting to Zulip server: {server_connection_error}.\x1b[0m",
+    ]
+    assert lines == expected_lines
+
+    assert captured.err == ""
+
+
+def test_warning_regarding_redundant_pygments_overrides(
+    capsys: CaptureFixture[str],
+    mocker: MockerFixture,
+    platform_mocker: Callable[[str, str], List[str]],
+    minimal_zuliprc: str,
+    theme: str = "a",
+    server_connection_error: str = "sce",
+    platform: str = "some_platform",
+    python: str = "3.99 (Zython) [cool]",
+) -> None:
+    mocker.patch(
+        CONTROLLER + ".__init__",
+        side_effect=ServerConnectionFailure(server_connection_error),
+    )
+    mocker.patch(MODULE + ".detected_platform", return_value=platform)
+    mocker.patch(MODULE + ".all_themes", return_value=("a", "b"))
+    mocker.patch(
+        MODULE + ".complete_and_incomplete_themes", return_value=(["a", "b"], [])
+    )
+    mocker.patch(MODULE + ".redundant_pygments_overrides", return_value=["k", "nc"])
+    mocker.patch(MODULE + ".generate_theme")
+
+    expected_platform_output = platform_mocker(platform, python)
+
+    with pytest.raises(SystemExit) as e:
+        main(["-c", minimal_zuliprc, "-t", theme])
+
+    assert str(e.value) == "1"
+
+    captured = capsys.readouterr()
+
+    lines = captured.out.strip().split("\n")
+    expected_lines = expected_platform_output + [
+        "Loading with:",
+        f"   theme '{theme}' specified on command line.",
+        "\x1b[93m   WARNING: Theme has redundant pygments overrides!",
+        "      (these could be removed: k, nc)\x1b[0m",
         "   autohide setting 'no_autohide' specified from default config.",
         "   exit confirmation setting 'enabled' specified from default config.",
         "   maximum footlinks value '3' specified from default config.",
