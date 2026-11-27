@@ -498,8 +498,19 @@ ZT_TO_URWID_CMD_MAPPING = {
     "ACTIVATE_BUTTON": ACTIVATE,
 }
 
+# Commands whose key is passed to urwid_readline (eg. enable_autocomplete),
+# which supports only a single key for each
+SINGLE_KEY_COMMANDS = [
+    "AUTOCOMPLETE",
+    "AUTOCOMPLETE_REVERSE",
+]
+
 
 class InvalidCommand(Exception):
+    pass
+
+
+class InvalidKeyBinding(Exception):
     pass
 
 
@@ -572,6 +583,19 @@ def primary_display_key_for_command(command: str) -> str:
     return display_key_for_urwid_key(primary_key_for_command(command))
 
 
+def validate_single_key_commands() -> None:
+    """
+    Ensures that commands which support only a single key have exactly one key
+    """
+    for command in SINGLE_KEY_COMMANDS:
+        command_keys = keys_for_command(command)
+        if len(command_keys) != 1:
+            raise InvalidKeyBinding(
+                f"{command} must have exactly one key, since urwid_readline"
+                f" supports only one, but has {command_keys}"
+            )
+
+
 def commands_for_random_tips() -> List[KeyBinding]:
     """
     Return list of commands which may be displayed as a random tip
@@ -588,3 +612,7 @@ def commands_for_random_tips() -> List[KeyBinding]:
 for zt_cmd, urwid_cmd in ZT_TO_URWID_CMD_MAPPING.items():
     for key in keys_for_command(zt_cmd):
         command_map[key] = urwid_cmd
+
+
+# Fail early if a single-key command was given more (or less) than one key
+validate_single_key_commands()
