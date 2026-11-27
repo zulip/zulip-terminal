@@ -33,7 +33,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with type-checking tools, stubs & minimal test libraries
-        run: pip install .[typing,testing_minimal]
+        run: pip install .[typing,testing-minimal]
       - name: Run mypy
         run: ./tools/run-mypy
 
@@ -66,9 +66,8 @@ jobs:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
-      - name: Install with linting tools & minimal test libraries
-        # NOTE: Install pytest so that isort recognizes it as a known library
-        run: pip install .[linting,minimal_testing]
+      - name: Install with linting tools
+        run: pip install .[linting]
       - name: Run isort
         run: ./tools/run-isort-check
 
