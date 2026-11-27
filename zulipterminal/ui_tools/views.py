@@ -24,7 +24,8 @@ from zulipterminal.config.symbols import (
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
     PINNED_STREAMS_DIVIDER,
-    SECTION_DIVIDER_LINE,
+    SECTION_DIVIDER_LINE
+
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -56,7 +57,7 @@ from zulipterminal.ui_tools.buttons import (
     TopicButton,
     UserButton,
 )
-from zulipterminal.ui_tools.messages import MessageBox
+from zulipterminal.ui_tools.messages import MessageBox,PlaceholderMessageBox
 from zulipterminal.ui_tools.utils import create_msg_box_list
 from zulipterminal.urwid_types import urwid_Size
 
@@ -65,10 +66,12 @@ MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
 
 
+
 class ModListWalker(urwid.SimpleFocusListWalker):
     def __init__(self, *, contents: List[Any], action: Callable[[], None]) -> None:
         self._action = action
         super().__init__(contents)
+
 
     def set_focus(self, position: int) -> None:
         # When setting focus via set_focus method.
@@ -80,6 +83,7 @@ class ModListWalker(urwid.SimpleFocusListWalker):
     def _set_focus(self, index: int) -> None:
         # This method is called when directly setting focus via
         # self.focus = focus_position
+
         if not self:  # type: ignore[truthy-bool]  # Implemented in base class
             self._focus = 0
             return
@@ -113,7 +117,6 @@ class MessageView(urwid.ListBox):
         # Initialize for reference
         self.focus_msg = 0
         self.log = ModListWalker(contents=self.main_view(), action=self.read_message)
-
         super().__init__(self.log)
         self.set_focus(self.focus_msg)
         # if loading new/old messages - True
@@ -129,13 +132,13 @@ class MessageView(urwid.ListBox):
         return msg_btn_list
 
     @asynch
-    def load_old_messages(self, anchor: int) -> None:
+    def load_old_messages(self, anchor: Any) -> None:
         self.old_loading = True
 
         ids_to_keep = self.model.get_message_ids_in_current_narrow()
-        if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
+        if not isinstance(self.log[0].original_widget, PlaceholderMessageBox):
             top_message_id = self.log[0].original_widget.message["id"]
-            ids_to_keep.remove(top_message_id)  # update this id
+            ids_to_keep.discard(top_message_id)  # Use discard to avoid KeyError
             no_update_baseline = {top_message_id}
         else:
             no_update_baseline = set()
@@ -145,8 +148,8 @@ class MessageView(urwid.ListBox):
 
         # Only update if more messages are provided
         if ids_to_process != no_update_baseline:
-            if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
-                self.log.remove(self.log[0])  # avoid duplication when updating
+            if  not isinstance(self.log[0].original_widget, PlaceholderMessageBox):
+                self.log.remove(self.log[0])  # Avoid duplication when updating
 
             message_list = create_msg_box_list(self.model, ids_to_process)
             message_list.reverse()
@@ -158,25 +161,42 @@ class MessageView(urwid.ListBox):
             self.model.controller.update_screen()
 
         self.old_loading = False
-
     @asynch
-    def load_new_messages(self, anchor: int) -> None:
+    def load_new_messages(self, anchor: Any) -> None:
         self.new_loading = True
         current_ids = self.model.get_message_ids_in_current_narrow()
         self.model.get_messages(num_before=0, num_after=30, anchor=anchor)
         new_ids = self.model.get_message_ids_in_current_narrow() - current_ids
-        if self.log:  # type: ignore[truthy-bool]  # Implemented in base class
-            last_message = self.log[-1].original_widget.message
-        else:
+
+        # Remove placeholders
+        indices_to_remove = []
+        for i, item in enumerate(self.log):
+            if isinstance(item.original_widget, PlaceholderMessageBox):
+                indices_to_remove.append(i)
+
+        for i in reversed(indices_to_remove):
+            del self.log[i]
+
+        # Only add new messages if there are any
+        if new_ids:
             last_message = None
+            if len(self.log) > 0:
+                last_message = self.log[-1].original_widget.message
 
-        message_list = create_msg_box_list(
-            self.model, new_ids, last_message=last_message
-        )
-        self.log.extend(message_list)
+            message_list = create_msg_box_list(self.model, new_ids, last_message=last_message)
 
-        self.model.controller.update_screen()
+            # Filter out any placeholders and add new messages
+            filtered_list = [msg for msg in message_list if not isinstance(msg.original_widget, PlaceholderMessageBox)]
+            if filtered_list:
+                self.log.extend(filtered_list)
+                # Shift focus to the most recent message (last in the list)
+                self.set_focus(len(self.log) - 1)
+                self.set_focus_valign("middle")  # Optional: Center the view vertically
+                self.model.controller.update_screen()
+
+
         self.new_loading = False
+
 
     def mouse_event(
         self, size: urwid_Size, event: str, button: int, col: int, row: int, focus: bool
@@ -198,7 +218,6 @@ class MessageView(urwid.ListBox):
                 position = self.log.next_position(self.focus_position)
                 self.set_focus(position, "above")
                 self.set_focus_valign("middle")
-
                 return key
             except Exception:
                 if self.focus:
@@ -252,25 +271,47 @@ class MessageView(urwid.ListBox):
     def update_search_box_narrow(self, message_view: Any) -> None:
         if not hasattr(self.model.controller, "view"):
             return
-        # if view is ready display current narrow
-        # at the bottom of the view.
+
+        # Check if message_view is a PlaceholderMessageBox or lacks required attributes
+        if isinstance(message_view, PlaceholderMessageBox) or not hasattr(message_view, "recipient_header"):
+            # Default behavior: display the current narrow (e.g., "all" or model.narrow)
+            narrow = self.model.narrow if self.model.narrow else ["all"]
+            self.model.controller.view.search_box.conversation_focus.set_text(f"#{narrow[0][1]}")
+            self.model.controller.view.search_box.msg_narrow.set_text("")
+            self.model.controller.update_screen()
+            return
+
+        # Regular MessageBox case: use recipient_header and top_search_bar
         recipient_bar = message_view.recipient_header()
         top_header = message_view.top_search_bar()
-        self.model.controller.view.search_box.conversation_focus.set_text(
-            top_header.markup
-        )
+        self.model.controller.view.search_box.conversation_focus.set_text(top_header.markup)
         self.model.controller.view.search_box.msg_narrow.set_text(recipient_bar.markup)
         self.model.controller.update_screen()
 
     def read_message(self, index: int = -1) -> None:
+        # Ensure there is a focused widget before proceeding
+        if self.focus is None:
+            return
+        if isinstance(self.focus.original_widget, PlaceholderMessageBox):
+                self.update_search_box_narrow(self.focus.original_widget)
+                # Optionally trigger loading messages if not already in progress
+                if not self.old_loading and not self.new_loading:
+                    anchor = self.focus.original_widget.message.get("id", None)  # Assuming placeholder has an anchor ID
+                    self.load_old_messages(anchor) if anchor else self.load_new_messages(None)
+                return
+        if self.focus is None or not isinstance(self.focus.original_widget, MessageBox):
+            return
+
         # Message currently in focus
         if hasattr(self.model.controller, "view"):
             view = self.model.controller.view
         else:
             return
+
         msg_w, curr_pos = self.body.get_focus()
         if msg_w is None:
             return
+
         self.update_search_box_narrow(msg_w.original_widget)
 
         # Do not read messages in explore mode.
@@ -288,6 +329,7 @@ class MessageView(urwid.ListBox):
         # in focus.
         if not (view.body.focus_col == 1 or last_message_focused):
             return
+
         # save the current focus
         self.model.set_focus_in_current_narrow(self.focus_position)
         # msg ids that have been read
@@ -302,6 +344,7 @@ class MessageView(urwid.ListBox):
             if msg_w is None:
                 break
         self.model.mark_message_ids_as_read(read_msg_ids)
+
 
 
 class StreamsViewDivider(urwid.Divider):
@@ -553,83 +596,116 @@ class UsersView(urwid.ListBox):
 
 class MiddleColumnView(urwid.Frame):
     def __init__(self, view: Any, model: Any, write_box: Any, search_box: Any) -> None:
-        message_view = MessageView(model, view)
         self.model = model
         self.controller = model.controller
         self.view = view
         self.search_box = search_box
-        view.message_view = message_view
-        super().__init__(message_view, header=search_box, footer=write_box)
+        self.write_box = write_box
 
-    def update_message_list_status_markers(self) -> None:
-        for message_w in self.body.log:
-            message_box = message_w.original_widget
+        self.message_view = MessageView(model, view)
+        view.message_view = self.message_view
 
-            message_box.update_message_author_status()
+        self.current_view = self.message_view
+        self.last_narrow = self.model.narrow
+        super().__init__(self.message_view, header=search_box, footer=write_box)
 
+    def set_view(self, view_name: str) -> None:
+        self.current_view = self.message_view
+        header = self.search_box
+        self.set_body(self.current_view)
+        self.set_header(header)
+        self.set_footer(self.write_box)
+        self.set_focus("body")
         self.controller.update_screen()
 
-    def keypress(self, size: urwid_Size, key: str) -> Optional[str]:
+    def update_message_list_status_markers(self) -> None:
+        if isinstance(self.current_view, MessageView):
+            for message_w in self.body.log:
+                message_box = message_w.original_widget
+                message_box.update_message_author_status()
+            self.controller.update_screen()
+
+    def check_narrow_and_switch_view(self) -> None:
+        """
+        Check if the model's narrow has changed and switch to MessageView if necessary.
+        """
+        current_narrow = self.model.narrow
+        if (
+            current_narrow != self.last_narrow
+            and self.current_view != self.message_view
+        ):
+            self.set_view("messages")
+        self.last_narrow = current_narrow
+
+    def keypress(self, size: Tuple[int, int], key: str) -> Optional[str]:
+        self.check_narrow_and_switch_view()
+
         if self.focus_position in ["footer", "header"]:
             return super().keypress(size, key)
 
         elif is_command_key("SEARCH_MESSAGES", key):
             self.controller.enter_editor_mode_with(self.search_box)
             self.set_focus("header")
-            return key
+            return None
 
-        elif is_command_key("REPLY_MESSAGE", key):
-            self.body.keypress(size, key)
-            if self.footer.focus is not None:
-                self.set_focus("footer")
-                self.footer.focus_position = 1
-            return key
 
-        elif is_command_key("STREAM_MESSAGE", key):
-            self.body.keypress(size, key)
-            # For new streams with no previous conversation.
-            if self.footer.focus is None:
-                stream_id = self.model.stream_id
-                stream_dict = self.model.stream_dict
-                if stream_id is None:
-                    self.footer.stream_box_view(0)
-                else:
-                    self.footer.stream_box_view(caption=stream_dict[stream_id]["name"])
+        elif is_command_key("ALL_MESSAGES", key):
+            self.controller.narrow_to_all_messages()
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("ALL_PM", key):
+            self.controller.narrow_to_all_pm()
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("ALL_STARRED", key):
+            self.controller.narrow_to_all_starred()
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("ALL_MENTIONS", key):
+            self.controller.narrow_to_all_mentions()
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("PRIVATE_MESSAGE", key):
+            self.footer.private_box_view()
             self.set_focus("footer")
             self.footer.focus_position = 0
-            return key
+            return None
 
-        elif is_command_key("REPLY_AUTHOR", key):
-            self.body.keypress(size, key)
-            if self.footer.focus is not None:
-                self.set_focus("footer")
-                self.footer.focus_position = 1
-            return key
+        elif is_command_key("GO_LEFT", key):
+            self.view.show_left_panel(visible=True)
+
+        elif is_command_key("GO_RIGHT", key):
+            self.view.show_right_panel(visible=True)
 
         elif is_command_key("NEXT_UNREAD_TOPIC", key):
-            # narrow to next unread topic
-            focus = self.view.message_view.focus
             narrow = self.model.narrow
-            if focus:
-                current_msg_id = focus.original_widget.message["id"]
+            if self.current_view == self.message_view and self.view.message_view.focus:
+                current_msg_id = self.view.message_view.focus.original_widget.message[
+                    "id"
+                ]
                 stream_topic = self.model.next_unread_topic_from_message_id(
                     current_msg_id
                 )
-                if stream_topic is None:
-                    return key
             elif narrow[0][0] == "stream" and narrow[1][0] == "topic":
                 stream_topic = self.model.next_unread_topic_from_message_id(None)
             else:
-                return key
+                stream_topic = self.model.next_unread_topic_from_message_id(None)
 
+            if stream_topic is None:
+                return key
             stream_id, topic = stream_topic
             self.controller.narrow_to_topic(
                 stream_name=self.model.stream_dict[stream_id]["name"],
                 topic_name=topic,
             )
-            return key
+            self.set_view("messages")
+            return None
+
         elif is_command_key("NEXT_UNREAD_PM", key):
-            # narrow to next unread pm
             pm = self.model.get_next_unread_pm()
             if pm is None:
                 return key
@@ -638,16 +714,132 @@ class MiddleColumnView(urwid.Frame):
                 recipient_emails=[email],
                 contextual_message_id=pm,
             )
-        elif is_command_key("PRIVATE_MESSAGE", key):
-            # Create new PM message
-            self.footer.private_box_view()
+            self.set_view("messages")
+            return None
+
+        if hasattr(self.current_view, "keypress"):
+            result = self.current_view.keypress(size, key)
+            if result is None:
+                return None
+
+        if (
+            is_command_key("REPLY_MESSAGE", key)
+            or is_command_key("MENTION_REPLY", key)
+            or is_command_key("QUOTE_REPLY", key)
+            or is_command_key("REPLY_AUTHOR", key)
+        ):  # 'r', 'enter', '@', '>', 'R'
+            if self.current_view != self.message_view:
+                self.set_view("messages")
+                if len(self.message_view.log)>0:
+                    self.message_view.set_focus(len(self.message_view.log) - 1)
+            self.current_view.keypress(size, key)
+            if self.footer.focus is not None:
+                self.set_focus("footer")
+                self.footer.focus_position = 1
+            return None
+
+        # elif is_command_key("STREAM_MESSAGE", key):
+        #     if self.controller.is_in_editor_mode():
+        #         self.controller.exit_editor_mode()
+        #     if self.current_view != self.message_view:
+        #         self.set_view("messages")
+        #     self.current_view.keypress(size, key)
+        #     if self.footer.focus is None:
+        #         stream_id = self.model.stream_id
+        #         stream_dict = self.model.stream_dict
+        #         if stream_id is None:
+        #             self.footer.stream_box_view(0)
+        #         else:
+        #             self.footer.stream_box_view(stream_id, caption=stream_dict[stream_id]["name"])
+        #     self.set_focus("footer")
+        #     self.footer.focus_position = 0
+        #     return None
+        elif is_command_key("STREAM_MESSAGE", key):
+            if self.controller.is_in_editor_mode():
+                self.controller.exit_editor_mode()
+            if self.current_view != self.message_view:
+                self.set_view("messages")
+            self.current_view.keypress(size, key)
+            if self.footer.focus is None:
+                stream_id = self.model.stream_id
+                stream_dict = self.model.stream_dict
+                if stream_id is None:
+                    # Set to a default or the intended stream
+                    default_stream_id = next(iter(stream_dict.keys()), 0)  # First stream or 0
+                    self.model.stream_id = default_stream_id
+                    stream_id = default_stream_id
+                try:
+                    stream_data = stream_dict.get(stream_id, {})
+                    if not stream_data:
+                        raise KeyError(f"No data for stream_id {stream_id}")
+                    caption = stream_data.get("name", "Unknown Stream")
+                    self.footer.stream_box_view(stream_id, caption=caption)
+                except KeyError:
+                    self.footer.stream_box_view(0, caption="Unknown Stream")  # Fallback
             self.set_focus("footer")
             self.footer.focus_position = 0
-            return key
-        elif is_command_key("GO_LEFT", key):
-            self.view.show_left_panel(visible=True)
-        elif is_command_key("GO_RIGHT", key):
-            self.view.show_right_panel(visible=True)
+            return None
+        elif is_command_key("STREAM_NARROW", key):
+            if (
+                self.current_view != self.message_view
+                or not self.view.message_view.focus
+            ):
+                return key
+            message = self.view.message_view.focus.original_widget.message
+            if message["type"] != "stream":
+                return key
+            self.controller.narrow_to_stream(stream_name=message["stream"])
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("TOPIC_NARROW", key):
+            if (
+                self.current_view != self.message_view
+                or not self.view.message_view.focus
+            ):
+                return key
+            message = self.view.message_view.focus.original_widget.message
+            if message["type"] != "stream":
+                return key
+            self.controller.narrow_to_topic(
+                stream_name=message["stream"],
+                topic_name=message["subject"],
+            )
+            self.set_view("messages")
+            return None
+
+        elif is_command_key("THUMBS_UP", key):
+            if (
+                self.current_view != self.message_view
+                or not self.view.message_view.focus
+            ):
+                return key
+            message = self.view.message_view.focus.original_widget.message
+            self.controller.toggle_message_reaction(message["id"], "thumbs_up")
+            self.controller.update_screen()
+            return None
+
+        elif is_command_key("TOGGLE_STAR_STATUS", key):
+            if (
+                self.current_view != self.message_view
+                or not self.view.message_view.focus
+            ):
+                return key
+            message = self.view.message_view.focus.original_widget.message
+            self.controller.toggle_message_star_status(message["id"])
+            self.controller.update_screen()
+            return None
+
+        elif is_command_key("ADD_REACTION", key):
+            if (
+                self.current_view != self.message_view
+                or not self.view.message_view.focus
+            ):
+                return key
+            message = self.view.message_view.focus.original_widget.message
+            self.controller.show_emoji_picker(message["id"])
+            return None
+
         return super().keypress(size, key)
 
 
