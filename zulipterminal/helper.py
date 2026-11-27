@@ -7,6 +7,7 @@ import subprocess
 import time
 from collections import defaultdict
 from contextlib import contextmanager
+from enum import Enum
 from functools import partial, wraps
 from itertools import chain, combinations
 from re import ASCII, MULTILINE, findall, match
@@ -47,6 +48,12 @@ from zulipterminal.platform_code import (
 
 
 StreamAccessType = Literal["public", "private", "web-public"]
+
+
+class SearchStatus(Enum):
+    DEFAULT = 0
+    FILTERED = 1
+    EMPTY = 2
 
 
 class StreamData(TypedDict):
