@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterable, List, Set, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple
 
 import pytest
 from pytest import param as case
@@ -19,8 +19,10 @@ from zulipterminal.helper import (
     open_media,
     powerset,
     process_media,
+    set_count,
     sort_unread_topics,
 )
+from zulipterminal.ui_tools.views import StreamsViewDivider
 
 
 MODULE = "zulipterminal.helper"
@@ -479,6 +481,75 @@ def test_notify_if_message_sent_outside_narrow(
         )
     else:
         report_success.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "message_stream_id, is_muted_stream, updated_button_index",
+    [
+        case(100, False, 0, id="pinned_stream_before_divider"),
+        case(200, False, 2, id="unpinned_stream_after_divider"),
+        case(300, False, None, id="stream_not_in_list"),
+        case(200, True, None, id="muted_stream_after_divider"),
+    ],
+)
+def test_set_count__stream_list_with_divider(
+    mocker: MockerFixture,
+    message_stream_id: int,
+    is_muted_stream: bool,
+    updated_button_index: Optional[int],
+) -> None:
+    message = {
+        "id": 1,
+        "type": "stream",
+        "sender_id": 2,
+        "stream_id": message_stream_id,
+        "subject": "topic",
+        "flags": [],
+    }
+    unread_counts: Dict[str, Any] = {
+        "unread_topics": {},
+        "streams": {},
+        "unread_pms": {},
+        "unread_huddles": {},
+        "all_mentions": 0,
+        "all_msg": 0,
+        "all_pms": 0,
+    }
+
+    controller = mocker.Mock()
+    controller.model.user_id = 1
+    controller.model.index = {"messages": {1: message}}
+    controller.model.unread_counts = unread_counts
+    controller.model.is_muted_stream.return_value = is_muted_stream
+    controller.model.is_muted_topic.return_value = False
+    controller.view.left_panel.is_in_topic_view = False
+
+    # Pinned stream, then the divider, then an unpinned stream.
+    # StreamsViewDivider is not a real stream, but has a placeholder
+    # stream_id of -1 so that it never matches a message's stream_id
+    # in set_count; that is what this test guards.
+    streams_btn_list = [
+        mocker.Mock(stream_id=100, count=0),
+        StreamsViewDivider(),
+        mocker.Mock(stream_id=200, count=0),
+    ]
+    controller.view.stream_w.streams_btn_list = streams_btn_list
+
+    set_count([1], controller, 1)
+
+    for index, button in enumerate(streams_btn_list):
+        if isinstance(button, StreamsViewDivider):
+            continue
+        if index == updated_button_index:
+            button.update_count.assert_called_once_with(1)
+        else:
+            button.update_count.assert_not_called()
+    assert unread_counts["streams"] == {message_stream_id: 1}
+    if is_muted_stream:
+        controller.view.home_button.update_count.assert_not_called()
+    else:
+        controller.view.home_button.update_count.assert_called_once_with(1)
+    controller.update_screen.assert_called_once_with()
 
 
 @pytest.mark.parametrize(
