@@ -1,10 +1,12 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import pytest
 from pytest import param as case
 
 from zulipterminal.widget import (
+    PollOption,
     Submessage,
+    TodoTask,
     find_widget_type,
     process_poll_widget,
     process_todo_widget,
@@ -342,7 +344,7 @@ def test_find_widget_type(
 def test_process_todo_widget(
     submessages: List[Submessage],
     expected_title: str,
-    expected_tasks: Dict[str, Dict[str, Union[str, bool]]],
+    expected_tasks: Dict[str, TodoTask],
 ) -> None:
     title, tasks = process_todo_widget(submessages)
 
@@ -657,7 +659,7 @@ def test_process_todo_widget(
 def test_process_poll_widget(
     submessages: List[Submessage],
     expected_poll_question: str,
-    expected_options: Dict[str, Dict[str, Union[str, List[str]]]],
+    expected_options: Dict[str, PollOption],
 ) -> None:
     poll_question, options = process_poll_widget(submessages)
 

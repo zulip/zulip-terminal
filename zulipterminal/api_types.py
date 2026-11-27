@@ -1,6 +1,7 @@
 """
 Types from the Zulip API, translated into python, to improve type checking
 """
+
 # NOTE: Only modify this file if it leads to a better match to the types used
 #       in the API at http://zulip.com/api
 
@@ -181,6 +182,14 @@ class SubscriptionSettingChange(TypedDict):
 ## TODO: Improve this typing to split private and stream message data
 
 
+class Submessage(TypedDict):
+    id: int
+    message_id: int
+    sender_id: int
+    msg_type: str
+    content: str
+
+
 class Message(TypedDict, total=False):
     id: int
     sender_id: int
@@ -195,7 +204,7 @@ class Message(TypedDict, total=False):
     subject_links: List[str]
     is_me_message: bool
     reactions: List[Dict[str, Any]]
-    submessages: List[Dict[str, Any]]
+    submessages: List[Submessage]
     flags: List[MessageFlag]
     sender_full_name: str
     sender_email: str
