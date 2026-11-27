@@ -31,6 +31,9 @@ Please include as many of the following as possible:
 - **Python version (and implementation):**
   eg. 3.8, 3.9, 3.10, ... (implementation is likely to be eg. CPython, or PyPy)
 
-If possible, please provide details from the `About` menu: (hotkey: Meta + ?)
-(this can provide some of the details above)
+<!-- Most of these above details can be copied from the `About` menu (hotkey: Meta + ?).
+Press c on the popup to copy the information to the clipboard and paste it below. -->
+```
+
+```
 
