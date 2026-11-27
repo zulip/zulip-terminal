@@ -622,3 +622,47 @@ class TestController:
             set_footer_text.assert_called_once_with()
         assert controller.is_typing_notification_in_progress is False
         assert controller.active_conversation_info == {}
+
+    def test_show_typing_notification_handles_concurrent_stop(
+        self,
+        mocker: MockerFixture,
+        controller: Controller,
+    ) -> None:
+        """
+        Regression test for #1501.
+
+        A `stop` typing event handled concurrently (model._handle_typing_event)
+        reassigns controller.active_conversation_info to a new {} rather than
+        mutating the current dict. show_typing_notification's loop used to
+        read self.active_conversation_info a second time to index
+        "sender_name", after already checking it was truthy in the while
+        condition; if the reassignment happened in between, that raised an
+        unhandled KeyError instead of cleanly ending the loop. This crashed
+        intermittently (timing-dependent), matching the flakiness reported in
+        the issue.
+
+        Run many trials with very short delays before the "stop" to make the
+        race window as small as possible and surface a regression reliably.
+        """
+        set_footer_text = mocker.patch(VIEW + ".set_footer_text")
+        mocker.patch(MODULE + ".time.sleep")
+
+        for delay in (0.0, 0.001):
+            for _ in range(50):
+                controller.active_conversation_info = {"sender_name": "hamlet"}
+                controller.is_typing_notification_in_progress = False
+
+                def mock_typing() -> None:
+                    controller.active_conversation_info = {}
+
+                timer = Timer(delay, mock_typing)
+                timer.start()
+                # @asynch runs synchronously under pytest (PYTEST_CURRENT_TEST
+                # is set), so this call races directly against the Timer's
+                # thread rather than spawning its own thread.
+                controller.show_typing_notification()
+                timer.join()
+
+        assert controller.is_typing_notification_in_progress is False
+        assert controller.active_conversation_info == {}
+        set_footer_text.assert_called_with()
