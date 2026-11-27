@@ -323,6 +323,12 @@ class StreamsView(urwid.Frame):
         self.log = urwid.SimpleFocusListWalker(streams_btn_list)
         self.streams_btn_list = streams_btn_list
         self.focus_index_before_search = 0
+        # Initialize search_lock before super().__init__() to prevent an
+        # AttributeError if an external pinning event triggers update_streams
+        # (via @asynch) before construction completes (see issue #1487).
+        self.search_lock = threading.Lock()
+        self.empty_search = False
+
         list_box = urwid.ListBox(self.log)
         self.stream_search_box = PanelSearchBox(
             self, "SEARCH_STREAMS", self.update_streams
@@ -333,8 +339,6 @@ class StreamsView(urwid.Frame):
                 [self.stream_search_box, urwid.Divider(SECTION_DIVIDER_LINE)]
             ),
         )
-        self.search_lock = threading.Lock()
-        self.empty_search = False
 
     @asynch
     def update_streams(self, search_box: Any, new_text: str) -> None:
@@ -898,7 +902,26 @@ class LeftColumnView(urwid.Pile):
         )
 
     def update_stream_view(self) -> None:
+        old_stream_id = None
+        old_search_text = ""
+        if hasattr(self.view, "stream_w"):
+            widget, _ = self.view.stream_w.log.get_focus()
+            if widget is not None and hasattr(widget, "stream_id"):
+                old_stream_id = widget.stream_id
+            old_search_text = self.view.stream_w.stream_search_box.edit_text
+
         self.stream_v = self.streams_view()
+
+        # Restore focus by finding the same stream in the rebuilt list.
+        if old_stream_id is not None:
+            for i, widget in enumerate(self.view.stream_w.log):
+                if hasattr(widget, "stream_id") and widget.stream_id == old_stream_id:
+                    self.view.stream_w.log.set_focus(i)
+                    break
+
+        if old_search_text:
+            self.view.stream_w.stream_search_box.set_edit_text(old_search_text)
+
         if not self.is_in_topic_view:
             self.show_stream_view()
 
