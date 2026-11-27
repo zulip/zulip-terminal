@@ -984,6 +984,7 @@ class Model:
         unread_topics = sort_unread_topics(
             self.unread_counts["unread_topics"],
             left_panel_stream_list,
+            self.index["topic_msg_ids"],
         )
         next_topic = False
         stream_start: Optional[Tuple[int, str]] = None
@@ -997,6 +998,7 @@ class Model:
             unread_topics = sort_unread_topics(
                 {**self.unread_counts["unread_topics"], current_topic: 0},
                 left_panel_stream_list,
+                self.index["topic_msg_ids"],
             )
         # loop over unread_topics list twice for the case that last_unread_topic was
         # the last valid unread_topic in unread_topics list.
