@@ -1,4 +1,4 @@
-.PHONY: install-devel check lint test check-clean-tree fix force-fix venv
+.PHONY: install-devel check lint test check-clean-tree fix force-fix venv debug debug-profile debug-clean
 
 # NOTE: ZT_VENV and BASEPYTHON are advanced undocumented features
 # Customize your venv name by running make as "ZT_VENV=my_venv_name make <command>"
@@ -23,6 +23,20 @@ lint: venv
 
 test: venv
 	@pytest
+
+### DEBUG TARGETS ###
+
+debug: venv
+	@echo "=== Running with debug enabled ==="
+	$(PYTHON) -m zulipterminal.cli.run -d
+
+debug-profile: venv
+	@echo "=== Running with profiling enabled ==="
+	$(PYTHON) -m zulipterminal.cli.run --profile
+
+debug-clean:
+	@echo "=== Cleaning debug files ==="
+	rm -f debug.log zulip-terminal.prof zulip-terminal-tracebacks.log
 
 ### FIX FILES ###
 
