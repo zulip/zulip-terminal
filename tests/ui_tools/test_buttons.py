@@ -178,6 +178,14 @@ class TestTopButton:
         )
         set_attr_map.assert_called_once_with({None: top_button.label_style})
 
+    def test_activate(self, mocker: MockerFixture, top_button: TopButton) -> None:
+        show_function = mocker.patch.object(top_button, "show_function")
+
+        top_button.activate("key")
+
+        assert top_button.controller.view.focus_panel == 1
+        show_function.assert_called_once_with()
+
 
 class TestPMButton:
     def test_button_text_length(self, mocker: MockerFixture, count: int = 10) -> None:

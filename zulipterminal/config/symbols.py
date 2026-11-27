@@ -70,6 +70,16 @@ POPUP_CONTENT_BORDER = dict(
     bline="▄",  # LOWER HALF BLOCK, U+2584
     brcorner="▟",  # QUADRANT UPPER RIGHT AND LOWER LEFT AND LOWER RIGHT, U+259F (v3.2)
 )
+# Avoids vertical lines, which screen readers read out, for single_panel layout
+POPUP_CONTENT_BORDER_NO_SIDES = dict(
+    POPUP_CONTENT_BORDER,
+    tlcorner=POPUP_CONTENT_BORDER["tline"],
+    trcorner=POPUP_CONTENT_BORDER["tline"],
+    lline="",
+    rline="",
+    blcorner=POPUP_CONTENT_BORDER["bline"],
+    brcorner=POPUP_CONTENT_BORDER["bline"],
+)
 
 COMPOSE_HEADER_TOP = "━"  # BOX DRAWINGS HEAVY HORIZONTAL, U+2501 (Box drawing)
 COMPOSE_HEADER_BOTTOM = "─"  # BOX DRAWINGS LIGHT HORIZONTAL, U+2500 (Box drawing)
