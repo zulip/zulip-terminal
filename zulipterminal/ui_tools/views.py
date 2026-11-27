@@ -21,10 +21,14 @@ from zulipterminal.config.keys import (
 )
 from zulipterminal.config.markdown_examples import MARKDOWN_ELEMENTS
 from zulipterminal.config.symbols import (
+    ALL_MESSAGES_MARKER,
     CHECK_MARK,
     COLUMN_TITLE_BAR_LINE,
+    DIRECT_MESSAGE_MARKER,
+    MENTIONED_MESSAGES_MARKER,
     PINNED_STREAMS_DIVIDER,
     SECTION_DIVIDER_LINE,
+    STARRED_MESSAGES_MARKER,
 )
 from zulipterminal.config.ui_mappings import (
     BOT_TYPE_BY_ID,
@@ -63,6 +67,82 @@ from zulipterminal.urwid_types import urwid_Size
 
 MIDDLE_COLUMN_MOUSE_SCROLL_LINES = 1
 SIDE_PANELS_MOUSE_SCROLL_LINES = 5
+
+
+class EmptyNarrowPlaceholder(urwid.WidgetWrap):
+    """
+    Focusable placeholder shown when a narrow contains no messages.
+    Implements recipient_header() and top_search_bar() so the search box
+    updates correctly even when there is nothing to focus on in the message
+    list.
+    """
+
+    def __init__(self, model: Any) -> None:
+        self.model = model
+        text = urwid.Text("No messages here.", align="center")
+        super().__init__(text)
+
+    def recipient_header(self) -> Any:
+        title = urwid.Text("")
+        header = urwid.AttrWrap(title, "bar")
+        header.markup = ""
+        return header
+
+    def top_search_bar(self) -> Any:
+        curr_narrow = self.model.narrow
+        is_search_narrow = self.model.is_search_narrow()
+        if is_search_narrow:
+            curr_narrow = [
+                sub_narrow for sub_narrow in curr_narrow if sub_narrow[0] != "search"
+            ]
+        else:
+            self.model.controller.view.search_box.text_box.set_edit_text("")
+        if curr_narrow == []:
+            text_to_fill = f" {ALL_MESSAGES_MARKER} All messages "
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "private":
+            text_to_fill = f" {DIRECT_MESSAGE_MARKER} All direct messages "
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "starred":
+            text_to_fill = f" {STARRED_MESSAGES_MARKER} Starred messages "
+        elif len(curr_narrow) == 1 and curr_narrow[0][1] == "mentioned":
+            text_to_fill = f" {MENTIONED_MESSAGES_MARKER} Mentions "
+        elif curr_narrow[0][0] == "stream":
+            stream_id = self.model.stream_id
+            assert stream_id is not None
+            bar_color = f"s{self.model.stream_dict[stream_id]['color']}"
+            stream_access_type = self.model.stream_access_type(stream_id)
+            stream_icon = STREAM_ACCESS_TYPE[stream_access_type]["icon"]
+            stream_name = self.model.stream_dict[stream_id]["name"]
+            if len(curr_narrow) == 2 and curr_narrow[1][0] == "topic":
+                text_to_fill = (
+                    "bar",  # type: ignore[assignment]
+                    (bar_color, f" {stream_icon} {stream_name}: topic narrow "),
+                )
+            else:
+                text_to_fill = (
+                    "bar",  # type: ignore[assignment]
+                    (bar_color, f" {stream_icon} {stream_name} "),
+                )
+        elif len(curr_narrow) == 1 and len(curr_narrow[0][1].split(",")) > 1:
+            text_to_fill = (
+                f" {DIRECT_MESSAGE_MARKER} Group direct message conversation "
+            )
+        else:
+            text_to_fill = f" {DIRECT_MESSAGE_MARKER} Direct message conversation "
+        if is_search_narrow:
+            title_markup = (
+                "header",
+                [
+                    ("general_narrow", text_to_fill),
+                    (None, " "),
+                    ("filter_results", "Search Results"),
+                ],
+            )
+        else:
+            title_markup = ("header", [("general_narrow", text_to_fill)])
+        title = urwid.Text(title_markup)
+        header = urwid.AttrWrap(title, "bar")
+        header.markup = title_markup
+        return header
 
 
 class ModListWalker(urwid.SimpleFocusListWalker):
@@ -201,7 +281,9 @@ class MessageView(urwid.ListBox):
 
                 return key
             except Exception:
-                if self.focus:
+                if self.focus and not isinstance(
+                    self.focus.original_widget, EmptyNarrowPlaceholder
+                ):
                     id = self.focus.original_widget.message["id"]
                     self.load_new_messages(id)
                 return key
@@ -213,7 +295,9 @@ class MessageView(urwid.ListBox):
                 self.set_focus_valign("middle")
                 return key
             except Exception:
-                if self.focus:
+                if self.focus and not isinstance(
+                    self.focus.original_widget, EmptyNarrowPlaceholder
+                ):
                     id = self.focus.original_widget.message["id"]
                     self.load_old_messages(id)
                 return key
@@ -230,15 +314,27 @@ class MessageView(urwid.ListBox):
             else:
                 return super().keypress(size, primary_key_for_command("SCROLL_DOWN"))
 
-        elif is_command_key("THUMBS_UP", key) and self.focus is not None:
+        elif (
+            is_command_key("THUMBS_UP", key)
+            and self.focus is not None
+            and not isinstance(self.focus.original_widget, EmptyNarrowPlaceholder)
+        ):
             message = self.focus.original_widget.message
             self.model.toggle_message_reaction(message, reaction_to_toggle="thumbs_up")
 
-        elif is_command_key("TOGGLE_STAR_STATUS", key) and self.focus is not None:
+        elif (
+            is_command_key("TOGGLE_STAR_STATUS", key)
+            and self.focus is not None
+            and not isinstance(self.focus.original_widget, EmptyNarrowPlaceholder)
+        ):
             message = self.focus.original_widget.message
             self.model.toggle_message_star_status(message)
 
-        elif is_command_key("REACTION_AGREEMENT", key) and self.focus is not None:
+        elif (
+            is_command_key("REACTION_AGREEMENT", key)
+            and self.focus is not None
+            and not isinstance(self.focus.original_widget, EmptyNarrowPlaceholder)
+        ):
             message = self.focus.original_widget.message
             message_reactions = message["reactions"]
             if message_reactions:
@@ -272,6 +368,9 @@ class MessageView(urwid.ListBox):
         if msg_w is None:
             return
         self.update_search_box_narrow(msg_w.original_widget)
+
+        if isinstance(msg_w.original_widget, EmptyNarrowPlaceholder):
+            return
 
         # Do not read messages in explore mode.
         if self.model.controller.in_explore_mode:
