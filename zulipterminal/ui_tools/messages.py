@@ -650,9 +650,8 @@ class MessageBox(urwid.Pile):
         message = {
             key: {
                 "is_starred": "starred" in msg["flags"],
-                "author": (
-                    msg["sender_full_name"] if "sender_full_name" in msg else None
-                ),
+                "author": 
+                    msg.get("sender_id"),
                 "time": (
                     self.model.formatted_local_time(
                         msg["timestamp"], show_seconds=False
@@ -690,7 +689,7 @@ class MessageBox(urwid.Pile):
             text: Dict[str, urwid_MarkupTuple] = {key: (None, " ") for key in text_keys}
 
             if any(different[key] for key in ("recipients", "author", "24h")):
-                text["author"] = ("msg_sender", message["this"]["author"])
+                text["author"] = ("msg_sender", self.message["sender_full_name"])
 
                 # TODO: Refactor to use user ids for look up instead of emails.
                 email = self.message.get("sender_email", "")
