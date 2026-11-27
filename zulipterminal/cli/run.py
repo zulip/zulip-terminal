@@ -11,6 +11,7 @@ import sys
 import traceback
 from enum import Enum
 from os import path, remove
+from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import requests
@@ -26,8 +27,16 @@ from zulipterminal.config.themes import (
 )
 from zulipterminal.core import Controller
 from zulipterminal.model import ServerConnectionFailure
-from zulipterminal.platform_code import detected_platform, detected_python_in_full
+from zulipterminal.platform_code import (
+    detected_platform,
+    detected_python_in_full,
+    xdg_config_home,
+)
 from zulipterminal.version import ZT_VERSION
+
+
+HOME_PATH_ZULIPRC = str(Path.home() / "zuliprc")
+CONFIG_PATH = str(xdg_config_home() / "zulip-terminal")
 
 
 class ConfigSource(Enum):
@@ -125,6 +134,25 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         description=description, formatter_class=formatter_class
     )
     parser.add_argument(
+        "account-alias",
+        nargs="?",
+        action="store",
+        default="",
+        help="specify the chosen alias of your zulip account "
+        "to fetch its configuration",
+    )
+    parser.add_argument(
+        "-n",
+        "--new-account",
+        action="store_true",
+        help="login to a new account",
+    )
+    parser.add_argument(
+        "--list-accounts",
+        action="store_true",
+        help="list the aliases of all your zulip accounts, and exit",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -136,7 +164,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         "-c",
         action="store",
         help="config file downloaded from your zulip "
-        "organization (default: ~/zuliprc)",
+        f"organization (default: {CONFIG_PATH}/account_alias/zuliprc)",
     )
     parser.add_argument(
         "--theme",
@@ -257,7 +285,7 @@ def get_server_settings(realm_url: str) -> ServerSettings:
     return response.json()
 
 
-def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
+def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str, str]]:
     from getpass import getpass
 
     try:
@@ -272,6 +300,12 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
     login_id_label = get_login_label(server_properties)
     login_id = styled_input(login_id_label)
     password = getpass(in_color("blue", "Password: "))
+    account_alias = styled_input(
+        "Please choose a simple and unique name for this account,"
+        " which represents your user profile and its server."
+        " Use only letters, numbers, and underscores.\n"
+        "Account alias: "
+    )
 
     response = requests.post(
         url=f"{preferred_realm_url}/api/v1/fetch_api_key",
@@ -281,13 +315,20 @@ def get_api_key(realm_url: str) -> Optional[Tuple[str, str, str]]:
         },
     )
     if response.status_code == requests.codes.OK:
-        return preferred_realm_url, login_id, str(response.json()["api_key"])
+        return (
+            preferred_realm_url,
+            login_id,
+            str(response.json()["api_key"]),
+            account_alias,
+        )
     return None
 
 
-def fetch_zuliprc(zuliprc_path: str) -> None:
+def login_and_save() -> str:
+    """
+    Prompts the user for their login credentials and saves them to a zuliprc file.
+    """
     print(
-        f"{in_color('red', f'zuliprc file was not found at {zuliprc_path}')}"
         f"\nPlease enter your credentials to login into your Zulip organization."
         f"\n"
         f"\nNOTE: The {in_color('blue', 'Zulip server URL')}"
@@ -311,7 +352,8 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(in_color("red", "\nIncorrect Email(or Username) or Password!\n"))
         login_data = get_api_key(realm_url)
 
-    preferred_realm_url, login_id, api_key = login_data
+    preferred_realm_url, login_id, api_key, account_alias = login_data
+    zuliprc_path = os.path.join(CONFIG_PATH, account_alias, "zuliprc")
     save_zuliprc_failure = _write_zuliprc(
         zuliprc_path,
         login_id=login_id,
@@ -322,6 +364,7 @@ def fetch_zuliprc(zuliprc_path: str) -> None:
         print(f"Generated API key saved at {zuliprc_path}")
     else:
         exit_with_error(save_zuliprc_failure)
+    return zuliprc_path
 
 
 def _write_zuliprc(
@@ -332,6 +375,7 @@ def _write_zuliprc(
     Only creates new private files; errors if file already exists
     """
     try:
+        Path(to_path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         with open(
             os.open(to_path, os.O_CREAT | os.O_WRONLY | os.O_EXCL, 0o600), "w"
         ) as f:
@@ -343,21 +387,61 @@ def _write_zuliprc(
         return f"{ex.__class__.__name__}: zuliprc could not be created at {to_path}"
 
 
-def parse_zuliprc(zuliprc_str: str) -> Dict[str, SettingData]:
-    zuliprc_path = path.expanduser(zuliprc_str)
-    while not path.exists(zuliprc_path):
+def resolve_to_valid_path(zuliprc_str: Optional[str], is_new_account: bool) -> str:
+    """
+    Returns the path to a valid zuliprc file.
+    If a path is not provided by the user, searches the default locations.
+    If none are found or the path provided is invalid, prompts the user to login
+    and returns the path to the created zuliprc file.
+    """
+    zuliprc_path = (
+        check_for_default_zuliprc()
+        if zuliprc_str is None
+        else path.expanduser(zuliprc_str)
+    )
+    while zuliprc_path is None or not path.exists(zuliprc_path):
+        if not is_new_account:
+            print(
+                f"{in_color('red', 'zuliprc file was not found')}"
+                f"{in_color('red', f' at {zuliprc_path}')}"
+                if zuliprc_path
+                else "."
+            )
         try:
-            fetch_zuliprc(zuliprc_path)
+            zuliprc_path = login_and_save()
         # Invalid user inputs (e.g. pressing arrow keys) may cause ValueError
         except (OSError, ValueError):
             # Remove zuliprc file if created.
-            if path.exists(zuliprc_path):
+            if zuliprc_path is not None and path.exists(zuliprc_path):
                 remove(zuliprc_path)
             print(in_color("red", "\nInvalid Credentials, Please try again!\n"))
         except EOFError:
             # Assume that the user pressed Ctrl+D and continue the loop
             print("\n")
+    return zuliprc_path
 
+
+def check_for_default_zuliprc() -> Optional[str]:
+    zuliprc_count_in_config = (
+        sum(1 for _ in Path(CONFIG_PATH).glob("*/zuliprc"))
+        if path.exists(CONFIG_PATH)
+        else 0
+    )
+    home_path_count = path.exists(HOME_PATH_ZULIPRC)
+    total_count = zuliprc_count_in_config + home_path_count
+
+    if total_count == 1:
+        return HOME_PATH_ZULIPRC if home_path_count else CONFIG_PATH
+    if total_count > 1:
+        exit_with_error(
+            "Found multiple zuliprc configuration files. Please retry by specifying"
+            " the path to your target zuliprc file by running\n"
+            "`zulip-term --config-file path/to/your/zuliprc`"
+        )
+    return None
+
+
+def parse_zuliprc(zuliprc_path: str) -> Dict[str, SettingData]:
     mode = os.stat(zuliprc_path).st_mode
     is_readable_by_group_or_others = mode & (stat.S_IRWXG | stat.S_IRWXO)
 
@@ -413,6 +497,17 @@ def list_themes() -> str:
     )
 
 
+def list_accounts() -> str:
+    if not path.exists(CONFIG_PATH):
+        exit_with_error(f"Config folder not found at {CONFIG_PATH}.")
+    valid_accounts = [file.parent.name for file in Path(CONFIG_PATH).glob("*/zuliprc")]
+    if len(valid_accounts) == 0:
+        exit_with_error("No accounts found.")
+    return "Configurations for the following accounts are available:\n  " "\n  ".join(
+        valid_accounts
+    )
+
+
 def main(options: Optional[List[str]] = None) -> None:
     """
     Launch Zulip Terminal.
@@ -451,10 +546,23 @@ def main(options: Optional[List[str]] = None) -> None:
         print(list_themes())
         sys.exit(0)
 
+    if args.list_accounts:
+        print(list_accounts())
+        sys.exit(0)
+
+    zuliprc_path = None
+    account_alias = getattr(args, "account-alias")
+    if account_alias:
+        if args.config_file:
+            exit_with_error("Cannot use account-alias and --config-file together")
+        zuliprc_path = os.path.join(CONFIG_PATH, account_alias, "zuliprc")
+        if not path.exists(zuliprc_path):
+            exit_with_error(
+                f"Account alias {account_alias} not found\n" f"{list_accounts()}"
+            )
     if args.config_file:
         zuliprc_path = args.config_file
-    else:
-        zuliprc_path = "~/zuliprc"
+    zuliprc_path = resolve_to_valid_path(zuliprc_path, args.new_account)
 
     print(
         "Detected:"
