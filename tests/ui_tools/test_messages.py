@@ -20,7 +20,7 @@ from zulipterminal.config.symbols import (
     STREAM_TOPIC_SEPARATOR,
     TIME_MENTION_MARKER,
 )
-from zulipterminal.ui_tools.messages import MessageBox
+from zulipterminal.ui_tools.messages import _HR_TOKEN, MessageBox
 
 
 MODULE = "zulipterminal.ui_tools.messages"
@@ -418,8 +418,8 @@ class TestMessageBox:
             ),
             case("<br>", [], id="br"),
             case("<br/>", [], id="br2"),
-            case("<hr>", ["[RULER NOT RENDERED]"], id="hr"),
-            case("<hr/>", ["[RULER NOT RENDERED]"], id="hr2"),
+            case("<hr>", [_HR_TOKEN], id="hr"),
+            case("<hr/>", [_HR_TOKEN], id="hr2"),
             case("<img>", ["[IMAGE NOT RENDERED]"], id="img"),
             case("<img/>", ["[IMAGE NOT RENDERED]"], id="img2"),
             case(
@@ -1590,9 +1590,44 @@ class TestMessageBox:
         expected_content = expected_content.replace("{}", QUOTED_TEXT_MARKER)
 
         content, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
+        rows = []
+        contents = content.contents
+        assert isinstance(contents, list)
+        for widget, _ in contents:
+            assert isinstance(widget, Text)
+            rows.append(widget.text)
 
-        rendered_text = Text(content)
-        assert rendered_text.text == expected_content
+        rendered = "\n".join(rows)
+
+        assert rendered == expected_content
+
+    @pytest.mark.parametrize(
+        "raw_html, expected_content",
+        [
+            case("<p>hi</p><hr>", ["hi", "<hr>"], id="hr_after_paragraph"),
+            case("<hr><p>hi</p>", ["", "<hr>", "hi"], id="hr_before_paragraph"),
+            case(
+                "<p>hi</p><hr><p>there</p>",
+                ["hi", "<hr>", "there"],
+                id="hr_between_paragraphs_with_newlines",
+            ),
+        ],
+    )
+    def test_transform_content_hr(self, mocker, raw_html, expected_content):
+        content_widget, *_ = MessageBox.transform_content(raw_html, SERVER_URL)
+
+        rendered = []
+
+        rows = content_widget.contents
+        assert isinstance(rows, list)
+
+        for widget, _ in rows:
+            if isinstance(widget, Divider):
+                rendered.append("<hr>")
+            else:
+                assert isinstance(widget, Text)
+                rendered.append(widget.text)
+        assert rendered == expected_content
 
     # FIXME This is the same parametrize as MsgInfoView:test_height_reactions
     @pytest.mark.parametrize(
