@@ -311,8 +311,11 @@ def test_parse_args_valid_autohide_option(option: str, autohide: Optional[str]) 
     "options", [["--autohide", "--no-autohide"], ["--no-autohide", "--autohide"]]
 )
 def test_main_multiple_autohide_options(
-    capsys: CaptureFixture[str], options: List[str]
+    capsys: CaptureFixture[str], mocker: MockerFixture, options: List[str]
 ) -> None:
+    # argparse names the program from argv[0], which depends on how pytest is run
+    mocker.patch("sys.argv", ["zulip-term"])
+
     with pytest.raises(SystemExit) as e:
         main(options)
 
@@ -320,7 +323,7 @@ def test_main_multiple_autohide_options(
 
     captured = capsys.readouterr()
     lines = captured.err.strip("\n")
-    lines = lines.split("pytest: ", 1)[1]
+    lines = lines.split("zulip-term: ", 1)[1]
     expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
 
@@ -348,8 +351,11 @@ def test__parse_args_valid_notify_option(
     ],
 )
 def test_main_multiple_notify_options(
-    capsys: CaptureFixture[str], options: List[str]
+    capsys: CaptureFixture[str], mocker: MockerFixture, options: List[str]
 ) -> None:
+    # argparse names the program from argv[0], which depends on how pytest is run
+    mocker.patch("sys.argv", ["zulip-term"])
+
     with pytest.raises(SystemExit) as e:
         main(options)
 
@@ -357,7 +363,7 @@ def test_main_multiple_notify_options(
 
     captured = capsys.readouterr()
     lines = captured.err.strip("\n")
-    lines = lines.split("pytest: ", 1)[1]
+    lines = lines.split("zulip-term: ", 1)[1]
     expected = f"error: argument {options[1]}: not allowed with argument {options[0]}"
     assert lines == expected
 
