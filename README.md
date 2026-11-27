@@ -207,6 +207,12 @@ to get the hang of things.
 
 ## Configuration
 
+configuration conssist of two file:
+- zulip_key, file contains the api_key
+- zuliprc, file consist of login configurations
+
+The `zulip_key`contains only the api_key.
+
 The `zuliprc` file contains two sections:
 - an `[api]` section with information required to connect to your Zulip server
 - a `[zterm]` section with configuration specific to `zulip-term`
@@ -216,13 +222,15 @@ A file with only the first section can be auto-generated in some cases by
 above). Parts of the second section can be added and adjusted in stages when
 you wish to customize the behavior of `zulip-term`.
 
+If you’re downloading the config file from your Zulip account, you should replace the `key` field with `passcmd`, setting its value to a command that outputs the api_key (e.g., cat zulip_key). If you’re not downloading it manually, zulip-term will configure this for you automatically, though it’s recommended to update the passcmd value afterward for better security.
+
 The example below, with dummy `[api]` section contents, represents a working
 configuration file with all the default compatible `[zterm]` values uncommented
 and with accompanying notes:
 ```
 [api]
 email=example@example.com
-key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+passcmd=cat zulip_key
 site=https://example.zulipchat.com
 
 [zterm]
@@ -256,6 +264,7 @@ transparency=disabled
 ## If not set, this falls back to the $ZULIP_EDITOR_COMMAND then $EDITOR environment variables
 # editor: nano
 ```
+
 
 > **NOTE:** Most of these configuration settings may be specified on the
 command line when `zulip-term` is started; `zulip-term -h` or `zulip-term --help`
