@@ -29,6 +29,17 @@ MODULE = "zulipterminal.ui_tools.messages"
 SERVER_URL = "https://chat.zulip.zulip"
 
 
+def todo_tasks(*tasks):
+    """
+    Generates to-do tasks in the processed form returned by process_todo_widget,
+    from (task, description, completed) tuples
+    """
+    return {
+        f"{index},canned": {"task": task, "desc": desc, "completed": completed}
+        for index, (task, desc, completed) in enumerate(tasks)
+    }
+
+
 class TestMessageBox:
     @pytest.fixture(autouse=True)
     def mock_external_classes(self, mocker, initial_index):
@@ -798,6 +809,61 @@ class TestMessageBox:
         name_index = 11 if is_me_message else -1  # 11 = len(<str><strong>)
         assert (
             msg_box.message["content"].find(message["sender_full_name"]) == name_index
+        )
+
+    @pytest.mark.parametrize(
+        "tasks, expected_task_lines",
+        [
+            case({}, [], id="no_tasks"),
+            case(
+                todo_tasks(("Wash", "", False)),
+                ["1. [ ] <strong>Wash</strong>"],
+                id="incomplete_task",
+            ),
+            case(
+                todo_tasks(("Wash", "", True)),
+                ["1. [✔] <strong>Wash</strong>"],
+                id="completed_task",
+            ),
+            case(
+                todo_tasks(("Wash", "the dishes", False)),
+                ["1. [ ] <strong>Wash</strong>: the dishes"],
+                id="task_with_description",
+            ),
+            case(
+                todo_tasks(("Wash", "", True), ("Cook", "dinner", False)),
+                [
+                    "1. [✔] <strong>Wash</strong>",
+                    "2. [ ] <strong>Cook</strong>: dinner",
+                ],
+                id="multiple_tasks",
+            ),
+        ],
+    )
+    def test_main_view_renders_todo_widget(self, mocker, tasks, expected_task_lines):
+        mocker.patch(MODULE + ".urwid.Text")
+        mocker.patch(MODULE + ".find_widget_type", return_value="todo")
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Chores", tasks))
+        message = {
+            "id": 4,
+            "type": "stream",
+            "display_recipient": "Verona",
+            "stream_id": 5,
+            "subject": "Test topic",
+            "flags": [],
+            "is_me_message": False,
+            "content": "<p>/todo</p>",
+            "reactions": [],
+            "sender_full_name": "Alice",
+            "timestamp": 1532103879,
+            "submessages": [{"msg_type": "widget"}],
+        }
+        msg_box = MessageBox(message, self.model, message)
+
+        msg_box.main_view()
+
+        assert msg_box.message["content"] == "\n".join(
+            ["<strong>To-do</strong>", "<strong>Chores</strong>", *expected_task_lines]
         )
 
     @pytest.mark.parametrize(
@@ -1922,3 +1988,244 @@ class TestMessageBox:
             msg_box.keypress.assert_not_called()
         else:
             msg_box.keypress.assert_called_once_with(size, expected_keypress)
+
+    @pytest.mark.parametrize(
+        "key, expected_helper, expected_args",
+        [
+            *[
+                case(
+                    key,
+                    "_toggle_todo_task_by_number",
+                    (number,),
+                    id=f"TODO_TOGGLE_TASK_{number}",
+                )
+                for number, key in enumerate(
+                    keys_for_command("TODO_TOGGLE_TASK"), start=1
+                )
+            ],
+            *[
+                case(key, "_rename_todo_list", (), id=f"TODO_RENAME_{key}")
+                for key in keys_for_command("TODO_RENAME")
+            ],
+            *[
+                case(key, "_add_todo_task", (), id=f"TODO_ADD_{key}")
+                for key in keys_for_command("TODO_ADD")
+            ],
+        ],
+    )
+    def test_keypress__todo_widget(
+        self, mocker, msg_box, widget_size, key, expected_helper, expected_args
+    ):
+        mocker.patch(MODULE + ".find_widget_type", return_value="todo")
+        helper = mocker.patch.object(msg_box, expected_helper)
+        size = widget_size(msg_box)
+
+        return_value = msg_box.keypress(size, key)
+
+        assert return_value is None
+        helper.assert_called_once_with(*expected_args)
+
+    @pytest.mark.parametrize(
+        "key, todo_helper",
+        [
+            *[
+                case(key, "_toggle_todo_task_by_number", id=f"TODO_TOGGLE_TASK_{key}")
+                for key in keys_for_command("TODO_TOGGLE_TASK")
+            ],
+            *[
+                case(key, "_rename_todo_list", id=f"TODO_RENAME_{key}")
+                for key in keys_for_command("TODO_RENAME")
+            ],
+            *[
+                case(key, "_add_todo_task", id=f"TODO_ADD_{key}")
+                for key in keys_for_command("TODO_ADD")
+            ],
+        ],
+    )
+    def test_keypress__not_todo_widget(
+        self, mocker, msg_box, widget_size, key, todo_helper
+    ):
+        mocker.patch(MODULE + ".find_widget_type", return_value="poll")
+        helper = mocker.patch.object(msg_box, todo_helper)
+        size = widget_size(msg_box)
+
+        msg_box.keypress(size, key)
+
+        helper.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "number_of_tasks, task_number, "
+        "expected_task_key, expected_warning, expected_error",
+        [
+            case(2, 1, "0,canned", None, None, id="first_task"),
+            case(2, 2, "1,canned", None, None, id="last_task"),
+            case(2, 3, None, None, " No such to-do task.", id="no_such_task"),
+            case(
+                10,
+                1,
+                "0,canned",
+                " This to-do list has 10 tasks, but only the first 9 can be toggled.",
+                None,
+                id="more_tasks_than_toggle_keys",
+            ),
+        ],
+    )
+    def test__toggle_todo_task_by_number(
+        self,
+        mocker,
+        msg_box,
+        number_of_tasks,
+        task_number,
+        expected_task_key,
+        expected_warning,
+        expected_error,
+    ):
+        tasks = todo_tasks(*[("Task", "", False)] * number_of_tasks)
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Title", tasks))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        model = msg_box.model
+
+        msg_box._toggle_todo_task_by_number(task_number)
+
+        if expected_task_key:
+            model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], {"type": "strike", "key": expected_task_key}
+            )
+        else:
+            model.send_widget_submessage.assert_not_called()
+        if expected_warning:
+            model.controller.report_warning.assert_called_once_with([expected_warning])
+        else:
+            model.controller.report_warning.assert_not_called()
+        if expected_error:
+            model.controller.report_error.assert_called_once_with([expected_error])
+        else:
+            model.controller.report_error.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "sender_id, expect_popup",
+        [
+            case(42, True, id="creator"),
+            case(1, False, id="not_creator"),
+        ],
+    )
+    def test__rename_todo_list(self, mocker, msg_box, sender_id, expect_popup):
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Old title", {}))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box.message["sender_id"] = sender_id
+        msg_box.model.user_id = 42
+        controller = msg_box.model.controller
+
+        msg_box._rename_todo_list()
+
+        if expect_popup:
+            controller.show_todo_text_input_popup.assert_called_once()
+            _, popup_kwargs = controller.show_todo_text_input_popup.call_args
+            assert popup_kwargs["fields"] == [("Title:", "Old title")]
+            controller.report_error.assert_not_called()
+        else:
+            controller.show_todo_text_input_popup.assert_not_called()
+            controller.report_error.assert_called_once_with(
+                [" Only the creator can rename this to-do list."]
+            )
+
+    @pytest.mark.parametrize(
+        "submitted_title, expected_submessage",
+        [
+            case(
+                "New title",
+                {"type": "new_task_list_title", "title": "New title"},
+                id="title_sent",
+            ),
+            case("", None, id="empty_title_not_sent"),
+        ],
+    )
+    def test__rename_todo_list__on_submit(
+        self, mocker, msg_box, submitted_title, expected_submessage
+    ):
+        mocker.patch(MODULE + ".process_todo_widget", return_value=("Old title", {}))
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box.message["sender_id"] = msg_box.model.user_id
+        msg_box._rename_todo_list()
+        _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
+
+        popup_kwargs["on_submit"]([submitted_title])
+
+        if expected_submessage:
+            msg_box.model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], expected_submessage
+            )
+        else:
+            msg_box.model.send_widget_submessage.assert_not_called()
+
+    def test__add_todo_task(self, msg_box):
+        msg_box._add_todo_task()
+
+        show_popup = msg_box.model.controller.show_todo_text_input_popup
+        show_popup.assert_called_once()
+        _, popup_kwargs = show_popup.call_args
+        assert popup_kwargs["fields"] == [
+            ("Task:", ""),
+            ("Description (optional):", ""),
+        ]
+
+    @pytest.mark.parametrize(
+        "existing_tasks, submitted_values, expected_submessage",
+        [
+            case(
+                {},
+                ["Wash", ""],
+                {
+                    "type": "new_task",
+                    "task": "Wash",
+                    "desc": "",
+                    "key": 0,
+                    "completed": False,
+                },
+                id="first_task_without_description",
+            ),
+            case(
+                {},
+                ["Wash", "the dishes"],
+                {
+                    "type": "new_task",
+                    "task": "Wash",
+                    "desc": "the dishes",
+                    "key": 0,
+                    "completed": False,
+                },
+                id="first_task_with_description",
+            ),
+            case(
+                {"0,canned": {}, "1,canned": {}, "4,42": {}},
+                ["Cook", ""],
+                {
+                    "type": "new_task",
+                    "task": "Cook",
+                    "desc": "",
+                    "key": 5,
+                    "completed": False,
+                },
+                id="key_after_largest_existing_key",
+            ),
+            case({}, ["", "the dishes"], None, id="no_task_name_not_sent"),
+        ],
+    )
+    def test__add_todo_task__on_submit(
+        self, mocker, msg_box, existing_tasks, submitted_values, expected_submessage
+    ):
+        mocker.patch(
+            MODULE + ".process_todo_widget", return_value=("Title", existing_tasks)
+        )
+        msg_box.message["submessages"] = [{"msg_type": "widget"}]
+        msg_box._add_todo_task()
+        _, popup_kwargs = msg_box.model.controller.show_todo_text_input_popup.call_args
+
+        popup_kwargs["on_submit"](submitted_values)
+
+        if expected_submessage:
+            msg_box.model.send_widget_submessage.assert_called_once_with(
+                msg_box.message["id"], expected_submessage
+            )
+        else:
+            msg_box.model.send_widget_submessage.assert_not_called()

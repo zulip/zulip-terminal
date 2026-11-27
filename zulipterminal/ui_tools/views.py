@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import pytz
 import urwid
 from typing_extensions import Literal
+from urwid_readline import ReadlineEdit
 
 from zulipterminal.api_types import EditPropagateMode, Message
 from zulipterminal.config.keys import (
@@ -2181,4 +2182,65 @@ class EmojiPickerView(PopUpView):
             self.controller.exit_editor_mode()
             self.controller.exit_popup()
             return key
+        return super().keypress(size, key)
+
+
+class TodoTextInputPopup(PopUpView):
+    def __init__(
+        self,
+        controller: Any,
+        *,
+        title: str,
+        fields: Sequence[Tuple[str, str]],
+        on_submit: Callable[[List[str]], None],
+        footer_text: Optional[str] = None,
+    ) -> None:
+        """
+        Each field is a (prompt, initial text) pair, with the text of all fields
+        passed to on_submit in the same order.
+        """
+        self.controller = controller
+        self.title = title
+        self.command = "EXIT_POPUP"
+        self._on_submit = on_submit
+
+        max_cols, max_rows = controller.maximum_popup_dimensions()
+        requested_width = max(
+            60,
+            *(len(prompt) + len(initial_text) + 10 for prompt, initial_text in fields),
+        )
+        self.width = min(max_cols, requested_width)
+        footer_rows = 2 if footer_text else 0
+        self.height = min(max_rows, len(fields) + 2 + footer_rows)
+
+        self._edits = [
+            ReadlineEdit(f"{prompt} ", edit_text=initial_text)
+            for prompt, initial_text in fields
+        ]
+        # A ListBox allows moving between fields, and scrolls to the cursor
+        body = urwid.ListBox(
+            urwid.SimpleFocusListWalker(
+                [urwid.Padding(edit, left=1, right=1) for edit in self._edits]
+            )
+        )
+
+        footer = (
+            urwid.Padding(urwid.Text(footer_text, align="center"), left=1, right=1)
+            if footer_text
+            else None
+        )
+
+        urwid.Frame.__init__(self, body=body, footer=footer)
+
+    def keypress(self, size: urwid_Size, key: str) -> str:
+        if is_command_key("EXIT_POPUP", key):
+            self.controller.exit_popup()
+            return key
+
+        if is_command_key("SUBMIT_POPUP", key):
+            values = [edit.edit_text.strip() for edit in self._edits]
+            self.controller.exit_popup()
+            self._on_submit(values)
+            return key
+
         return super().keypress(size, key)

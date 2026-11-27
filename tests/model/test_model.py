@@ -973,6 +973,40 @@ class TestModel:
     @pytest.mark.parametrize(
         "response, return_value",
         [
+            case({"result": "success"}, True, id="API_success"),
+            case({"result": "error", "msg": "Failed"}, False, id="API_error"),
+        ],
+    )
+    def test_send_widget_submessage(
+        self,
+        mocker: MockerFixture,
+        model: Model,
+        response: Dict[str, Any],
+        return_value: bool,
+        message_id: int = 1,
+        # Compact, with non-ASCII text unescaped, as JSON.stringify in the webapp
+        widget_content_json: str = '{"type":"new_task_list_title","title":"Café"}',
+    ) -> None:
+        self.client.call_endpoint = mocker.Mock(return_value=response)
+        widget_content = {"type": "new_task_list_title", "title": "Café"}
+
+        result = model.send_widget_submessage(message_id, widget_content)
+
+        self.client.call_endpoint.assert_called_once_with(
+            "submessage",
+            method="POST",
+            request={
+                "message_id": message_id,
+                "msg_type": "widget",
+                "content": widget_content_json,
+            },
+        )
+        assert result == return_value
+        self.display_error_if_present.assert_called_once_with(response, self.controller)
+
+    @pytest.mark.parametrize(
+        "response, return_value",
+        [
             ({"result": "success"}, True),
             ({"result": "some_failure"}, False),
         ],
@@ -1474,23 +1508,36 @@ class TestModel:
         [
             (
                 {"topic_links": [{"url": "www.foo.com", "text": "Bar"}]},
-                {"topic_links": [{"url": "www.foo.com", "text": "Bar"}]},
+                {
+                    "topic_links": [{"url": "www.foo.com", "text": "Bar"}],
+                    "submessages": [],
+                },
             ),
             (
                 {"topic_links": ["www.foo1.com"]},
-                {"topic_links": [{"url": "www.foo1.com", "text": ""}]},
+                {
+                    "topic_links": [{"url": "www.foo1.com", "text": ""}],
+                    "submessages": [],
+                },
             ),
             (
                 {"topic_links": []},
-                {"topic_links": []},
+                {"topic_links": [], "submessages": []},
             ),
             (
                 {"subject_links": ["www.foo2.com"]},
-                {"topic_links": [{"url": "www.foo2.com", "text": ""}]},
+                {
+                    "topic_links": [{"url": "www.foo2.com", "text": ""}],
+                    "submessages": [],
+                },
             ),
             (
                 {"subject_links": []},
-                {"topic_links": []},
+                {"topic_links": [], "submessages": []},
+            ),
+            (
+                {"submessages": [{"msg_type": "widget", "content": "{}"}]},
+                {"submessages": [{"msg_type": "widget", "content": "{}"}]},
             ),
         ],
         ids=[
@@ -1499,6 +1546,7 @@ class TestModel:
             "Zulip_3.0+_ZFL1_response_empty_topic_links",
             "Zulip_2.1+_response_with_subject_links",
             "Zulip_2.1+_response_empty_subject_links",
+            "response_with_existing_submessages",
         ],
     )
     def test_modernize_message_response(
