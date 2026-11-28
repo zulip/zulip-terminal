@@ -1102,14 +1102,34 @@ class MessageBox(urwid.Pile):
                     [" Editing sent message is disabled."]
                 )
                 return key
+
+            msg_body_edit_enabled = True
+            if self.message.get("submessages"):
+                if self.message["type"] == "private":
+                    self.model.controller.report_error(
+                        [" Widget messages cannot be edited."]
+                    )
+                    return key
+                elif self.message["type"] == "stream":
+                    self.model.controller.report_warning(
+                        [
+                            " Only topic editing allowed."
+                            " Widget messages cannot be edited."
+                        ]
+                    )
+                    msg_body_edit_enabled = False
+
             # Check if message is still editable, i.e. within
             # the time limit. A limit of 0 signifies no limit
             # on message body editing.
-            msg_body_edit_enabled = True
             edit_time_limit = self.model.initial_data[
                 "realm_message_content_edit_limit_seconds"
             ]
-            if edit_time_limit is not None and edit_time_limit > 0:
+            if (
+                msg_body_edit_enabled
+                and edit_time_limit is not None
+                and edit_time_limit > 0
+            ):
                 if self.message["sender_id"] == self.model.user_id:
                     time_since_msg_sent = time() - self.message["timestamp"]
                     # Don't allow editing message body if time-limit exceeded.

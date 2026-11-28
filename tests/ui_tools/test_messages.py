@@ -1373,6 +1373,68 @@ class TestMessageBox:
                 {"stream": None, "private": None},
                 id="no_msg_body_edit_limit_with_no_topic:ZFL>=138",
             ),
+            case(
+                {
+                    "sender_id": 1,
+                    "timestamp": 45,
+                    "subject": "test",
+                    "submessages": [
+                        {
+                            "id": 1,
+                            "msg_type": "widget",
+                            "sender_id": 1,
+                            "content": (
+                                '{"widget_type": "poll", "extra_data": '
+                                '{"question": "Sample Question?", '
+                                '"options": ["Yes", "No"]}}'
+                            ),
+                        }
+                    ],
+                },
+                True,
+                60,
+                {"stream": False, "private": False},
+                {"stream": True, "private": False},
+                {
+                    "stream": (
+                        " Only topic editing allowed."
+                        " Widget messages cannot be edited."
+                    ),
+                    "private": " Widget messages cannot be edited.",
+                },
+                id="widget_message_editing_restricted",
+            ),
+            case(
+                {
+                    "sender_id": 1,
+                    "timestamp": 1,
+                    "subject": "test",
+                    "submessages": [
+                        {
+                            "id": 1,
+                            "msg_type": "widget",
+                            "sender_id": 1,
+                            "content": (
+                                '{"widget_type": "poll", "extra_data": '
+                                '{"question": "Sample Question?", '
+                                '"options": ["Yes", "No"]}}'
+                            ),
+                        }
+                    ],
+                },
+                True,
+                60,
+                {"stream": False, "private": False},
+                {"stream": True, "private": False},
+                {
+                    "stream": (
+                        " Only topic editing allowed."
+                        " Widget messages cannot be edited."
+                    ),
+                    "private": " Widget messages cannot be edited.",
+                },
+                id="widget_message_after_time_limit",
+            ),
         ],
     )
     def test_keypress_EDIT_MESSAGE(
