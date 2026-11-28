@@ -241,11 +241,16 @@ jobs:
           - {PYTHON: 3.9, OS: ubuntu-24.04, NAME: "CPython 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.10", OS: ubuntu-24.04, NAME: "CPython 3.10 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: "3.11", OS: ubuntu-24.04, NAME: "CPython 3.11 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.12", OS: ubuntu-24.04, NAME: "CPython 3.12 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: "3.13", OS: ubuntu-24.04, NAME: "CPython 3.13 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.7', OS: ubuntu-24.04, NAME: "PyPy 3.7 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.8', OS: ubuntu-24.04, NAME: "PyPy 3.8 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.9', OS: ubuntu-24.04, NAME: "PyPy 3.9 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: 'pypy-3.10', OS: ubuntu-24.04, NAME: "PyPy 3.10 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.11', OS: ubuntu-24.04, NAME: "PyPy 3.11 (ubuntu)", EXPECT: "Linux"}
+          - {PYTHON: 'pypy-3.12', OS: ubuntu-24.04, NAME: "PyPy 3.12 (ubuntu)", EXPECT: "Linux"}
           - {PYTHON: '3.11', OS: macos-latest, NAME: "CPython 3.11 (macos)", EXPECT: "MacOS"}
+          - {PYTHON: "3.13", OS: macos-latest, NAME: "CPython 3.13 (macos)", EXPECT: "MacOS"}
     env:
       EXPECT: ${{ matrix.env.EXPECT }}
       PYTHON: ${{ matrix.env.PYTHON }}
