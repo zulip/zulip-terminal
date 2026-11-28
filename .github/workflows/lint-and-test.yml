@@ -33,7 +33,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'setup.py'
       - name: Install with type-checking tools, stubs & minimal test libraries
-        run: pip install .[typing,testing_minimal]
+        run: pip install .[typing,testing-minimal]
       - name: Run mypy
         run: ./tools/run-mypy
 
@@ -66,9 +66,8 @@ jobs:
           python-version: ${{ env.LINTING_PYTHON_VERSION }}
           cache: 'pip'
           cache-dependency-path: 'setup.py'
-      - name: Install with linting tools & minimal test libraries
-        # NOTE: Install pytest so that isort recognizes it as a known library
-        run: pip install .[linting,minimal_testing]
+      - name: Install with linting tools
+        run: pip install .[linting]
       - name: Run isort
         run: ./tools/run-isort-check
 
@@ -200,7 +199,7 @@ jobs:
   isolated-commits:
     runs-on: ubuntu-24.04
     name: Ensure isolated PR commits
-    needs:
+    needs: &lint_and_base_jobs
       - mypy
       - ruff
       - isort
@@ -231,7 +230,7 @@ jobs:
           CHECK="pip install .[linting,testing,typing] && ./tools/lint-all && pytest" ./tools/check-branch FETCH_HEAD
 
   pytest-on-other-platforms:
-    needs: isolated-commits
+    needs: *lint_and_base_jobs
     strategy:
       # Not failing fast allows all matrix jobs to try & finish even if one fails early
       fail-fast: false
