@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Type consistency (mypy)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - PEP8 & more (ruff)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Import order (isort)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Code format (black)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Spellcheck (codespell, typos)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Hotkeys & docs sync (lint-hotkeys)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Lint - Docstrings & docs sync (lint-docstring)
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # 7.1.0
@@ -149,7 +149,7 @@ jobs:
         run: echo "PR_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - name: 'Checkout PR branch and all PR commits'
         if: github.event_name == 'pull_request'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
@@ -173,7 +173,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Install & test - CPython 3.7 (ubuntu), codecov
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - name: Install Python version
@@ -211,7 +211,7 @@ jobs:
       - base_pytest
       - gitlint
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         if: github.event_name == 'pull_request'
         with:
           persist-credentials: false
@@ -252,7 +252,7 @@ jobs:
     runs-on: ${{ matrix.env.OS }}
     name: Install & test - ${{ matrix.env.NAME}}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.01
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # 7.0.1
         with:
           persist-credentials: false
       - name: Install Python version ${{ matrix.env.PYTHON }}
