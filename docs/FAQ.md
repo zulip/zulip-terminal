@@ -38,7 +38,7 @@ Feedback on using these or any other implementations are welcome, such as those
 ## What Python versions are supported?
 
 Supported python versions depend on the release:
-- the current `main` branch in git is tested in CI on Python 3.7 to 3.11, but no upper limit is imposed
+- the current `main` branch in git is tested in CI on Python 3.7 to 3.13, but no upper limit is imposed
 - Release 0.7.0 was the last release to support Python 3.6 (maximum 3.10)
 - Release 0.6.0 was the last release to support Python 3.5 (maximum 3.9)
 

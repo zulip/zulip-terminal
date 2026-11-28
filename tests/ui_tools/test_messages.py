@@ -298,12 +298,12 @@ class TestMessageBox:
                 id="link_differenttext",
             ),
             case(
-                '<a href="/user_uploads/blah.gif"',
+                '<a href="/user_uploads/blah.gif"></a>',
                 [("msg_link", "blah.gif"), " ", ("msg_link_index", "[1]")],
                 id="link_userupload",
             ),
             case(
-                '<a href="/api"',
+                '<a href="/api"></a>',
                 [("msg_link", "/api"), " ", ("msg_link_index", "[1]")],
                 id="link_api",
             ),
@@ -656,7 +656,7 @@ class TestMessageBox:
                 id="emoji",
             ),
             case(
-                '<div class="inline-preview-twitter"',
+                '<div class="inline-preview-twitter"></div>',
                 ["[TWITTER PREVIEW NOT RENDERED]"],
                 id="preview-twitter",
             ),

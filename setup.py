@@ -76,6 +76,8 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
@@ -109,9 +111,13 @@ setup(
         "zulip>=0.8.2,<0.9.0",  # Next release, 0.9.0, requires Python 3.9
         "urwid_readline>=0.15.1",
         "beautifulsoup4>=4.13.4",
-        "lxml==4.9.4",
+        "lxml>=5.3.0; implementation_name != 'pypy' or python_version >= '3.9'",
+        # lxml 6 has no PyPy 3.8 wheels, and 6.2.0 cannot be built on Python 3.8
+        "lxml>=5.3.0,<6; implementation_name == 'pypy' and python_version == '3.8'",
+        # lxml 5 cannot be imported on PyPy 3.7
+        "lxml==4.9.4; implementation_name == 'pypy' and python_version < '3.8'",
         "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
-        "typing_extensions~=4.5.0",
+        "typing_extensions>=4.6.0",
         "python-dateutil>=2.8.2",
         "pytz>=2025",  # Can use native support from Python 3.9 onwards
         "tzlocal>=5.0,<5.1",  # 5.1 will drop support for Python 3.7

@@ -131,28 +131,33 @@ def test_main_help(capsys: CaptureFixture[str], options: str) -> None:
 
     assert lines[0].startswith("usage: ")
 
-    required_arguments = {
-        "--theme THEME, -t THEME",
-        "-h, --help",
-        "-d, --debug",
-        "--list-themes",
-        "--profile",
-        "--config-file CONFIG_FILE, -c CONFIG_FILE",
-        "--autohide",
-        "--no-autohide",
-        "-v, --version",
-        "-e, --explore",
-        "--color-depth",
-        "--notify",
-        "--no-notify",
-        "--transparency",
-        "--no-transparency",
+    # Python 3.12 and earlier: "--theme THEME, -t THEME"
+    # Python 3.13+: "--theme, -t THEME"
+    shown_options = set()
+    for line in lines:
+        if len(line) > 2 and line[2] == "-":
+            parts = line.strip().split("  ")[0].split(", ")
+            option_strings = tuple(part.split(" ")[0] for part in parts)
+            metavar = parts[-1].partition(" ")[2]
+            shown_options.add((option_strings, metavar))
+
+    assert shown_options == {
+        (("-h", "--help"), ""),
+        (("-v", "--version"), ""),
+        (("--config-file", "-c"), "CONFIG_FILE"),
+        (("--theme", "-t"), "THEME"),
+        (("--list-themes",), ""),
+        (("--color-depth",), "{1,16,256,24bit}"),
+        (("-e", "--explore"), ""),
+        (("--transparency",), ""),
+        (("--no-transparency",), ""),
+        (("--notify",), ""),
+        (("--no-notify",), ""),
+        (("--autohide",), ""),
+        (("--no-autohide",), ""),
+        (("-d", "--debug"), ""),
+        (("--profile",), ""),
     }
-    optional_argument_lines = {
-        line[2:] for line in lines if len(line) > 2 and line[2] == "-"
-    }
-    for line in optional_argument_lines:
-        assert any(line.startswith(arg) for arg in required_arguments)
 
     assert captured.err == ""
 
