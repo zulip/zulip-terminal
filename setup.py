@@ -115,7 +115,7 @@ setup(
         # lxml 5 cannot be imported on PyPy 3.7
         "lxml==4.9.4; implementation_name == 'pypy' and python_version < '3.8'",
         "pygments>=2.17.2,<2.18.0",  # 2.18.0 will drop support for Python 3.7
-        "typing_extensions~=4.5.0",
+        "typing_extensions>=4.6.0",
         "python-dateutil>=2.8.2",
         "pytz>=2025",  # Can use native support from Python 3.9 onwards
         "tzlocal>=5.0,<5.1",  # 5.1 will drop support for Python 3.7
